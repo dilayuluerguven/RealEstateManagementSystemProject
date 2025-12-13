@@ -34,9 +34,7 @@ namespace RealEstateManagementProject.Controllers
         }
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserForRegisterDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest("Bilgiler gecerli değil.");
+        { 
             var result=await _userService.CreateUserAsync(dto);
             if (!result)
                 return BadRequest("Kullanıcı oluşturulamadı.");
@@ -45,9 +43,6 @@ namespace RealEstateManagementProject.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserForRegisterDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest("Bilgiler geçerli değil.");
-
             var result = await _userService.UpdateUserAsync(id, dto);
 
             if (!result)

@@ -1,10 +1,11 @@
-﻿using RealEstateManagementProject.Entities;
+﻿using RealEstateManagementProject.Dtos;
+using RealEstateManagementProject.Entities;
 
 namespace RealEstateManagementProject.Business.Abstract
 {
     public interface ILogService
     {
-        Task<List<Log>> GetAllAsync();
+        Task<List<LogFilterDTO>> GetAllAsync();
         Task<bool> AddAsync(Log log);
     }
 }

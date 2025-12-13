@@ -9,7 +9,8 @@ namespace RealEstateManagementProject.Dtos
         [Required(ErrorMessage = "İlçe adı zorunludur.")]
         [MaxLength(100, ErrorMessage = "İlçe adı en fazla 100 karakter olabilir.")]
         public string IlceAdi { get; set; } = string.Empty;
-
+        
+        [Required]
         public int IlId { get; set; }
     }
 }

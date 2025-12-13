@@ -2,7 +2,7 @@
 
 namespace RealEstateManagementProject.Dtos
 {
-    public class UserDTO
+    public class UserDto
     {
         public int Id { get; set; }
 

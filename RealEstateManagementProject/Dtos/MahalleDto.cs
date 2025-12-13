@@ -10,6 +10,7 @@ namespace RealEstateManagementProject.Dtos
         [MaxLength(100, ErrorMessage = "Mahalle adı en fazla 100 karakter olabilir.")]
 
         public string MahalleAdi { get; set; }=string.Empty;
+        [Required]
         public int IlceId { get; set; }
     }
 }

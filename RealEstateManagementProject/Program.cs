@@ -18,6 +18,7 @@ builder.Services.AddScoped<IMahalleService, MahalleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ITasinmazService, TasinmazService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();

@@ -13,10 +13,10 @@ namespace RealEstateManagementProject.Business.Concrete
         {
             _context = context;
         }
-        public async Task<List<UserDTO>> GetAllUsersAsync()
+        public async Task<List<UserDto>> GetAllUsersAsync()
         {
             var users = await _context.Users.ToListAsync();
-            var result = users.Select(x => new UserDTO
+            var result = users.Select(x => new UserDto
             {
                 Id = x.Id,
                 AdSoyad = x.AdSoyad,
@@ -25,14 +25,14 @@ namespace RealEstateManagementProject.Business.Concrete
             }).ToList();
             return result;
         }
-        public async Task<UserDTO> GetUserByIdAsync(int id)
+        public async Task<UserDto> GetUserByIdAsync(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
                 return null;
 
-            var result = new UserDTO
+            var result = new UserDto
             {
                 Id = user.Id,
                 AdSoyad = user.AdSoyad,
