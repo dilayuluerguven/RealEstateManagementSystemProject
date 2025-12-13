@@ -1,10 +1,21 @@
-﻿namespace RealEstateManagementProject.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RealEstateManagementProject.Dtos
 {
     public class UserDTO
     {
         public int Id { get; set; }
-        public string AdSoyad { get; set; }
-        public string Email { get; set; }
-        public string Rol { get; set; }
+
+        [Required(ErrorMessage = "Ad soyad zorunludur.")]
+        [MaxLength(100)]
+        public string AdSoyad { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email zorunludur.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir email giriniz.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Rol zorunludur.")]
+        [MaxLength(50)]
+        public string Rol { get; set; } = string.Empty;
     }
 }
