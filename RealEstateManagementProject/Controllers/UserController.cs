@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
 
@@ -6,6 +7,7 @@ namespace RealEstateManagementProject.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -32,21 +34,26 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok(user);
         }
+
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] UserForRegisterDto dto)
-        { 
-            var result=await _userService.CreateUserAsync(dto);
+        public async Task<IActionResult> CreateUser(UserForRegisterDto dto)
+        {
+            var result = await _userService.CreateUserAsync(dto);
+
             if (!result)
                 return BadRequest("Kullanıcı oluşturulamadı.");
+
             return Ok("Kullanıcı başarıyla oluşturuldu.");
         }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserForRegisterDto dto)
+        public async Task<IActionResult> UpdateUser(int id, UserForRegisterDto dto)
         {
             var result = await _userService.UpdateUserAsync(id, dto);
 
             if (!result)
                 return BadRequest("Kullanıcı güncellenemedi.");
+
             return Ok("Kullanıcı başarıyla güncellendi.");
         }
 
@@ -60,6 +67,5 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok("Kullanıcı başarıyla silindi.");
         }
-
     }
 }

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
 
 namespace RealEstateManagementProject.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MahalleController : ControllerBase
@@ -32,7 +34,6 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok(result);
         }
-
         [HttpPost]
         public async Task<IActionResult> Add(MahalleDto dto)
         {
@@ -43,7 +44,6 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok("Mahalle başarıyla eklendi.");
         }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, MahalleDto dto)
         {
@@ -54,7 +54,6 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok("Mahalle başarıyla güncellendi.");
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

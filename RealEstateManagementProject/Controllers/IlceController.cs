@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
 
 namespace RealEstateManagementProject.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class IlceController : ControllerBase
@@ -42,7 +44,6 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok("İlçe başarıyla eklendi.");
         }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, IlceDto dto)
         {
