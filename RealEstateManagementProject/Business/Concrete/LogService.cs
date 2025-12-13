@@ -9,10 +9,13 @@ namespace RealEstateManagementProject.Business.Concrete
     public class LogService : ILogService
     {
         private readonly ApplicationDbContext _context;
-
-        public LogService(ApplicationDbContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public LogService(
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<List<LogFilterDTO>> GetAllAsync()
@@ -33,9 +36,25 @@ namespace RealEstateManagementProject.Business.Concrete
 
         public async Task<bool> AddAsync(Log log)
         {
-            await _context.Loglar.AddAsync(log);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                log.IpAdresi ??=
+                    _httpContextAccessor.HttpContext?
+                        .Connection?
+                        .RemoteIpAddress?
+                        .ToString() ?? "UNKNOWN";
+
+                await _context.Loglar.AddAsync(log);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
+
+
     }
 }

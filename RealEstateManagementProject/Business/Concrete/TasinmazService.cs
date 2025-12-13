@@ -2,6 +2,7 @@
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
+using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
 
 namespace RealEstateManagementProject.Business.Concrete
@@ -9,10 +10,12 @@ namespace RealEstateManagementProject.Business.Concrete
     public class TasinmazService : ITasinmazService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
 
-        public TasinmazService(ApplicationDbContext context)
+        public TasinmazService(ApplicationDbContext context, ILogService logService)
         {
             _context = context;
+            _logService = logService;
         }
 
         public async Task<List<TasinmazDto>> GetAllAsync()
@@ -58,55 +61,125 @@ namespace RealEstateManagementProject.Business.Concrete
 
         public async Task<bool> AddAsync(TasinmazDto dto)
         {
-            var tasinmaz = new Tasinmaz
+            try
             {
-                IlId = dto.IlId,
-                IlceId = dto.IlceId,
-                MahalleId = dto.MahalleId,
-                UserId = dto.UserId,
-                Ada = dto.Ada,
-                Parsel = dto.Parsel,
-                Adres = dto.Adres,
-                EmlakTipi = dto.EmlakTipi,
-                Koordinat = dto.Koordinat
-            };
+                var tasinmaz = new Tasinmaz
+                {
+                    IlId = dto.IlId,
+                    IlceId = dto.IlceId,
+                    MahalleId = dto.MahalleId,
+                    UserId = dto.UserId,
+                    Ada = dto.Ada,
+                    Parsel = dto.Parsel,
+                    Adres = dto.Adres,
+                    EmlakTipi = dto.EmlakTipi,
+                    Koordinat = dto.Koordinat
+                };
 
-            await _context.Tasinmazlar.AddAsync(tasinmaz);
-            await _context.SaveChangesAsync();
-            return true;
+                await _context.Tasinmazlar.AddAsync(tasinmaz);
+                await _context.SaveChangesAsync();
+
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "CREATE",
+                    Durum = "SUCCESS",
+                    Aciklama = "Taşınmaz eklendi",
+                    Tarih = DateTime.UtcNow
+                });
+
+                return true;
+            }
+            catch
+            {
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "CREATE",
+                    Durum = "ERROR",
+                    Aciklama = "Taşınmaz eklenemedi",
+                    Tarih = DateTime.UtcNow
+                });
+
+                return false;
+            }
         }
 
         public async Task<bool> UpdateAsync(int id, TasinmazDto dto)
         {
-            var tasinmaz = await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id);
+            try
+            {
+                var tasinmaz = await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id);
+                if (tasinmaz == null)
+                    return false;
 
-            if (tasinmaz == null)
+                tasinmaz.IlId = dto.IlId;
+                tasinmaz.IlceId = dto.IlceId;
+                tasinmaz.MahalleId = dto.MahalleId;
+                tasinmaz.UserId = dto.UserId;
+                tasinmaz.Ada = dto.Ada;
+                tasinmaz.Parsel = dto.Parsel;
+                tasinmaz.Adres = dto.Adres;
+                tasinmaz.EmlakTipi = dto.EmlakTipi;
+                tasinmaz.Koordinat = dto.Koordinat;
+
+                await _context.SaveChangesAsync();
+
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "UPDATE",
+                    Durum = "SUCCESS",
+                    Aciklama = $"Taşınmaz güncellendi (Id={id})",
+                    Tarih = DateTime.UtcNow
+                });
+
+                return true;
+            }
+            catch
+            {
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "UPDATE",
+                    Durum = "ERROR",
+                    Aciklama = $"Taşınmaz güncellenemedi (Id={id})",
+                    Tarih = DateTime.UtcNow
+                });
+
                 return false;
-
-            tasinmaz.IlId = dto.IlId;
-            tasinmaz.IlceId = dto.IlceId;
-            tasinmaz.MahalleId = dto.MahalleId;
-            tasinmaz.UserId = dto.UserId;
-            tasinmaz.Ada = dto.Ada;
-            tasinmaz.Parsel = dto.Parsel;
-            tasinmaz.Adres = dto.Adres;
-            tasinmaz.EmlakTipi = dto.EmlakTipi;
-            tasinmaz.Koordinat = dto.Koordinat;
-
-            await _context.SaveChangesAsync();
-            return true;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var tasinmaz = await _context.Tasinmazlar.FindAsync(id);
+            try
+            {
+                var tasinmaz = await _context.Tasinmazlar.FindAsync(id);
+                if (tasinmaz == null)
+                    return false;
 
-            if (tasinmaz == null)
+                _context.Tasinmazlar.Remove(tasinmaz);
+                await _context.SaveChangesAsync();
+
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "DELETE",
+                    Durum = "SUCCESS",
+                    Aciklama = $"Taşınmaz silindi (Id={id})",
+                    Tarih = DateTime.UtcNow
+                });
+
+                return true;
+            }
+            catch
+            {
+                await _logService.AddAsync(new Log
+                {
+                    IslemTipi = "DELETE",
+                    Durum = "ERROR",
+                    Aciklama = $"Taşınmaz silinemedi (Id={id})",
+                    Tarih = DateTime.UtcNow
+                });
+
                 return false;
-
-            _context.Tasinmazlar.Remove(tasinmaz);
-            await _context.SaveChangesAsync();
-            return true;
+            }
         }
     }
 }
