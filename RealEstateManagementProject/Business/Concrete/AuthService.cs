@@ -1,10 +1,15 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
+using RealEstateManagementProject.Helpers;
+
 using RealEstateManagementProject.Entities.Concrete;
 
 namespace RealEstateManagementProject.Business.Concrete
@@ -13,18 +18,20 @@ namespace RealEstateManagementProject.Business.Concrete
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogService _logService;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(ApplicationDbContext context, ILogService logService)
+        public AuthService(ApplicationDbContext context, ILogService logService, IConfiguration configuration)
         {
             _context = context;
             _logService = logService;
+            _configuration = configuration;
         }
 
         public async Task<UserDto?> LoginAsync(
             UserForLoginDto loginDto,
             string ipAddress)
         {
-            var hashedPassword = HashPassword(loginDto.Sifre);
+            var hashedPassword = HashHelper.Sha256Hash(loginDto.Sifre);
 
             var user = await _context.Users.FirstOrDefaultAsync(x =>
                 x.Email == loginDto.Email &&
@@ -48,7 +55,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 Id = user.Id,
                 AdSoyad = user.AdSoyad,
                 Email = user.Email,
-                Rol = user.Rol
+                Rol = user.Rol,
+                Token = CreateToken(user)
             };
         }
 
@@ -67,7 +75,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 AdSoyad = registerDto.AdSoyad,
                 Email = registerDto.Email,
                 Rol = registerDto.Rol,
-                Sifre = HashPassword(registerDto.Sifre)
+                Sifre = HashHelper.Sha256Hash(registerDto.Sifre)
             };
 
             await _context.Users.AddAsync(user);
@@ -86,11 +94,33 @@ namespace RealEstateManagementProject.Business.Concrete
             return true;
         }
 
-        private string HashPassword(string sifre)
+        private string CreateToken(User user)
         {
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(sifre));
-            return Convert.ToHexString(bytes);
+            var claims = new[]
+            {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Rol)
+    };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)
+            );
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(
+                    int.Parse(_configuration["Jwt:ExpireMinutes"]!)
+                ),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }
