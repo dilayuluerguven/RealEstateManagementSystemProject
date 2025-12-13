@@ -16,6 +16,8 @@ builder.Services.AddScoped<IIlService, IlService>();
 builder.Services.AddScoped<IIlceService, IlceService>();
 builder.Services.AddScoped<IMahalleService, MahalleService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<ITasinmazService, TasinmazService>();
 
 
 var app = builder.Build();
