@@ -18,9 +18,16 @@ namespace RealEstateManagementProject.Business.Concrete
             _logService = logService;
         }
 
-        public async Task<List<TasinmazDto>> GetAllAsync()
+        public async Task<List<TasinmazDto>> GetAllAsync(int? userId)
         {
-            return await _context.Tasinmazlar
+            var query = _context.Tasinmazlar.AsQueryable();
+
+            if (userId.HasValue)
+            {
+                query = query.Where(x => x.UserId == userId.Value);
+            }
+
+            return await query
                 .Select(x => new TasinmazDto
                 {
                     Id = x.Id,
@@ -37,9 +44,10 @@ namespace RealEstateManagementProject.Business.Concrete
                 .ToListAsync();
         }
 
-        public async Task<TasinmazDto?> GetByIdAsync(int id)
+        public async Task<TasinmazDto?> GetByIdAsync(int id, int userId)
         {
-            var tasinmaz = await _context.Tasinmazlar.FindAsync(id);
+            var tasinmaz = await _context.Tasinmazlar
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
             if (tasinmaz == null)
                 return null;
@@ -58,7 +66,6 @@ namespace RealEstateManagementProject.Business.Concrete
                 Koordinat = tasinmaz.Koordinat
             };
         }
-
         public async Task<bool> AddAsync(TasinmazDto dto)
         {
             try
@@ -83,7 +90,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     IslemTipi = "CREATE",
                     Durum = "SUCCESS",
-                    Aciklama = "Taşınmaz eklendi",
+                    Aciklama = $"Taşınmaz eklendi (UserId={dto.UserId})",
                     Tarih = DateTime.UtcNow
                 });
 
@@ -102,19 +109,19 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
-
         public async Task<bool> UpdateAsync(int id, TasinmazDto dto)
         {
             try
             {
-                var tasinmaz = await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id);
+                var tasinmaz = await _context.Tasinmazlar
+                    .FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
+
                 if (tasinmaz == null)
                     return false;
 
                 tasinmaz.IlId = dto.IlId;
                 tasinmaz.IlceId = dto.IlceId;
                 tasinmaz.MahalleId = dto.MahalleId;
-                tasinmaz.UserId = dto.UserId;
                 tasinmaz.Ada = dto.Ada;
                 tasinmaz.Parsel = dto.Parsel;
                 tasinmaz.Adres = dto.Adres;
@@ -127,7 +134,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     IslemTipi = "UPDATE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Taşınmaz güncellendi (Id={id})",
+                    Aciklama = $"Taşınmaz güncellendi (Id={id}, UserId={dto.UserId})",
                     Tarih = DateTime.UtcNow
                 });
 
@@ -146,12 +153,13 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
-
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, int userId)
         {
             try
             {
-                var tasinmaz = await _context.Tasinmazlar.FindAsync(id);
+                var tasinmaz = await _context.Tasinmazlar
+                    .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
                 if (tasinmaz == null)
                     return false;
 
@@ -162,7 +170,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     IslemTipi = "DELETE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Taşınmaz silindi (Id={id})",
+                    Aciklama = $"Taşınmaz silindi (Id={id}, UserId={userId})",
                     Tarih = DateTime.UtcNow
                 });
 
