@@ -3,6 +3,6 @@
     public class Il
     {
         public int Id { get; set; }
-        public string IlAdi { get; set; }
+        public string IlAdi { get; set; }=string.Empty;
     }
 }
