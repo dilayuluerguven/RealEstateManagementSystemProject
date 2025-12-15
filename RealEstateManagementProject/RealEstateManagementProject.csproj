@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Entities\Abstract\" />
-    <Folder Include="Helpers\" />
   </ItemGroup>
 
 </Project>
