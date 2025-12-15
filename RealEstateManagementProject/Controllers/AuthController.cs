@@ -38,7 +38,7 @@ namespace RealEstateManagementProject.Controllers
             var result = await _authService.RegisterAsync(dto, ipAddress);
 
             if (!result)
-                return BadRequest("Bu email zaten kayıtlı.");
+                return BadRequest("Bu e-mail zaten kayıtlı.");
 
             return Ok("Kullanıcı başarıyla oluşturuldu.");
         }
