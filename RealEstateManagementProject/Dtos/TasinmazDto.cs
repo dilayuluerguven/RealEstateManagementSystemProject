@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RealEstateManagementProject.Dtos
 {
@@ -15,7 +17,7 @@ namespace RealEstateManagementProject.Dtos
         [Required(ErrorMessage = "Mahalle bilgisi zorunludur.")]
         public int MahalleId { get; set; }
 
-        [Required(ErrorMessage = "Kullanıcı bilgisi zorunludur.")]
+        [BindNever]
         public int UserId { get; set; }
 
         [Required(ErrorMessage = "Ada bilgisi zorunludur.")]
