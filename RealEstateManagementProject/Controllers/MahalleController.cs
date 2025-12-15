@@ -17,52 +17,12 @@ namespace RealEstateManagementProject.Controllers
             _mahalleService = mahalleService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("getMahalleByIlceId/{ilceId}")]
+        public async Task<IActionResult> GetMahallelerByIlce(int ilceId)
         {
-            var result = await _mahalleService.GetAllAsync();
+            var result = await _mahalleService.GetByIlceIdAsync(ilceId);
             return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _mahalleService.GetByIdAsync(id);
-
-            if (result == null)
-                return NotFound("Mahalle bulunamadı.");
-
-            return Ok(result);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Add(MahalleDto dto)
-        {
-            var result = await _mahalleService.AddAsync(dto);
-
-            if (!result)
-                return BadRequest("Mahalle eklenemedi.");
-
-            return Ok("Mahalle başarıyla eklendi.");
-        }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, MahalleDto dto)
-        {
-            var result = await _mahalleService.UpdateAsync(id, dto);
-
-            if (!result)
-                return NotFound("Mahalle bulunamadı.");
-
-            return Ok("Mahalle başarıyla güncellendi.");
-        }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _mahalleService.DeleteAsync(id);
-
-            if (!result)
-                return NotFound("Mahalle bulunamadı.");
-
-            return Ok("Mahalle başarıyla silindi.");
         }
     }
 }
+
