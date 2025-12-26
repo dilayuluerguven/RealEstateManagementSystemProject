@@ -1,0 +1,64 @@
+<h3>Yeni Taşınmaz ekleyin</h3>
+<form [formGroup]="formGroup" (ngSubmit)="submit()">
+  <div class="form-group mt-3">
+     <select class="form-control" formControlName="il">
+        <option value="">İl seçiniz</option>
+        <option *ngFor="let item of iller" [value]="item.id">{{item.ilAdi}}</option>
+    </select> 
+  </div>
+  <div class="form-group mt-3">
+     <select class="form-control" formControlName="ilce">
+        <option value="">İlce seçiniz</option>
+        <option *ngFor="let item of ilceler" [value]="item.id">{{item.ilceAdi}}</option>
+    </select> 
+  </div>
+   <div class="form-group mt-3">
+     <select class="form-control" formControlName="mahalle">
+        <option value="">Mahalle seçiniz</option>
+        <option *ngFor="let item of mahalleler" [value]="item.id">{{item.mahalleAdi}}</option>
+    </select> 
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      class="form-control mt-3"
+      formControlName="ada"
+      placeholder="Ada giriniz"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      class="form-control mt-3"
+      formControlName="parsel"
+      placeholder="Parsel giriniz"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      class="form-control mt-3"
+      formControlName="adres"
+      placeholder="Adres giriniz"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      class="form-control mt-3"
+      formControlName="emlakTipi"
+      placeholder="Emlak Tipi giriniz"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      class="form-control mt-3"
+      formControlName="koordinat"
+      placeholder="Koordinat giriniz"
+    />
+  </div>
+
+
+  <button type="submit" class="btn btn-primary mt-3" >Submit</button>
+</form>

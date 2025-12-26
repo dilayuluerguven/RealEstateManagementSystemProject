@@ -1,0 +1,20 @@
+<button class="btn btn-primary" routerLink="/core/tasinmaz/add">Yeni ekle</button>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>İl</th>
+      <th>İlçe</th>
+      <th>Mahalle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of tasinmazlar">
+      <td>{{ item.id }}</td>
+      <td>{{ item.ilAdi }}</td>
+      <td>{{ item.ilceAdi }}</td>
+      <td>{{ item.mahalleAdi }}</td>
+    </tr>
+  </tbody>
+</table>
