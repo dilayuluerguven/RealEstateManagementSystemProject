@@ -56,9 +56,14 @@ public class TasinmazController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("add/")]
-    public async Task<IActionResult> Add(TasinmazDto dto)
+    [HttpPost("add")]
+    public async Task<IActionResult> Add([FromBody] TasinmazDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
@@ -71,6 +76,7 @@ public class TasinmazController : ControllerBase
 
         return Ok("Taşınmaz başarıyla eklendi.");
     }
+
 
     [HttpPut("update/{id}")]
     public async Task<IActionResult> Update(int id, TasinmazDto dto)
