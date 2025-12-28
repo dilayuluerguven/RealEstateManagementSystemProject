@@ -23,8 +23,13 @@ export class AddComponent implements OnInit {
   }
   save(){
     if(this.formGroup.invalid) return;
-    this.userService.createUser(this.formGroup.value).subscribe(()=>{
-      this.router.navigate(['/core/admin/users']);
+    this.userService.createUser(this.formGroup.value).subscribe({
+      next:()=>{
+        this.router.navigate(['/core/admin/users']);
+      },
+      error:(err)=>{
+        console.log(err)
+      }
     })
   }
 }

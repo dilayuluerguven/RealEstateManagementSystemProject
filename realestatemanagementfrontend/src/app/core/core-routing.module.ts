@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { UserLayoutComponent } from './layouts/user-layout/user-layout.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { UpdateComponent } from './user-admin-control/update/update.component';
+import { AddComponent } from './user-admin-control/add/add.component';
 
 const routes: Routes = [
   // USER
@@ -44,6 +46,12 @@ const routes: Routes = [
         loadChildren: () =>
           import('./tasinmaz/tasinmaz.module').then(m => m.TasinmazModule),
       },
+      {
+        path:'update/:id',component:UpdateComponent
+      },
+      {
+        path:'add',component:AddComponent
+      }
     ],
   },
 ];
