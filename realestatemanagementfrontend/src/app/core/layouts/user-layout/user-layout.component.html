@@ -10,9 +10,16 @@
       </a>
     </li>
   </ul>
+    <div class="d-flex align-items-center text-black">
+      <span class="me-3">
+        👤 User
+      </span>
+      <button class="btn btn-outline-dark btn-sm" (click)="logout()">
+        Çıkış Yap
+      </button>
+    </div>
 </nav>
 
 <div class="container mt-3">
-    user
 <router-outlet></router-outlet>
 </div>
