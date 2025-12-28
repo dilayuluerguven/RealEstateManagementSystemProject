@@ -1,1 +1,42 @@
-<p>update works!</p>
+<h3>Taşınmazınızı güncelleyin</h3>
+
+<form [formGroup]="formGroup" (ngSubmit)="update()">
+
+  <div class="form-group mt-3">
+    <select class="form-control" formControlName="il">
+      <option [ngValue]="null">İl seçiniz</option>
+      <option *ngFor="let item of iller" [ngValue]="item.id">
+        {{ item.ilAdi }}
+      </option>
+    </select>
+  </div>
+
+  <div class="form-group mt-3">
+    <select class="form-control" formControlName="ilce">
+      <option [ngValue]="null">İlçe seçiniz</option>
+      <option *ngFor="let item of ilceler" [ngValue]="item.id">
+        {{ item.ilceAdi }}
+      </option>
+    </select>
+  </div>
+
+  <div class="form-group mt-3">
+    <select class="form-control" formControlName="mahalle">
+      <option [ngValue]="null">Mahalle seçiniz</option>
+      <option *ngFor="let item of mahalleler" [ngValue]="item.id">
+        {{ item.mahalleAdi }}
+      </option>
+    </select>
+  </div>
+
+  <input class="form-control mt-3" type="number" formControlName="ada" placeholder="Ada giriniz" />
+  <input class="form-control mt-3" type="number" formControlName="parsel" placeholder="Parsel giriniz" />
+  <input class="form-control mt-3" type="text" formControlName="adres" placeholder="Adres giriniz" />
+  <input class="form-control mt-3" type="text" formControlName="emlakTipi" placeholder="Emlak Tipi giriniz" />
+  <input class="form-control mt-3" type="text" formControlName="koordinat" placeholder="Koordinat giriniz" />
+
+  <button type="submit" class="btn btn-primary mt-3" [disabled]="formGroup.invalid">
+    Güncelle
+  </button>
+
+</form>
