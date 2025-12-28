@@ -92,7 +92,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
-        public async Task<bool> UpdateUserAsync(int id, UserForRegisterDto dto)
+        public async Task<bool> UpdateUserAsync(int id, UserUpdateDto dto)
         {
             try
             {
@@ -111,7 +111,9 @@ namespace RealEstateManagementProject.Business.Concrete
                 user.Rol = dto.Rol;
 
                 if (!string.IsNullOrWhiteSpace(dto.Sifre))
+                {
                     user.Sifre = HashHelper.Sha256Hash(dto.Sifre);
+                }
 
                 await _context.SaveChangesAsync();
 
@@ -125,7 +127,7 @@ namespace RealEstateManagementProject.Business.Concrete
 
                 return true;
             }
-            catch
+            catch (Exception)
             {
                 await _logService.AddAsync(new Log
                 {

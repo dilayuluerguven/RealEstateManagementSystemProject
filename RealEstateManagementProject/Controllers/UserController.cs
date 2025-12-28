@@ -47,7 +47,7 @@ namespace RealEstateManagementProject.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserForRegisterDto dto)
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto dto)
         {
             var result = await _userService.UpdateUserAsync(id, dto);
 
