@@ -3,6 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { TasinmazService } from '../tasinmaz.service';
 import { LocationService } from '../../shared/location.service';
 import { Router } from '@angular/router';
+import { Tasinmaz } from '../models/tasinmaz';
 
 @Component({
   selector: 'app-add',
@@ -11,15 +12,16 @@ import { Router } from '@angular/router';
 })
 export class AddComponent implements OnInit {
   formGroup = new FormGroup({
-    il: new FormControl(''),
-    ilce: new FormControl(''),
-    mahalle: new FormControl(''),
+    il: new FormControl<number | null>(null),
+    ilce: new FormControl<number | null>(null),
+    mahalle: new FormControl<number | null>(null),
     ada: new FormControl(''),
     parsel: new FormControl(''),
     adres: new FormControl(''),
     emlakTipi: new FormControl(''),
     koordinat: new FormControl(''),
   });
+
   iller: any[] = [];
   ilceler: any[] = [];
   mahalleler: any[] = [];
@@ -56,24 +58,23 @@ export class AddComponent implements OnInit {
     });
   }
   submit() {
-    const dto = {
+    const dto: Tasinmaz = {
+      userId:1,
       ilId: Number(this.formGroup.value.il),
       ilceId: Number(this.formGroup.value.ilce),
       mahalleId: Number(this.formGroup.value.mahalle),
-      ada: Number(this.formGroup.value.ada),
-      parsel: Number(this.formGroup.value.parsel),
-      adres: this.formGroup.value.adres,
-      emlakTipi: this.formGroup.value.emlakTipi,
-      koordinat: this.formGroup.value.koordinat,
+      ada: Number(this.formGroup.value.ada)!,
+      parsel:Number( this.formGroup.value.parsel)!,
+      adres: this.formGroup.value.adres!,
+      emlakTipi: this.formGroup.value.emlakTipi!,
+      koordinat: this.formGroup.value.koordinat!,
     };
+
     this.tasinmazService.add(dto).subscribe({
       next: () => {
-        alert('Taşinmaz eklendi.');
+        alert('Taşınmaz eklendi.');
         this.formGroup.reset();
         this.router.navigate(['/core/tasinmaz/list']);
-      },
-      error: () => {
-        alert('Taşınmaz eklenirken hata oluştu.');
       },
     });
   }
