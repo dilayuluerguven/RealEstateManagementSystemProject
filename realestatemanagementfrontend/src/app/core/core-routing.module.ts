@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HeaderComponent } from './header/header.component';
+
+import { UserLayoutComponent } from './layouts/user-layout/user-layout.component';
+import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
 const routes: Routes = [
+  // USER
   {
     path: '',
-    component: HeaderComponent,
+    component: UserLayoutComponent,
     children: [
       {
         path: '',
@@ -15,11 +18,36 @@ const routes: Routes = [
       {
         path: 'tasinmaz',
         loadChildren: () =>
-          import('./tasinmaz/tasinmaz.module').then((m) => m.TasinmazModule),
+          import('./tasinmaz/tasinmaz.module').then(m => m.TasinmazModule),
+      },
+    ],
+  },
+
+  // ADMIN
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    children: [
+      {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full',
+      },
+      {
+        path: 'users',
+        loadChildren: () =>
+          import('./user-admin-control/admin-control.module')
+            .then(m => m.UserAdminControlModule),
+      },
+      {
+        path: 'tasinmaz',
+        loadChildren: () =>
+          import('./tasinmaz/tasinmaz.module').then(m => m.TasinmazModule),
       },
     ],
   },
 ];
+
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

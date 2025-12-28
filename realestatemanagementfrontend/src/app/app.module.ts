@@ -7,7 +7,9 @@ import { LoginComponent } from './auth/login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-import { AuthInterceptor } from './auth/interceptor/auth.interceptor';
+
+import { UserAdminControlModule } from './core/user-admin-control/admin-control.module';
+import { AuthInterceptor } from './interceptor/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,7 @@ import { AuthInterceptor } from './auth/interceptor/auth.interceptor';
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
-    RouterModule
+    RouterModule,
   ],
   providers: [
     {provide:HTTP_INTERCEPTORS,useClass:AuthInterceptor,multi:true}
