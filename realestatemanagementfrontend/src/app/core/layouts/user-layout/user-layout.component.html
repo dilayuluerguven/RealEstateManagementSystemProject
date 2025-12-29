@@ -1,25 +1,45 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
-  <a class="navbar-brand fw-bold" >
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-4">
+  <a class="navbar-brand fw-bold">
     Taşınmaz Yönetimi
   </a>
 
-  <ul class="navbar-nav ms-auto">
-    <li class="nav-item">
-      <a class="nav-link" >
-        Taşınmazlarım
-      </a>
-    </li>
-  </ul>
-    <div class="d-flex align-items-center text-black">
-      <span class="me-3">
-        👤 User
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#userNavbar"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="userNavbar">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/core/tasinmaz/list"
+          routerLinkActive="active"
+        >
+          <i class="bi bi-house-door me-1"></i>
+          Taşınmazlarım
+        </a>
+      </li>
+    </ul>
+
+    <div class="d-flex align-items-center gap-3">
+      <span class="d-flex align-items-center text-dark">
+        <i class="bi bi-person-circle me-1"></i>
+        User
       </span>
+
       <button class="btn btn-outline-dark btn-sm" (click)="logout()">
-        Çıkış Yap
+        <i class="bi bi-box-arrow-right me-1"></i>
+        Çıkış
       </button>
     </div>
+  </div>
 </nav>
 
-<div class="container mt-3">
-<router-outlet></router-outlet>
+<div class="container mt-4">
+  <router-outlet></router-outlet>
 </div>
