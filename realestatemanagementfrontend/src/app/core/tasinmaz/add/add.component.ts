@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TasinmazService } from '../tasinmaz.service';
 import { LocationService } from '../../shared/location.service';
 import { Router } from '@angular/router';
-import { Tasinmaz } from '../models/tasinmaz';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-add',
@@ -12,15 +12,16 @@ import { Tasinmaz } from '../models/tasinmaz';
 })
 export class AddComponent implements OnInit {
   formGroup = new FormGroup({
-    il: new FormControl<number | null>(null),
-    ilce: new FormControl<number | null>(null),
-    mahalle: new FormControl<number | null>(null),
-    ada: new FormControl(''),
-    parsel: new FormControl(''),
-    adres: new FormControl(''),
-    emlakTipi: new FormControl(''),
-    koordinat: new FormControl(''),
-  });
+  il: new FormControl<number | null>(null, Validators.required),
+  ilce: new FormControl<number | null>(null, Validators.required),
+  mahalle: new FormControl<number | null>(null, Validators.required),
+  ada: new FormControl<number | null>(null, Validators.required),
+  parsel: new FormControl<number | null>(null, Validators.required),
+  adres: new FormControl('', Validators.required),
+  emlakTipi: new FormControl('', Validators.required),
+  koordinat: new FormControl('', Validators.required),
+});
+
 
   iller: any[] = [];
   ilceler: any[] = [];
@@ -28,54 +29,77 @@ export class AddComponent implements OnInit {
   constructor(
     private tasinmazService: TasinmazService,
     private locService: LocationService,
-    private router: Router
+    private router: Router,
+    private toastr:ToastrService
   ) {}
-  ngOnInit(): void {
-    this.locService.getIller().subscribe((res) => {
-      console.log('iller', res);
+ ngOnInit(): void {
+  this.locService.getIller().subscribe(res => {
+    this.iller = res;
+  });
 
-      this.iller = res;
-    });
-    this.formGroup.get('il')?.valueChanges.subscribe((ilId) => {
-      if (!ilId) {
-        this.ilceler = [];
-        this.formGroup.get('ilce')?.reset();
-        return;
-      }
-      this.locService.getIlceler(Number(ilId)).subscribe((res) => {
-        this.ilceler = res;
-      });
-    });
-    this.formGroup.get('ilce')?.valueChanges.subscribe((ilceId) => {
-      if (!ilceId) {
-        this.mahalleler = [];
-        this.formGroup.get('mahalle')?.reset();
-        return;
-      }
-      this.locService.getMahalleler(Number(ilceId)).subscribe((res) => {
-        this.mahalleler = res;
-      });
-    });
-  }
-  submit() {
-    const dto: Tasinmaz = {
-      userId:1,
-      ilId: Number(this.formGroup.value.il),
-      ilceId: Number(this.formGroup.value.ilce),
-      mahalleId: Number(this.formGroup.value.mahalle),
-      ada: Number(this.formGroup.value.ada)!,
-      parsel:Number( this.formGroup.value.parsel)!,
-      adres: this.formGroup.value.adres!,
-      emlakTipi: this.formGroup.value.emlakTipi!,
-      koordinat: this.formGroup.value.koordinat!,
-    };
+  this.formGroup.get('il')?.valueChanges.subscribe(ilId => {
 
-    this.tasinmazService.add(dto).subscribe({
-      next: () => {
-        alert('Taşınmaz eklendi.');
-        this.formGroup.reset();
-        this.router.navigate(['/core/tasinmaz/list']);
+    this.ilceler = [];
+    this.mahalleler = [];
+
+    this.formGroup.patchValue(
+      {
+        ilce: null,
+        mahalle: null
       },
+      { emitEvent: false }
+    );
+
+    if (!ilId) return;
+
+    this.locService.getIlceler(ilId).subscribe(res => {
+      this.ilceler = res;
     });
+  });
+
+  this.formGroup.get('ilce')?.valueChanges.subscribe(ilceId => {
+
+    this.mahalleler = [];
+
+    this.formGroup.patchValue(
+      { mahalle: null },
+      { emitEvent: false }
+    );
+
+    if (!ilceId) return;
+
+    this.locService.getMahalleler(ilceId).subscribe(res => {
+      this.mahalleler = res;
+    });
+  });
+}
+
+  submit() {
+  if (this.formGroup.invalid) {
+    this.formGroup.markAllAsTouched();
+    return;
   }
+
+  const dto = {
+    ilId: this.formGroup.value.il!,
+    ilceId: this.formGroup.value.ilce!,
+    mahalleId: this.formGroup.value.mahalle!,
+    ada: Number(this.formGroup.value.ada),
+    parsel: Number(this.formGroup.value.parsel),
+    adres: this.formGroup.value.adres!,
+    emlakTipi: this.formGroup.value.emlakTipi!,
+    koordinat: this.formGroup.value.koordinat!,
+  };
+
+  this.tasinmazService.add(dto).subscribe({
+    next: () => {
+      this.toastr.success('Taşınmaz başarıyla eklendi');
+      this.router.navigate(['/core/tasinmaz/list']);
+    },
+    error: () => {
+      this.toastr.error('Taşınmaz eklenemedi');
+    }
+  });
+}
+
 }

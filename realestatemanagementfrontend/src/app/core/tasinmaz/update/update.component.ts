@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TasinmazService } from '../tasinmaz.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LocationService } from '../../shared/location.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-update',
@@ -25,13 +26,14 @@ export class UpdateComponent implements OnInit {
   iller: any[] = [];
   ilceler: any[] = [];
   mahalleler: any[] = [];
-  userId!:number;
+  userId!: number;
 
   constructor(
     private tasinmazService: TasinmazService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private locService: LocationService
+    private locService: LocationService,
+    private toastr: ToastrService
   ) {}
   ngOnInit(): void {
     this.locService.getIller().subscribe((x) => {
@@ -41,7 +43,7 @@ export class UpdateComponent implements OnInit {
     if (this.id) {
       this.tasinmazService.getById(this.id).subscribe((x) => {
         console.log('Taşinmaz:', x);
-        this.userId=x.userId;
+        this.userId = x.userId;
         this.formGroup.patchValue({
           il: x.ilId,
           ilce: x.ilceId,
@@ -80,9 +82,13 @@ export class UpdateComponent implements OnInit {
   }
   update() {
     if (!this.id) return;
+
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      return;
+    }
+
     const dto = {
-      id:this.id, 
-      userId:this.userId,
       ilId: this.formGroup.value.il!,
       ilceId: this.formGroup.value.ilce!,
       mahalleId: this.formGroup.value.mahalle!,
@@ -92,13 +98,22 @@ export class UpdateComponent implements OnInit {
       emlakTipi: this.formGroup.value.emlakTipi!,
       koordinat: this.formGroup.value.koordinat!,
     };
+
     this.tasinmazService.update(this.id, dto).subscribe({
       next: () => {
-        alert('Taşınmaz güncellendi');
-        this.router.navigate(['/core/tasinmaz/list']);
+        this.toastr.success('Taşınmaz başarıyla güncellendi');
+
+        const role = localStorage.getItem('role');
+
+        if (role === 'Admin') {
+          this.router.navigate(['/core/admin/tasinmaz/list']);
+        } else {
+          this.router.navigate(['/core/tasinmaz/list']);
+        }
       },
+
       error: () => {
-        alert('Güncelleme yapılamadı.');
+        this.toastr.error('Güncelleme yapılamadı');
       },
     });
   }
