@@ -48,7 +48,9 @@ public class TasinmazController : ControllerBase
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
-        var result = await _tasinmazService.GetByIdAsync(id, userId);
+        bool isAdmin = User.IsInRole("Admin");
+
+        var result = await _tasinmazService.GetByIdAsync(id, userId, isAdmin);
 
         if (result == null)
             return NotFound("Taşınmaz bulunamadı.");
@@ -57,7 +59,7 @@ public class TasinmazController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> Add([FromBody] TasinmazDto dto)
+    public async Task<IActionResult> Add([FromBody] TasinmazCreateUpdateDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -72,27 +74,32 @@ public class TasinmazController : ControllerBase
         var result = await _tasinmazService.AddAsync(dto);
 
         if (!result)
-            return BadRequest("Taşınmaz eklenemedi.");
+            return BadRequest();
 
-        return Ok("Taşınmaz başarıyla eklendi.");
+        return Ok();
     }
 
 
     [HttpPut("update/{id}")]
-    public async Task<IActionResult> Update(int id, TasinmazDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] TasinmazCreateUpdateDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
         dto.UserId = userId;
+        bool isAdmin = User.IsInRole("Admin");
 
-        var result = await _tasinmazService.UpdateAsync(id, dto);
+        var result = await _tasinmazService.UpdateAsync(id, dto,isAdmin);
 
         if (!result)
-            return NotFound("Taşınmaz bulunamadı.");
+            return NotFound();
 
-        return Ok("Taşınmaz başarıyla güncellendi.");
+        return Ok();
     }
+
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -100,11 +107,14 @@ public class TasinmazController : ControllerBase
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
-        var result = await _tasinmazService.DeleteAsync(id, userId);
+        bool isAdmin = User.IsInRole("Admin");
+
+        var result = await _tasinmazService.DeleteAsync(id, userId, isAdmin);
 
         if (!result)
-            return NotFound("Taşınmaz bulunamadı.");
+            return NotFound();
 
-        return Ok("Taşınmaz başarıyla silindi.");
+        return Ok();
     }
+
 }

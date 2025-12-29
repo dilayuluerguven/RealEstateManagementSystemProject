@@ -18,9 +18,13 @@ namespace RealEstateManagementProject.Business.Concrete
             _logService = logService;
         }
 
-        public async Task<List<TasinmazDto>> GetAllAsync(int? userId)
+        public async Task<List<TasinmazListDto>> GetAllAsync(int? userId)
         {
-            var query = _context.Tasinmazlar.AsQueryable();
+            var query = _context.Tasinmazlar
+                .Include(x => x.Il)
+                .Include(x => x.Ilce)
+                .Include(x => x.Mahalle)
+                .AsQueryable();
 
             if (userId.HasValue)
             {
@@ -28,13 +32,18 @@ namespace RealEstateManagementProject.Business.Concrete
             }
 
             return await query
-                .Select(x => new TasinmazDto
+                .Select(x => new TasinmazListDto
                 {
                     Id = x.Id,
+                    UserId = x.UserId,
                     IlId = x.IlId,
                     IlceId = x.IlceId,
                     MahalleId = x.MahalleId,
-                    UserId = x.UserId,
+
+                    IlAdi = x.Il.IlAdi,
+                    IlceAdi = x.Ilce.IlceAdi,
+                    MahalleAdi = x.Mahalle.MahalleAdi,
+
                     Ada = x.Ada,
                     Parsel = x.Parsel,
                     Adres = x.Adres,
@@ -44,15 +53,25 @@ namespace RealEstateManagementProject.Business.Concrete
                 .ToListAsync();
         }
 
-        public async Task<TasinmazDto?> GetByIdAsync(int id, int userId)
+        public async Task<TasinmazCreateUpdateDto?> GetByIdAsync(int id, int userId, bool isAdmin)
         {
-            var tasinmaz = await _context.Tasinmazlar
-                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            Tasinmaz? tasinmaz;
+
+            if (isAdmin)
+            {
+                tasinmaz = await _context.Tasinmazlar
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            else
+            {
+                tasinmaz = await _context.Tasinmazlar
+                    .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            }
 
             if (tasinmaz == null)
                 return null;
 
-            return new TasinmazDto
+            return new TasinmazCreateUpdateDto
             {
                 Id = tasinmaz.Id,
                 IlId = tasinmaz.IlId,
@@ -66,7 +85,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 Koordinat = tasinmaz.Koordinat
             };
         }
-        public async Task<bool> AddAsync(TasinmazDto dto)
+        public async Task<bool> AddAsync(TasinmazCreateUpdateDto dto)
         {
             try
             {
@@ -109,56 +128,52 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
-        public async Task<bool> UpdateAsync(int id, TasinmazDto dto)
+        public async Task<bool> UpdateAsync(int id, TasinmazCreateUpdateDto dto, bool isAdmin)
         {
-            try
+            Tasinmaz? tasinmaz;
+
+            if (isAdmin)
             {
-                var tasinmaz = await _context.Tasinmazlar
+                tasinmaz = await _context.Tasinmazlar
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            else
+            {
+                tasinmaz = await _context.Tasinmazlar
                     .FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
-
-                if (tasinmaz == null)
-                    return false;
-
-                tasinmaz.IlId = dto.IlId;
-                tasinmaz.IlceId = dto.IlceId;
-                tasinmaz.MahalleId = dto.MahalleId;
-                tasinmaz.Ada = dto.Ada;
-                tasinmaz.Parsel = dto.Parsel;
-                tasinmaz.Adres = dto.Adres;
-                tasinmaz.EmlakTipi = dto.EmlakTipi;
-                tasinmaz.Koordinat = dto.Koordinat;
-
-                await _context.SaveChangesAsync();
-
-                await _logService.AddAsync(new Log
-                {
-                    IslemTipi = "UPDATE",
-                    Durum = "SUCCESS",
-                    Aciklama = $"Taşınmaz güncellendi (Id={id}, UserId={dto.UserId})",
-                    Tarih = DateTime.UtcNow
-                });
-
-                return true;
             }
-            catch
-            {
-                await _logService.AddAsync(new Log
-                {
-                    IslemTipi = "UPDATE",
-                    Durum = "ERROR",
-                    Aciklama = $"Taşınmaz güncellenemedi (Id={id})",
-                    Tarih = DateTime.UtcNow
-                });
 
+            if (tasinmaz == null)
                 return false;
-            }
+
+            tasinmaz.IlId = dto.IlId;
+            tasinmaz.IlceId = dto.IlceId;
+            tasinmaz.MahalleId = dto.MahalleId;
+            tasinmaz.Ada = dto.Ada;
+            tasinmaz.Parsel = dto.Parsel;
+            tasinmaz.Adres = dto.Adres;
+            tasinmaz.EmlakTipi = dto.EmlakTipi;
+            tasinmaz.Koordinat = dto.Koordinat;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
-        public async Task<bool> DeleteAsync(int id, int userId)
+        public async Task<bool> DeleteAsync(int id, int userId, bool isAdmin)
         {
             try
             {
-                var tasinmaz = await _context.Tasinmazlar
-                    .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                Tasinmaz? tasinmaz;
+
+                if (isAdmin)
+                {
+                    tasinmaz = await _context.Tasinmazlar
+                        .FirstOrDefaultAsync(x => x.Id == id);
+                }
+                else
+                {
+                    tasinmaz = await _context.Tasinmazlar
+                        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                }
 
                 if (tasinmaz == null)
                     return false;
@@ -170,7 +185,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     IslemTipi = "DELETE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Taşınmaz silindi (Id={id}, UserId={userId})",
+                    Aciklama = $"Taşınmaz silindi (Id={id})",
                     Tarih = DateTime.UtcNow
                 });
 
