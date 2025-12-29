@@ -13,7 +13,12 @@ namespace RealEstateManagementProject.Dtos
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Şifre zorunludur.")]
-        [MinLength(6, ErrorMessage = "Şifre en az 6 karakter olmalıdır.")]
+        [MinLength(8, ErrorMessage = "Şifre en az 8 karakter olmalıdır.")]
+        [MaxLength(12, ErrorMessage = "Şifre en fazla 12 karakter olabilir.")]
+        [RegularExpression(
+            @"^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,12}$",
+            ErrorMessage = "Şifre 8-12 karakter olmalı ve en az 1 harf, 1 rakam, 1 özel karakter içermelidir."
+        )]
         public string Sifre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Rol zorunludur.")]
