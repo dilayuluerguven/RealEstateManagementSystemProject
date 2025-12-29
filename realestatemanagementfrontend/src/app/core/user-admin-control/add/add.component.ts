@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminControlService } from '../admin-control.service';
 import { Router } from '@angular/router';
+import { Toast, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-add',
@@ -10,7 +11,7 @@ import { Router } from '@angular/router';
 })
 export class AddComponent implements OnInit {
   formGroup!:FormGroup;
-  constructor(private fb:FormBuilder,private userService:AdminControlService,private router:Router) {
+  constructor(private fb:FormBuilder,private userService:AdminControlService,private router:Router,private toastr:ToastrService) {
     
   }
   ngOnInit(): void {
@@ -26,9 +27,10 @@ export class AddComponent implements OnInit {
     this.userService.createUser(this.formGroup.value).subscribe({
       next:()=>{
         this.router.navigate(['/core/admin/users']);
+        this.toastr.success("Kullanıcı başarıyla kaydedildi.")
       },
       error:(err)=>{
-        console.log(err)
+        this.toastr.warning("Kullanıcı kaydedilmedi.")
       }
     })
   }

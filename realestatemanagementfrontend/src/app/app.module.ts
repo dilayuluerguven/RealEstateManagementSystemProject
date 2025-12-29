@@ -8,8 +8,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
-import { UserAdminControlModule } from './core/user-admin-control/admin-control.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthInterceptor } from './interceptor/auth.interceptor';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,8 @@ import { AuthInterceptor } from './interceptor/auth.interceptor';
     ReactiveFormsModule,
     HttpClientModule,
     RouterModule,
+    BrowserAnimationsModule,
+  ToastrModule.forRoot()
   ],
   providers: [
     {provide:HTTP_INTERCEPTORS,useClass:AuthInterceptor,multi:true}
