@@ -4,35 +4,56 @@
       Yeni kullanıcı kaydet
     </button>
     <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Id</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>İşlemler</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td>{{ user.id }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.rol }}</td>
-          <td>
-            <div class="d-flex gap-2">
-              <button (click)="deleteUser(user.id)" class="btn btn-danger">
-                Sil
-              </button>
+  <thead>
+    <tr>
+      <th>
+        <input
+          type="checkbox"
+          [checked]="isAllSelected()"
+          (change)="toggleSelectAll($event)"
+        />
+        Hepsini Seç
+      </th>
+      <th>Id</th>
+      <th>Email</th>
+      <th>Rol</th>
+    </tr>
+  </thead>
 
-              <button
-                class="btn btn-primary"
-                [routerLink]="['/core/admin/update', user.id]"
-              >
-                Güncelle
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <tbody>
+    <tr *ngFor="let user of users">
+      <td>
+        <input
+          type="checkbox"
+          [checked]="isSelected(user)"
+          (change)="toggleUser(user)"
+        />
+      </td>
+      <td>{{ user.id }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.rol }}</td>
+    </tr>
+  </tbody>
+</table>
+
+    <span class="ms-2 text-muted"> Seçili: {{ selectedUsers.length }} </span>
+
+    <div class="d-flex gap-2">
+      <button
+        (click)="deleteSelected()"
+        [disabled]="selectedUsers.length === 0"
+        class="btn btn-danger"
+      >
+        {{ deleteButtonText }}
+      </button>
+
+      <button
+        class="btn btn-primary"
+        (click)="goToUpdate()"
+        [disabled]="selectedUsers.length !== 1"
+      >
+        Güncelle
+      </button>
+    </div>
   </div>
 </div>
