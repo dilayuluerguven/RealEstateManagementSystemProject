@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace RealEstateManagementProject.Dtos
 {
-    public class TasinmazDto
+    public class TasinmazCreateUpdateDto
     {
         public int Id { get; set; }
 
