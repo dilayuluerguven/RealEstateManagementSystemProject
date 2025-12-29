@@ -73,7 +73,7 @@ export class ListComponent implements OnInit {
   }
   get deleteButtonText(): string {
     return this.selectedUsers.length > 1
-      ? `Toplu Sil (${this.selectedUsers.length})`
+      ? `Sil (${this.selectedUsers.length})`
       : 'Sil';
   }
   isAllSelected(): boolean {

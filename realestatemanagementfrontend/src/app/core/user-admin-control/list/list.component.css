@@ -1,0 +1,17 @@
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.action-buttons .btn {
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.action-buttons .btn i {
+  vertical-align: middle;
+}
+
+.action-buttons .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

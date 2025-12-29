@@ -18,20 +18,36 @@ export class AddComponent implements OnInit {
       this.formGroup=this.fb.group({
         adSoyad:['',[Validators.required]],
         email:['',[Validators.required,Validators.email]],
-        sifre:['',Validators.required],
-        rol:['Admin',Validators.required]
+        sifre:['',[Validators.required,Validators.minLength(8),Validators.maxLength(12),Validators.pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,12}$/
+    ),]],
+        rol:['',Validators.required]
       });
   }
-  save(){
-    if(this.formGroup.invalid) return;
-    this.userService.createUser(this.formGroup.value).subscribe({
-      next:()=>{
-        this.router.navigate(['/core/admin/users']);
-        this.toastr.success("Kullanıcı başarıyla kaydedildi.")
-      },
-      error:(err)=>{
-        this.toastr.warning("Kullanıcı kaydedilmedi.")
-      }
-    })
+  save() {
+  if (this.formGroup.invalid) {
+    this.formGroup.markAllAsTouched();
+    this.toastr.warning('Lütfen zorunlu alanları doğru doldurun');
+    return;
   }
+
+  this.userService.createUser(this.formGroup.value).subscribe({
+    next: () => {
+      this.toastr.success('Kullanıcı başarıyla kaydedildi');
+      this.router.navigate(['/core/admin/users']);
+    },
+    error: (err) => {
+      if (err.error?.errors) {
+        Object.values(err.error.errors).forEach((messages: any) => {
+          messages.forEach((msg: string) => {
+            this.toastr.error(msg);
+          });
+        });
+      } else {
+        this.toastr.error('Kullanıcı kaydedilemedi');
+      }
+    },
+  });
+}
+
 }

@@ -1,0 +1,15 @@
+label.required::after {
+  content: " *";
+  color: red;
+}
+
+.back-btn {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.back-btn:hover {
+  color: #0a58ca;
+  transform: translateX(-2px);
+  transition: all 0.2s ease;
+}
