@@ -150,6 +150,13 @@ namespace RealEstateManagementProject.Business.Concrete
                 if (user == null)
                     return false;
 
+                if (user.Rol == "Admin")
+                {
+                    var adminCount = await _context.Users.CountAsync(x => x.Rol == "Admin");
+                    if (adminCount <= 1)
+                        return false;
+                }
+
                 var tasinmazlar = _context.Tasinmazlar.Where(t => t.UserId == id);
                 _context.Tasinmazlar.RemoveRange(tasinmazlar);
                 _context.Users.Remove(user);
