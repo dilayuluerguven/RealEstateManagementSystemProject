@@ -2,7 +2,7 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Taşınmaz Listesi</h5>
 
-    <button class="btn btn-success" routerLink="/core/tasinmaz/add">
+    <button class="btn btn-success" routerLink="/core/admin/tasinmaz/add" *ngIf="!isAdmin">
       <i class="bi bi-plus-circle me-1"></i>
       Yeni taşınmaz
     </button>
