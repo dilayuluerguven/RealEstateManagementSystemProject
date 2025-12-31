@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
+using System.Security.Claims;
 
 namespace RealEstateManagementProject.Controllers
 {
@@ -30,31 +31,68 @@ namespace RealEstateManagementProject.Controllers
             var user = await _userService.GetUserByIdAsync(id);
 
             if (user == null)
-                return NotFound("Kullanıcı bulunamadı.");
+            {
+                return NotFound(new
+                {
+                    message = "Kullanıcı bulunamadı."
+                });
+            }
 
             return Ok(user);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(UserForRegisterDto dto)
+        public async Task<IActionResult> CreateUser([FromBody] UserForRegisterDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Geçersiz veri gönderildi."
+                });
+            }
+
             var result = await _userService.CreateUserAsync(dto);
 
             if (!result)
-                return BadRequest("Kullanıcı oluşturulamadı.");
+            {
+                return BadRequest(new
+                {
+                    message = "Bu email ile kayıtlı bir kullanıcı zaten var."
+                });
+            }
 
-            return Ok("Kullanıcı başarıyla oluşturuldu.");
+            return Ok(new
+            {
+                message = "Kullanıcı başarıyla oluşturuldu."
+            });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto dto)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Geçersiz veri gönderildi."
+                });
+            }
+
             var result = await _userService.UpdateUserAsync(id, dto);
 
             if (!result)
-                return BadRequest("Kullanıcı güncellenemedi.");
+            {
+                return BadRequest(new
+                {
+                    message = "Kullanıcı güncellenemedi."
+                });
+            }
 
-            return Ok("Kullanıcı başarıyla güncellendi.");
+            return Ok(new
+            {
+                message = "Kullanıcı başarıyla güncellendi."
+            });
         }
 
         [HttpDelete("{id}")]
@@ -63,9 +101,22 @@ namespace RealEstateManagementProject.Controllers
             var result = await _userService.DeleteUserAsync(id);
 
             if (!result)
-                return BadRequest("Kullanıcı silinemedi.");
+            {
+                return BadRequest(new
+                {
+                    message = "Kullanıcı silinemedi (son admin olabilir)."
+                });
+            }
 
-            return Ok("Kullanıcı başarıyla silindi.");
+            var currentUserId = int.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
+
+            return Ok(new
+            {
+                message = "Kullanıcı başarıyla silindi.",
+                selfDeleted = currentUserId == id
+            });
         }
     }
 }
