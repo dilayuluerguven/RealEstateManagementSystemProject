@@ -1,1 +1,150 @@
-<p>register works!</p>
+<div
+  class="container min-vh-100 d-flex justify-content-center align-items-center"
+>
+  <div class="col-md-4">
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-body p-4">
+        <h4 class="text-center mb-4 fw-bold">Kayıt Ol</h4>
+
+        <form [formGroup]="formGroup" (ngSubmit)="register()">
+          <div class="mb-3">
+            <label class="form-label">Ad Soyad</label>
+            <input type="text" class="form-control" formControlName="adSoyad" />
+            <small
+              class="text-danger"
+              *ngIf="
+                formGroup.get('adSoyad')?.touched &&
+                formGroup.get('adSoyad')?.invalid
+              "
+            >
+              Ad soyad zorunludur
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">E-mail</label>
+            <input type="email" class="form-control" formControlName="email" />
+            <small
+              class="text-danger"
+              *ngIf="
+                formGroup.get('email')?.touched &&
+                formGroup.get('email')?.invalid
+              "
+            >
+              Geçerli bir email giriniz
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Şifre</label>
+            <div class="input-group">
+              <input
+                [type]="hidePassword ? 'password' : 'text'"
+                class="form-control"
+                formControlName="password"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="hidePassword = !hidePassword"
+              >
+                <i
+                  class="bi"
+                  [ngClass]="hidePassword ? 'bi-eye' : 'bi-eye-slash'"
+                ></i>
+              </button>
+            </div>
+            <small
+              class="text-danger"
+              *ngIf="
+    formGroup.get('password')?.touched &&
+    formGroup.get('password')?.errors?.['required']
+  "
+            >
+              Şifre zorunludur
+            </small>
+
+            <small
+              class="text-danger"
+              *ngIf="
+    formGroup.get('password')?.touched &&
+    formGroup.get('password')?.errors?.['minlength']
+  "
+            >
+              Şifre en az 8 karakter olmalıdır
+            </small>
+
+            <small
+              class="text-danger"
+              *ngIf="
+    formGroup.get('password')?.touched &&
+    formGroup.get('password')?.errors?.['maxlength']
+  "
+            >
+              Şifre en fazla 12 karakter olabilir
+            </small>
+
+            <small
+              class="text-danger"
+              *ngIf="
+    formGroup.get('password')?.touched &&
+    formGroup.get('password')?.errors?.['pattern']
+  "
+            >
+              Şifre harf, rakam ve özel karakter içermelidir
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Şifre Tekrar</label>
+            <div class="input-group">
+              <input
+                [type]="hideConfirmPassword ? 'password' : 'text'"
+                class="form-control"
+                formControlName="confirmPassword"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="hideConfirmPassword = !hideConfirmPassword"
+              >
+                <i
+                  class="bi"
+                  [ngClass]="hideConfirmPassword ? 'bi-eye' : 'bi-eye-slash'"
+                ></i>
+              </button>
+            </div>
+
+            <small
+              class="text-danger"
+              *ngIf="
+                formGroup.touched &&
+                formGroup.errors?.['notMatch']
+              "
+            >
+              Şifreler uyuşmuyor
+            </small>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary w-100"
+            [disabled]="formGroup.invalid || loading"
+          >
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm me-2"
+            ></span>
+            <span *ngIf="!loading">Kayıt Ol</span>
+          </button>
+
+          <div class="text-center mt-3">
+            <a routerLink="/login" class="text-decoration-none">
+              Hesabınız varsa giriş yapın
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
