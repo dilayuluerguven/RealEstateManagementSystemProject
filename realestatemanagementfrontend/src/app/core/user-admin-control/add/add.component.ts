@@ -11,6 +11,7 @@ import { Toast, ToastrService } from 'ngx-toastr';
 })
 export class AddComponent implements OnInit {
   formGroup!:FormGroup;
+  showPassword: boolean = false;
   constructor(private fb:FormBuilder,private userService:AdminControlService,private router:Router,private toastr:ToastrService) {
     
   }
@@ -48,6 +49,9 @@ export class AddComponent implements OnInit {
       }
     },
   });
+}
+togglePassword() {
+  this.showPassword = !this.showPassword;
 }
 
 }

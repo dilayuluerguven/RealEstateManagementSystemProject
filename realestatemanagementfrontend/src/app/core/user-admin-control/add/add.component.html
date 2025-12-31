@@ -1,66 +1,126 @@
-<div class="d-flex align-items-center mb-3 ">
-    <button type="button"
-    class="btn btn-link p-0 back-btn "
-    routerLink="/core/admin/users">
-    <i class="bi bi-arrow-left fs-4"></i>
-    </button>
-    <h4>Yeni kullanıcı ekle</h4>
-</div>
-<div class="card shadow-sm">
-  <div class="card-body">
-    <form [formGroup]="formGroup" (ngSubmit)="save()">
-      <div class="mb-3">
-        <label class="required form-label">Ad-Soyad</label>
-        <input class="form-control" formControlName="adSoyad" />
-        <div class="text-danger small"
-          *ngIf="formGroup.get('adSoyad')?.touched && formGroup.get('adSoyad')?.invalid">
-          Ad soyad zorunludur
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="required form-label">E-mail</label>
-        <input class="form-control" formControlName="email" />
-        <div class="text-danger small"
-          *ngIf="formGroup.get('email')?.touched && formGroup.get('email')?.invalid">
-          <div *ngIf="formGroup.get('email')?.errors?.['required']">E-mail zorunludur</div>
-          <div *ngIf="formGroup.get('email')?.errors?.['email']">Geçerli bir email giriniz</div>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="required form-label">Şifre</label>
-        <input type="password" class="form-control" formControlName="sifre" />
-        <div class="text-danger small"
-          *ngIf="formGroup.get('sifre')?.touched && formGroup.get('sifre')?.invalid">
-          <div *ngIf="formGroup.get('sifre')?.errors?.['required']">Şifre zorunludur</div>
-          <div *ngIf="formGroup.get('sifre')?.errors?.['minlength']">En az 8 karakter</div>
-          <div *ngIf="formGroup.get('sifre')?.errors?.['maxlength']">En fazla 12 karakter</div>
-          <div *ngIf="formGroup.get('sifre')?.errors?.['pattern']">
-            Büyük/küçük harf, rakam ve özel karakter içermelidir
-          </div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <label class="required form-label">Rol</label>
-        <select class="form-select" formControlName="rol">
-          <option value="">Seçiniz</option>
-          <option value="Admin">Admin</option>
-          <option value="User">User</option>
-        </select>
-        <div class="text-danger small"
-          *ngIf="formGroup.get('rol')?.touched && formGroup.get('rol')?.invalid">
-          Rol seçilmelidir
-        </div>
-      </div>
-      <div class="d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-secondary"
-          routerLink="/core/admin/users">
-          İptal
-        </button>
-        <button class="btn btn-success px-4">
-          Kaydet
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Yeni Kullanıcı Ekle</h5>
 
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      routerLink="/core/admin/users"
+      type="button"
+    >
+      <i class="bi bi-arrow-left me-1"></i>
+      Listeye Dön
+    </button>
+  </div>
+
+  <form [formGroup]="formGroup" (ngSubmit)="save()">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Ad Soyad <span class="text-danger">*</span>
+      </label>
+      <input class="form-control" formControlName="adSoyad" />
+      <div
+        class="text-danger small"
+        *ngIf="formGroup.get('adSoyad')?.touched && formGroup.get('adSoyad')?.invalid"
+      >
+        Ad soyad zorunludur
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        E-mail <span class="text-danger">*</span>
+      </label>
+      <input class="form-control" formControlName="email" />
+      <div
+        class="text-danger small"
+        *ngIf="formGroup.get('email')?.touched && formGroup.get('email')?.invalid"
+      >
+        <div *ngIf="formGroup.get('email')?.errors?.['required']">
+          E-mail zorunludur
+        </div>
+        <div *ngIf="formGroup.get('email')?.errors?.['email']">
+          Geçerli bir email giriniz
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Şifre <span class="text-danger">*</span>
+      </label>
+
+      <div class="input-group">
+        <input
+          class="form-control"
+          formControlName="sifre"
+          [type]="showPassword ? 'text' : 'password'"
+        />
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary border"
+          (click)="togglePassword()"
+        >
+          <i
+            class="bi"
+            [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+          ></i>
+        </button>
+      </div>
+
+      <div
+        class="text-danger small"
+        *ngIf="formGroup.get('sifre')?.touched && formGroup.get('sifre')?.invalid"
+      >
+        <div *ngIf="formGroup.get('sifre')?.errors?.['required']">
+          Şifre zorunludur
+        </div>
+        <div *ngIf="formGroup.get('sifre')?.errors?.['minlength']">
+          En az 8 karakter
+        </div>
+        <div *ngIf="formGroup.get('sifre')?.errors?.['maxlength']">
+          En fazla 12 karakter
+        </div>
+        <div *ngIf="formGroup.get('sifre')?.errors?.['pattern']">
+          Büyük/küçük harf, rakam ve özel karakter içermelidir
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">
+        Rol <span class="text-danger">*</span>
+      </label>
+      <select class="form-control" formControlName="rol">
+        <option value="" disabled>Rol seçiniz</option>
+        <option value="Admin">Admin</option>
+        <option value="User">User</option>
+      </select>
+      <div
+        class="text-danger small"
+        *ngIf="formGroup.get('rol')?.touched && formGroup.get('rol')?.invalid"
+      >
+        Rol seçilmelidir
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        routerLink="/core/admin/users"
+      >
+        İptal
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-success"
+        [disabled]="formGroup.invalid"
+      >
+        <i class="bi bi-save me-1"></i>
+        Kaydet
+      </button>
+    </div>
+  </form>
+</div>
