@@ -55,19 +55,36 @@ export class ListComponent implements OnInit {
 
     toast.onTap.subscribe(() => {
       const ids = this.selectedUsers.map((u) => u.id);
+      let selfDeleted = false;
 
       ids.forEach((id) => {
-        this.userService.deleteUser(id).subscribe();
+        this.userService.deleteUser(id).subscribe({
+          next: (res: any) => {
+            if (res.selfDeleted) {
+              localStorage.clear();
+              this.router.navigate(['/login']);
+              this.toastr.info('Hesabınız silindi, çıkış yapıldı');
+            }
+          },
+        });
       });
 
       this.users = this.users.filter((u) => !ids.includes(u.id));
       this.selectedUsers = [];
+
+      if (selfDeleted) {
+        this.toastr.info('Hesabınız silindi, çıkış yapılıyor');
+        localStorage.removeItem('token');
+        this.router.navigate(['/login']);
+        return;
+      }
 
       this.toastr.success(
         count === 1 ? 'Kullanıcı silindi' : 'Kullanıcılar silindi'
       );
     });
   }
+
   goToUpdate() {
     this.router.navigate(['/core/admin/update', this.selectedUsers[0].id]);
   }
