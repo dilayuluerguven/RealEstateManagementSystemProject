@@ -1,42 +1,133 @@
-<h3>Taşınmazınızı güncelleyin</h3>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Taşınmaz Bilgilerini Güncelle</h5>
 
-<form [formGroup]="formGroup" (ngSubmit)="update()">
-
-  <div class="form-group mt-3">
-    <select class="form-control" formControlName="il">
-      <option [ngValue]="null">İl seçiniz</option>
-      <option *ngFor="let item of iller" [ngValue]="item.id">
-        {{ item.ilAdi }}
-      </option>
-    </select>
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      routerLink="/core/tasinmaz/list"
+      type="button"
+    >
+      <i class="bi bi-arrow-left me-1"></i>
+      Listeye Dön
+    </button>
   </div>
 
-  <div class="form-group mt-3">
-    <select class="form-control" formControlName="ilce">
-      <option [ngValue]="null">İlçe seçiniz</option>
-      <option *ngFor="let item of ilceler" [ngValue]="item.id">
-        {{ item.ilceAdi }}
-      </option>
-    </select>
-  </div>
+  <form [formGroup]="formGroup" (ngSubmit)="update()">
 
-  <div class="form-group mt-3">
-    <select class="form-control" formControlName="mahalle">
-      <option [ngValue]="null">Mahalle seçiniz</option>
-      <option *ngFor="let item of mahalleler" [ngValue]="item.id">
-        {{ item.mahalleAdi }}
-      </option>
-    </select>
-  </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        İl <span class="text-danger">*</span>
+      </label>
+      <select class="form-control" formControlName="il">
+        <option [ngValue]="null" disabled>İl seçiniz</option>
+        <option *ngFor="let item of iller" [ngValue]="item.id">
+          {{ item.ilAdi }}
+        </option>
+      </select>
+    </div>
 
-  <input class="form-control mt-3" type="number" formControlName="ada" placeholder="Ada giriniz" />
-  <input class="form-control mt-3" type="number" formControlName="parsel" placeholder="Parsel giriniz" />
-  <input class="form-control mt-3" type="text" formControlName="adres" placeholder="Adres giriniz" />
-  <input class="form-control mt-3" type="text" formControlName="emlakTipi" placeholder="Emlak Tipi giriniz" />
-  <input class="form-control mt-3" type="text" formControlName="koordinat" placeholder="Koordinat giriniz" />
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        İlçe <span class="text-danger">*</span>
+      </label>
+      <select class="form-control" formControlName="ilce">
+        <option [ngValue]="null" disabled>İlçe seçiniz</option>
+        <option *ngFor="let item of ilceler" [ngValue]="item.id">
+          {{ item.ilceAdi }}
+        </option>
+      </select>
+    </div>
 
-  <button type="submit" class="btn btn-primary mt-3" [disabled]="formGroup.invalid">
-    Güncelle
-  </button>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Mahalle <span class="text-danger">*</span>
+      </label>
+      <select class="form-control" formControlName="mahalle">
+        <option [ngValue]="null" disabled>Mahalle seçiniz</option>
+        <option *ngFor="let item of mahalleler" [ngValue]="item.id">
+          {{ item.mahalleAdi }}
+        </option>
+      </select>
+    </div>
 
-</form>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Ada <span class="text-danger">*</span>
+      </label>
+      <input
+        type="number"
+        class="form-control"
+        formControlName="ada"
+        placeholder="Ada giriniz"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Parsel <span class="text-danger">*</span>
+      </label>
+      <input
+        type="number"
+        class="form-control"
+        formControlName="parsel"
+        placeholder="Parsel giriniz"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Adres <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="adres"
+        placeholder="Adres giriniz"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">
+        Emlak Tipi <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="emlakTipi"
+        placeholder="Emlak tipi giriniz"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">
+        Koordinat <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="koordinat"
+        placeholder="Koordinat giriniz"
+      />
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        routerLink="/core/tasinmaz/list"
+      >
+        İptal
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-success"
+        [disabled]="formGroup.invalid"
+      >
+        <i class="bi bi-save me-1"></i>
+        Güncelle
+      </button>
+    </div>
+
+  </form>
+</div>
