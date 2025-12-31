@@ -18,11 +18,12 @@ export class AdminControlService {
 }
 
 
-  deleteUser(id: number) {
-    return this.httpClient.delete(`${environment.baseUrl}/api/User/${id}`, {
-      responseType: 'text',
-    });
-  }
+ deleteUser(id: number) {
+  return this.httpClient.delete<any>(
+    `${environment.baseUrl}/api/User/${id}`
+  );
+}
+
   createUser(data: any) {
     return this.httpClient.post(`${environment.baseUrl}/api/User`, data, {
       responseType: 'text',
