@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 export class UpdateComponent implements OnInit {
   formGroup!: FormGroup;
   userId!: number;
-
+  showPassword: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -52,32 +52,35 @@ export class UpdateComponent implements OnInit {
   });
 }
 
-  update() {
+ update() {
   if (this.formGroup.invalid) {
     this.toastr.warning('Lütfen zorunlu alanları doldurun');
     this.formGroup.markAllAsTouched();
     return;
   }
 
-  const payload: any = {
-    adSoyad: this.formGroup.value.adSoyad,
-    email: this.formGroup.value.email,
-    rol: this.formGroup.value.rol
+  const payload = {
+    adSoyad: this.formGroup.get('adSoyad')!.value,
+    email: this.formGroup.get('email')!.value,
+    rol: this.formGroup.get('rol')!.value,
+    sifre: this.formGroup.get('sifre')!.value || null
   };
-
-  if (this.formGroup.value.sifre?.trim()) {
-    payload.sifre = this.formGroup.value.sifre;
-  }
 
   this.userService.updateUser(payload, this.userId).subscribe({
     next: () => {
       this.toastr.success('Kullanıcı başarıyla güncellendi');
       this.router.navigate(['/core/admin/users']);
     },
-    error: () => {
-      this.toastr.error('Güncelleme işlemi başarısız');
+    error: (err) => {
+      console.error('UPDATE ERROR:', err);
+      this.toastr.error(err?.error?.message || 'Güncelleme işlemi başarısız');
     }
   });
 }
+togglePassword() {
+  this.showPassword = !this.showPassword;
+}
+
+
 
 }
