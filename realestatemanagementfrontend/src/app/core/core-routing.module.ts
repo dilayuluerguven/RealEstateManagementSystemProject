@@ -12,8 +12,8 @@ const routes: Routes = [
   {
     path: '',
     component: UserLayoutComponent,
-    canActivate:[UserGuard],
-    canActivateChild:[UserGuard],
+    canActivate: [UserGuard],
+    canActivateChild: [UserGuard],
     children: [
       {
         path: '',
@@ -32,7 +32,7 @@ const routes: Routes = [
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [AdminGuard],
-    canActivateChild:[AdminGuard],
+    canActivateChild: [AdminGuard],
     children: [
       {
         path: 'users',
@@ -45,6 +45,13 @@ const routes: Routes = [
         path: 'tasinmaz',
         loadChildren: () =>
           import('./tasinmaz/tasinmaz.module').then((m) => m.TasinmazModule),
+      },
+      {
+        path: 'logs',
+        loadChildren: () =>
+          import('./user-admin-control/logs/logs.module').then(
+            (m) => m.LogsModule
+          ),
       },
       {
         path: '',
