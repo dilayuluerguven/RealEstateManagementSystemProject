@@ -21,7 +21,7 @@
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "ngx-toastr": "^16.2.0",
-    "ol": "^10.7.0",
+    "ol": "^7.5.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
@@ -30,7 +30,9 @@
     "@angular-devkit/build-angular": "^15.2.11",
     "@angular/cli": "~15.2.11",
     "@angular/compiler-cli": "^15.2.0",
+    "@types/geojson": "^7946.0.16",
     "@types/jasmine": "~4.3.0",
+    "@types/topojson-specification": "^1.0.5",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.1.0",
