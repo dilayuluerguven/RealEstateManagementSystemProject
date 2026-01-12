@@ -5,10 +5,11 @@ import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.compon
 import { UserLayoutComponent } from './layouts/user-layout/user-layout.component';
 import { RouterModule } from '@angular/router';
 import { TasinmazMapComponent } from './map/tasinmaz-map/tasinmaz-map.component';
+import { TasinmazListMapComponent } from './map/tasinmaz-list-map/tasinmaz-list-map.component';
 
 @NgModule({
-  declarations: [AdminLayoutComponent, UserLayoutComponent, TasinmazMapComponent],
+  declarations: [AdminLayoutComponent, UserLayoutComponent, TasinmazMapComponent, TasinmazListMapComponent],
   imports: [CommonModule, CoreRoutingModule, RouterModule],
-  exports:[TasinmazMapComponent]
+  exports:[TasinmazMapComponent,TasinmazListMapComponent]
 })
 export class CoreModule {}
