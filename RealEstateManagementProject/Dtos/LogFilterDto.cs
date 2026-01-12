@@ -2,6 +2,7 @@
 {
     public class LogFilterDTO
     {
+        public int Id { get; set; }
         public int? UserId { get; set; }
         public string? Durum { get; set; }
         public string? IslemTipi { get; set; }

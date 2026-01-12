@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
+using RealEstateManagementProject.Dtos;
 
 namespace RealEstateManagementProject.Controllers
 {
@@ -22,5 +23,23 @@ namespace RealEstateManagementProject.Controllers
             var logs = await _logService.GetAllAsync();
             return Ok(logs);
         }
+        [HttpPost("filter")]
+        public async Task<IActionResult> Filter([FromBody] LogFilterDTO filter)
+        {
+            var logs = await _logService.FilterAsync(filter);
+            return Ok(logs);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _logService.DeleteAsync(id);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+
     }
 }
