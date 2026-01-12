@@ -11,6 +11,7 @@ namespace RealEstateManagementProject.Business.Concrete
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+
         public LogService(
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor)
@@ -35,16 +36,20 @@ namespace RealEstateManagementProject.Business.Concrete
                 })
                 .ToListAsync();
         }
+
         private int? GetUserIdFromToken()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?
                 .User?
                 .Claims?
-                .FirstOrDefault(x => x.Type == "UserId" || x.Type == ClaimTypes.NameIdentifier);
+                .FirstOrDefault(x =>
+                    x.Type == "UserId" ||
+                    x.Type == ClaimTypes.NameIdentifier);
 
-            return userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+            return userIdClaim != null
+                ? int.Parse(userIdClaim.Value)
+                : null;
         }
-
 
         public async Task<bool> AddAsync(Log log)
         {
@@ -53,28 +58,31 @@ namespace RealEstateManagementProject.Business.Concrete
                 if (log.UserId == 0)
                 {
                     var userId = GetUserIdFromToken();
-                    if (userId.HasValue)
-                        log.UserId = userId.Value;
+                    log.UserId = userId ?? 0;
                 }
 
-                log.IpAdresi ??=
+                log.IpAdresi =
                     _httpContextAccessor.HttpContext?
                         .Connection?
                         .RemoteIpAddress?
-                        .ToString() ?? "UNKNOWN";
+                        .ToString()
+                    ?? "UNKNOWN";
 
-                log.Tarih = DateTime.Now;
+                log.Tarih = DateTime.UtcNow;
 
                 await _context.Loglar.AddAsync(log);
                 await _context.SaveChangesAsync();
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine("LOG ERROR: " + ex.Message);
+                Console.WriteLine(ex.InnerException?.Message);
                 return false;
             }
         }
+
         public async Task<List<LogFilterDTO>> FilterAsync(LogFilterDTO filter)
         {
             IQueryable<Log> query = _context.Loglar;
@@ -111,6 +119,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 })
                 .ToListAsync();
         }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var log = await _context.Loglar.FindAsync(id);
@@ -123,9 +132,5 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return true;
         }
-
-
-
-
     }
 }

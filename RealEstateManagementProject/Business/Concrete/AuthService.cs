@@ -122,5 +122,6 @@ namespace RealEstateManagementProject.Business.Concrete
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+
     }
 }

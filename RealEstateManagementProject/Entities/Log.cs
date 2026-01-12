@@ -8,7 +8,7 @@ namespace RealEstateManagementProject.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public string Durum { get; set; }         
         public string IslemTipi { get; set; }      
         public string Aciklama { get; set; }       
