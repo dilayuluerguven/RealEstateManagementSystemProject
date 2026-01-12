@@ -6,6 +6,7 @@ import { AddComponent } from './add/add.component';
 import { ListComponent } from './list/list.component';
 import { UpdateComponent } from './update/update.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CoreModule } from '../core.module';
 
 
 @NgModule({
@@ -16,7 +17,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   ],
   imports: [
     CommonModule,
-    TasinmazRoutingModule,ReactiveFormsModule
+    TasinmazRoutingModule,ReactiveFormsModule,CoreModule
   ]
 })
 export class TasinmazModule { }
