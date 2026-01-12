@@ -2,7 +2,11 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Taşınmaz Listesi</h5>
 
-    <button class="btn btn-success" routerLink="/core/tasinmaz/add" *ngIf="!isAdmin">
+    <button
+      class="btn btn-success"
+      routerLink="/core/tasinmaz/add"
+      *ngIf="!isAdmin"
+    >
       <i class="bi bi-plus-circle me-1"></i>
       Yeni taşınmaz
     </button>
@@ -78,17 +82,15 @@
       </button>
     </div>
   </div>
-  <div class="card shadow-sm mb-6">
+  <div class="card shadow-sm mb-4">
     <div class="card-header bg-white fw-bold">
-      <i class="bi bi-geo-alt me-1 text-danger"></i> Taşınmaz Konumları
+      <i class="bi bi-geo-alt me-1 text-danger"></i>
+      Taşınmaz Konumları
     </div>
-    <div class="card-body p-0" style="height: 450px; overflow: hidden;">
-      <app-tasinmaz-map 
-        class="w-100 h-100" 
-        [tasinmazlar]="tasinmazlar">
-      </app-tasinmaz-map>
+
+    <div class="card-body p-0" style="height: 450px">
+      <app-tasinmaz-list-map [tasinmazlar]="tasinmazlar">
+      </app-tasinmaz-list-map>
     </div>
   </div>
 </div>
-
-
