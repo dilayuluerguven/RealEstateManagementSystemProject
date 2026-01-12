@@ -1,5 +1,10 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-
+import {
+  Component,
+  AfterViewInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -10,60 +15,74 @@ import Point from 'ol/geom/Point';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Style, Icon } from 'ol/style';
-
+import { toLonLat } from 'ol/proj';
 
 @Component({
   selector: 'app-tasinmaz-map',
   templateUrl: './tasinmaz-map.component.html',
   styleUrls: ['./tasinmaz-map.component.css'],
 })
-export class TasinmazMapComponent implements OnInit, AfterViewInit {
+export class TasinmazMapComponent implements AfterViewInit, OnChanges {
+  @Input() tasinmazlar: any[] = [];
+
   map!: Map;
   vectorSource = new VectorSource();
-
-  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     this.initMap();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tasinmazlar'] && this.map) {
+      this.drawMarkers();
+    }
+  }
+
   private initMap(): void {
-  const vectorLayer = new VectorLayer({
-    source: this.vectorSource,
-  });
+    const vectorLayer = new VectorLayer({
+      source: this.vectorSource,
+    });
 
-  this.map = new Map({
-    target: 'map',
-    layers: [
-      new TileLayer({
-        source: new OSM(),
+    this.map = new Map({
+      target: 'map',
+      layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+      view: new View({
+        center: fromLonLat([32.85411, 39.92077]),
+        zoom: 6,
       }),
-      vectorLayer
-    ],
-    view: new View({
-      center: fromLonLat([32.85411, 39.92077]), 
-      zoom: 6,
-    }),
-  });
+    });
+    this.map.on('click', (event) => {
+      const coordinate = event.coordinate;
+      const [lon, lat] = toLonLat(coordinate);
 
-  this.addTestMarker();
-}
-private addTestMarker(): void {
-  const feature = new Feature({
-    geometry: new Point(fromLonLat([32.85411, 39.92077])),
-  });
+      console.log('LAT:', lat);
+      console.log('LON:', lon);
+    });
+  }
 
-  feature.setStyle(
-    new Style({
-      image: new Icon({
-        src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-        scale: 0.05,
-      }),
-    })
-  );
+  private drawMarkers(): void {
+    this.vectorSource.clear();
 
-  this.vectorSource.addFeature(feature);
-}
+    this.tasinmazlar.forEach((t) => {
+      if (!t.koordinat) return;
 
+      const [lat, lon] = t.koordinat.split(',').map(Number);
+      if (isNaN(lat) || isNaN(lon)) return;
 
+      const feature = new Feature({
+        geometry: new Point(fromLonLat([lon, lat])),
+      });
+
+      feature.setStyle(
+        new Style({
+          image: new Icon({
+            src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+            scale: 0.05,
+          }),
+        })
+      );
+
+      this.vectorSource.addFeature(feature);
+    });
+  }
 }
