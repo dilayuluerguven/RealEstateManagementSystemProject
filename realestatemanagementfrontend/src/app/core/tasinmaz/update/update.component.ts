@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TasinmazService } from '../tasinmaz.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LocationService } from '../../shared/location.service';
 import { ToastrService } from 'ngx-toastr';
+import { TasinmazService } from '../tasinmaz.service';
+import { LocationService } from '../../shared/location.service';
 
 @Component({
   selector: 'app-update',
@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./update.component.css'],
 })
 export class UpdateComponent implements OnInit {
+
   formGroup = new FormGroup({
     il: new FormControl<number | null>(null, Validators.required),
     ilce: new FormControl<number | null>(null, Validators.required),
@@ -22,67 +23,90 @@ export class UpdateComponent implements OnInit {
     koordinat: new FormControl<string | null>(null, Validators.required),
   });
 
-  id: number | undefined;
+  id!: number;
+
   iller: any[] = [];
   ilceler: any[] = [];
   mahalleler: any[] = [];
-  userId!: number;
 
   constructor(
     private tasinmazService: TasinmazService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
     private locService: LocationService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private toastr: ToastrService
   ) {}
-  ngOnInit(): void {
-    this.locService.getIller().subscribe((x) => {
-      this.iller = x;
-    });
-    this.id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
-    if (this.id) {
-      this.tasinmazService.getById(this.id).subscribe((x) => {
-        console.log('Taşinmaz:', x);
-        this.userId = x.userId;
-        this.formGroup.patchValue({
-          il: x.ilId,
-          ilce: x.ilceId,
-          mahalle: x.mahalleId,
-          ada: x.ada,
-          parsel: x.parsel,
-          adres: x.adres,
-          emlakTipi: x.emlakTipi,
-          koordinat: x.koordinat,
-        });
-      });
-    }
-    this.formGroup.get('il')?.valueChanges.subscribe((ilId) => {
-      if (!ilId) {
-        this.ilceler = [];
-        this.formGroup.get('ilce')?.reset();
-        return;
-      }
 
-      this.locService.getIlceler(ilId).subscribe((res) => {
+  ngOnInit(): void {
+    this.id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
+
+    this.locService.getIller().subscribe(res => {
+      this.iller = res;
+    });
+
+    if (this.id) {
+      this.loadTasinmaz();
+    }
+
+    this.formGroup.get('il')?.valueChanges.subscribe(ilId => {
+      this.ilceler = [];
+      this.mahalleler = [];
+
+      this.formGroup.patchValue(
+        { ilce: null, mahalle: null },
+        { emitEvent: false }
+      );
+
+      if (!ilId) return;
+
+      this.locService.getIlceler(ilId).subscribe(res => {
         this.ilceler = res;
       });
     });
 
-    this.formGroup.get('ilce')?.valueChanges.subscribe((ilceId) => {
-      if (!ilceId) {
-        this.mahalleler = [];
-        this.formGroup.get('mahalle')?.reset();
-        return;
-      }
+    this.formGroup.get('ilce')?.valueChanges.subscribe(ilceId => {
+      this.mahalleler = [];
 
-      this.locService.getMahalleler(ilceId).subscribe((res) => {
+      this.formGroup.patchValue(
+        { mahalle: null },
+        { emitEvent: false }
+      );
+
+      if (!ilceId) return;
+
+      this.locService.getMahalleler(ilceId).subscribe(res => {
         this.mahalleler = res;
       });
     });
   }
-  update() {
-    if (!this.id) return;
 
+  private loadTasinmaz(): void {
+    this.tasinmazService.getById(this.id).subscribe(res => {
+      this.formGroup.patchValue({
+        il: res.ilId,
+        ilce: res.ilceId,
+        mahalle: res.mahalleId,
+        ada: res.ada,
+        parsel: res.parsel,
+        adres: res.adres,
+        emlakTipi: res.emlakTipi,
+        koordinat: res.koordinat 
+      });
+
+      this.formGroup.get('koordinat')?.markAsTouched();
+    });
+  }
+
+  onGeometryCreated(geometry: any) {
+    this.formGroup.patchValue({
+      koordinat: JSON.stringify(geometry)
+    });
+
+    this.formGroup.get('koordinat')?.markAsTouched();
+    this.formGroup.get('koordinat')?.updateValueAndValidity();
+  }
+
+  update() {
     if (this.formGroup.invalid) {
       this.formGroup.markAllAsTouched();
       return;
@@ -92,8 +116,8 @@ export class UpdateComponent implements OnInit {
       ilId: this.formGroup.value.il!,
       ilceId: this.formGroup.value.ilce!,
       mahalleId: this.formGroup.value.mahalle!,
-      ada: this.formGroup.value.ada!,
-      parsel: this.formGroup.value.parsel!,
+      ada: Number(this.formGroup.value.ada),
+      parsel: Number(this.formGroup.value.parsel),
       adres: this.formGroup.value.adres!,
       emlakTipi: this.formGroup.value.emlakTipi!,
       koordinat: this.formGroup.value.koordinat!,
@@ -102,19 +126,11 @@ export class UpdateComponent implements OnInit {
     this.tasinmazService.update(this.id, dto).subscribe({
       next: () => {
         this.toastr.success('Taşınmaz başarıyla güncellendi');
-
-        const role = localStorage.getItem('role');
-
-        if (role === 'Admin') {
-          this.router.navigate(['/core/admin/tasinmaz/list']);
-        } else {
-          this.router.navigate(['/core/tasinmaz/list']);
-        }
+        this.router.navigate(['/core/tasinmaz/list']);
       },
-
       error: () => {
         this.toastr.error('Güncelleme yapılamadı');
-      },
+      }
     });
   }
 }
