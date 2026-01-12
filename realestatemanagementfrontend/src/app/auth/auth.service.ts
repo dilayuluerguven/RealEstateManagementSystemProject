@@ -40,4 +40,7 @@ export class AuthService {
       { responseType: 'text' }
     );
   }
+  logout() {
+    return this.httpClient.post(`${environment.baseUrl}/api/Auth/logout`, {});
+  }
 }

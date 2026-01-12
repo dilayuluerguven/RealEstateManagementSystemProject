@@ -6,10 +6,11 @@ import { UserLayoutComponent } from './layouts/user-layout/user-layout.component
 import { RouterModule } from '@angular/router';
 import { TasinmazMapComponent } from './map/tasinmaz-map/tasinmaz-map.component';
 import { TasinmazListMapComponent } from './map/tasinmaz-list-map/tasinmaz-list-map.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [AdminLayoutComponent, UserLayoutComponent, TasinmazMapComponent, TasinmazListMapComponent],
-  imports: [CommonModule, CoreRoutingModule, RouterModule],
+  imports: [CommonModule, CoreRoutingModule, RouterModule,HttpClientModule],
   exports:[TasinmazMapComponent,TasinmazListMapComponent]
 })
 export class CoreModule {}
