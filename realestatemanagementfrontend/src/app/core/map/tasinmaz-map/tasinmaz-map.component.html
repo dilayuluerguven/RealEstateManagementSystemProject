@@ -1,27 +1,44 @@
-<div class="mb-2 mt-2 btn-group">
-  <button
-    class="btn btn-outline-primary"
-    type="button"
-    (click)="startDraw('Polygon')"
+<div class="position-relative">
+  <div
+    class="position-absolute top-0 start-0 m-3 z-3 shadow-sm bg-white rounded-pill border d-flex align-items-center px-1"
   >
-    Alan
-  </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-light d-flex align-items-center gap-1 rounded-pill px-3"
+      (click)="startDraw('Polygon')"
+      title="Alan çiz"
+    >
+      <i class="bi bi-bounding-box"></i>
 
-  <button
-    class="btn btn-outline-primary"
-    type="button"
-    (click)="startDraw('LineString')"
-  >
-    Çizgi
-  </button>
+      <span class="d-none d-md-inline">Alan</span>
+    </button>
 
-  <button
-    class="btn btn-outline-primary"
-    type="button"
-    (click)="startDraw('Point')"
-  >
-    Nokta
-  </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-light d-flex align-items-center gap-1 rounded-pill px-3 mx-1"
+      (click)="startDraw('LineString')"
+      title="Çizgi çiz"
+    >
+      <i class="bi bi-pencil"></i>
+
+      <span class="d-none d-md-inline">Çizgi</span>
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-sm btn-light d-flex align-items-center gap-1 rounded-pill px-3"
+      (click)="startDraw('Point')"
+      title="Nokta seç"
+    >
+      <i class="bi bi-geo-alt"></i>
+
+      <span class="d-none d-md-inline">Nokta</span>
+    </button>
+  </div>
+
+  <div
+    id="map"
+    class="map border rounded-4"
+    style="height: 420px; width: 100%"
+  ></div>
 </div>
-
-<div id="map" class="map"></div>
