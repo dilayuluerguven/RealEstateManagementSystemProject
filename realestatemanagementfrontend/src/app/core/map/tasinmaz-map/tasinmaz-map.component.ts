@@ -1,113 +1,119 @@
 import {
-  Component,
   AfterViewInit,
+  Component,
+  EventEmitter,
   Input,
   OnChanges,
-  SimpleChanges,
+  Output,
+  SimpleChanges
 } from '@angular/core';
+
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import { fromLonLat } from 'ol/proj';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import { Style, Icon } from 'ol/style';
-import { toLonLat } from 'ol/proj';
-import { Circle as CircleStyle, Fill, Stroke } from 'ol/style';
+import OSM from 'ol/source/OSM';
+import Draw from 'ol/interaction/Draw';
+import { GeoJSON } from 'ol/format';
 
 @Component({
   selector: 'app-tasinmaz-map',
   templateUrl: './tasinmaz-map.component.html',
   styleUrls: ['./tasinmaz-map.component.css'],
 })
-export class TasinmazMapComponent implements AfterViewInit, OnChanges {
-  @Input() tasinmazlar: any[] = [];
+export class TasinmazMapComponent
+  implements AfterViewInit, OnChanges {
+
+  @Input() initialGeometry?: string;
+  @Output() geometryCreated = new EventEmitter<any>();
 
   map!: Map;
+
   vectorSource = new VectorSource();
-  selectedLat!: number;
-  selectedLon!: number;
+  vectorLayer = new VectorLayer({
+    source: this.vectorSource,
+  });
+
+  draw?: Draw;
 
   ngAfterViewInit(): void {
     this.initMap();
+
+    setTimeout(() => {
+      this.map.updateSize();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tasinmazlar'] && this.map) {
-      this.drawMarkers();
+    if (
+      changes['initialGeometry'] &&
+      changes['initialGeometry'].currentValue &&
+      this.map
+    ) {
+      this.drawExistingGeometry(
+        changes['initialGeometry'].currentValue
+      );
     }
   }
 
-  private initMap(): void {
-    const vectorLayer = new VectorLayer({
-      source: this.vectorSource,
-    });
-
+  initMap(): void {
     this.map = new Map({
       target: 'map',
-      layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+        this.vectorLayer,
+      ],
       view: new View({
-        center: fromLonLat([32.85411, 39.92077]),
+        center: [3900000, 4750000], 
         zoom: 6,
       }),
     });
-    this.map.on('click', (event) => {
-      const [lon, lat] = toLonLat(event.coordinate);
-
-      this.selectedLat = lat;
-      this.selectedLon = lon;
-
-      this.addMarker(lat, lon);
-
-      console.log('koordinat:', `${lat},${lon}`);
-    });
   }
-  private addMarker(lat: number, lon: number): void {
-    this.vectorSource.clear();
 
-    const feature = new Feature({
-      geometry: new Point(fromLonLat([lon, lat])),
-    });
+  drawExistingGeometry(geoJsonString: string): void {
+    const format = new GeoJSON();
 
-    feature.setStyle(
-      new Style({
-        image: new Icon({
-          src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-          scale: 0.05,
-          anchor: [0.5, 1],
-        }),
-      })
+    const feature = format.readFeature(
+      JSON.parse(geoJsonString),
+      {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857',
+      }
     );
 
+    this.vectorSource.clear();
     this.vectorSource.addFeature(feature);
   }
 
-  private drawMarkers(): void {
-    this.vectorSource.clear();
+  startDraw(type: 'Point' | 'LineString' | 'Polygon'): void {
+    if (this.draw) {
+      this.map.removeInteraction(this.draw);
+    }
 
-    this.tasinmazlar.forEach((t) => {
-      if (!t.koordinat) return;
+    this.draw = new Draw({
+      source: this.vectorSource,
+      type,
+    });
 
-      const [lat, lon] = t.koordinat.split(',').map(Number);
-      if (isNaN(lat) || isNaN(lon)) return;
+    this.draw.on('drawstart', () => {
+      this.vectorSource.clear();
+    });
 
-      const feature = new Feature({
-        geometry: new Point(fromLonLat([lon, lat])),
-      });
-
-      feature.setStyle(
-        new Style({
-          image: new Icon({
-            src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-            scale: 0.05,
-          }),
-        })
+    this.draw.on('drawend', (event) => {
+      const geoJson = new GeoJSON().writeFeatureObject(
+        event.feature,
+        {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326',
+        }
       );
 
-      this.vectorSource.addFeature(feature);
+      this.geometryCreated.emit(geoJson);
     });
+
+    this.map.addInteraction(this.draw);
   }
 }

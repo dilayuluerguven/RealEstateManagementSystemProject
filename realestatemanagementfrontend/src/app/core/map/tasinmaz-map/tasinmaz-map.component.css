@@ -1,11 +1,17 @@
-.map-container {
+:host {
+  display: block;
   width: 100%;
-  height: 500px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  height: 100%;
 }
 
 .map {
   width: 100%;
   height: 100%;
+}
+.map-toolbar button:hover {
+  background-color: #f1f5f9;
+}
+
+.map-toolbar button:focus {
+  box-shadow: none;
 }

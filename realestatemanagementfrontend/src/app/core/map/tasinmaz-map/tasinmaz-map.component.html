@@ -1,3 +1,27 @@
-<div class="map-container">
-  <div id="map" class="map"></div>
+<div class="mb-2 mt-2 btn-group">
+  <button
+    class="btn btn-outline-primary"
+    type="button"
+    (click)="startDraw('Polygon')"
+  >
+    Alan
+  </button>
+
+  <button
+    class="btn btn-outline-primary"
+    type="button"
+    (click)="startDraw('LineString')"
+  >
+    Çizgi
+  </button>
+
+  <button
+    class="btn btn-outline-primary"
+    type="button"
+    (click)="startDraw('Point')"
+  >
+    Nokta
+  </button>
 </div>
+
+<div id="map" class="map"></div>
