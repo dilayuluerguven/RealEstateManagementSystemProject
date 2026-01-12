@@ -58,7 +58,7 @@
       Seçili taşınmaz: <strong>{{ selectedTasinmazlar.length }}</strong>
     </span>
 
-    <div class="btn-group">
+    <div class="btn-group mb-3">
       <button
         class="btn btn-outline-danger"
         (click)="deleteSelected()"
@@ -78,7 +78,17 @@
       </button>
     </div>
   </div>
+  <div class="card shadow-sm mb-6">
+    <div class="card-header bg-white fw-bold">
+      <i class="bi bi-geo-alt me-1 text-danger"></i> Taşınmaz Konumları
+    </div>
+    <div class="card-body p-0" style="height: 450px; overflow: hidden;">
+      <app-tasinmaz-map 
+        class="w-100 h-100" 
+        [tasinmazlar]="tasinmazlar">
+      </app-tasinmaz-map>
+    </div>
+  </div>
 </div>
-<app-tasinmaz-map [tasinmazlar]="tasinmazlar"></app-tasinmaz-map>
 
 

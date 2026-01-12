@@ -16,6 +16,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Style, Icon } from 'ol/style';
 import { toLonLat } from 'ol/proj';
+import { Circle as CircleStyle, Fill, Stroke } from 'ol/style';
 
 @Component({
   selector: 'app-tasinmaz-map',
@@ -27,6 +28,8 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
 
   map!: Map;
   vectorSource = new VectorSource();
+  selectedLat!: number;
+  selectedLon!: number;
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -52,12 +55,34 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
       }),
     });
     this.map.on('click', (event) => {
-      const coordinate = event.coordinate;
-      const [lon, lat] = toLonLat(coordinate);
+      const [lon, lat] = toLonLat(event.coordinate);
 
-      console.log('LAT:', lat);
-      console.log('LON:', lon);
+      this.selectedLat = lat;
+      this.selectedLon = lon;
+
+      this.addMarker(lat, lon);
+
+      console.log('koordinat:', `${lat},${lon}`);
     });
+  }
+  private addMarker(lat: number, lon: number): void {
+    this.vectorSource.clear();
+
+    const feature = new Feature({
+      geometry: new Point(fromLonLat([lon, lat])),
+    });
+
+    feature.setStyle(
+      new Style({
+        image: new Icon({
+          src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+          scale: 0.05,
+          anchor: [0.5, 1],
+        }),
+      })
+    );
+
+    this.vectorSource.addFeature(feature);
   }
 
   private drawMarkers(): void {
