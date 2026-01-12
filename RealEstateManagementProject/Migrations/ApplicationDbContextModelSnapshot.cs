@@ -115,6 +115,9 @@ namespace RealEstateManagementProject.Migrations
                     b.Property<int>("MahalleId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Parsel")
                         .HasColumnType("integer");
 
@@ -190,7 +193,7 @@ namespace RealEstateManagementProject.Migrations
                     b.Property<DateTime>("Tarih")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
