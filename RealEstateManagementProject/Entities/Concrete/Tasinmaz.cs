@@ -16,5 +16,7 @@
         public string Adres { get; set; } = string.Empty;
         public string EmlakTipi { get; set; } = string.Empty;
         public string Koordinat { get; set; } = string.Empty;
+        public DateTime OlusturmaTarihi { get; set; }
+
     }
 }
