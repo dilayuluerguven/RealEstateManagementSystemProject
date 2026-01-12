@@ -19,7 +19,7 @@ export class AddComponent implements OnInit {
   parsel: new FormControl<number | null>(null, Validators.required),
   adres: new FormControl('', Validators.required),
   emlakTipi: new FormControl('', Validators.required),
-  koordinat: new FormControl('', Validators.required),
+  koordinat: new FormControl<string | null>(null, Validators.required),
 });
 
 
@@ -75,6 +75,11 @@ export class AddComponent implements OnInit {
 }
 
   submit() {
+  if (!this.formGroup.value.koordinat) {
+    this.toastr.warning('Lütfen harita üzerinden taşınmaz çizin');
+    return;
+  }
+
   if (this.formGroup.invalid) {
     this.formGroup.markAllAsTouched();
     return;
@@ -102,4 +107,17 @@ export class AddComponent implements OnInit {
   });
 }
 
+onGeometryCreated(geometry: any) {
+  console.log('Geometry:', geometry); 
+
+  this.formGroup.patchValue({
+    koordinat: JSON.stringify(geometry)
+  });
+
+  this.formGroup.get('koordinat')?.markAsTouched();
+  this.formGroup.get('koordinat')?.updateValueAndValidity();
 }
+
+
+}
+

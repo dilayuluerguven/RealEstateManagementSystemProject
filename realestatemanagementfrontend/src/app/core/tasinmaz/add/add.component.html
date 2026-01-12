@@ -1,7 +1,6 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5 class="mb-0">Yeni Taşınmaz Ekle</h5>
-
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0 fw-semibold text-dark">Yeni Taşınmaz Ekle</h4>
     <button
       class="btn btn-outline-secondary btn-sm"
       routerLink="/core/tasinmaz/list"
@@ -11,177 +10,107 @@
     </button>
   </div>
   <form [formGroup]="formGroup" (ngSubmit)="submit()">
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >İl <span class="text-danger">*</span></label
-      >
-      <select class="form-control" formControlName="il">
-        <option [ngValue]="null" disabled>İl seçiniz</option>
-        <option *ngFor="let item of iller" [value]="item.id">
-          {{ item.ilAdi }}
-        </option>
-      </select>
-
-      <div
-        class="text-danger small"
-        *ngIf="formGroup.get('il')?.touched && formGroup.get('il')?.invalid"
-      >
-        İl seçilmelidir
+    <div class="card shadow-sm mb-4 border-0">
+      <div class="card-body p-4">
+        <h6 class="fw-semibold mb-4 text-primary">
+          <i class="bi bi-info-circle me-1"></i>
+          Temel Bilgiler
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label required">İl</label>
+            <select class="form-select" formControlName="il">
+              <option [ngValue]="null">İl seçiniz</option>
+              <option *ngFor="let item of iller" [value]="item.id">
+                {{ item.ilAdi }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label required">İlçe</label>
+            <select class="form-select" formControlName="ilce">
+              <option [ngValue]="null">İlçe seçiniz</option>
+              <option *ngFor="let item of ilceler" [value]="item.id">
+                {{ item.ilceAdi }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label required">Mahalle</label>
+            <select class="form-select" formControlName="mahalle">
+              <option [ngValue]="null">Mahalle seçiniz</option>
+              <option *ngFor="let item of mahalleler" [value]="item.id">
+                {{ item.mahalleAdi }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label required">Ada</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="ada"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label required">Parsel</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="parsel"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label required">Emlak Tipi</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="emlakTipi"
+            />
+          </div>
+          <div class="col-12">
+            <label class="form-label required">Adres</label>
+            <textarea
+              class="form-control"
+              rows="3"
+              formControlName="adres"
+            ></textarea>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >İlçe <span class="text-danger">*</span></label
-      >
-      <select class="form-control" formControlName="ilce">
-        <option [ngValue]="null" disabled>İlçe seçiniz</option>
-        <option *ngFor="let item of ilceler" [value]="item.id">
-          {{ item.ilceAdi }}
-        </option>
-      </select>
-
-      <div
-        class="text-danger small"
-        *ngIf="formGroup.get('ilce')?.touched && formGroup.get('ilce')?.invalid"
-      >
-        İlçe seçilmelidir
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h6 class="fw-semibold mb-3 text-primary required">
+          <i class="bi bi-geo-alt-fill me-1"></i>
+          Harita Konumu
+        </h6>
+        <div
+          class="border rounded overflow-hidden mb-4"
+          style="height: 420px"
+        >
+          <app-tasinmaz-map
+            (geometryCreated)="onGeometryCreated($event)">
+          </app-tasinmaz-map>
+        </div>
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            routerLink="/core/tasinmaz/list"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="submit"
+            class="btn btn-success px-5"
+            [disabled]="formGroup.invalid"
+          >
+            <i class="bi bi-save me-1"></i>
+            Kaydet
+          </button>
+        </div>
       </div>
     </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >Mahalle <span class="text-danger">*</span></label
-      >
-      <select class="form-control" formControlName="mahalle">
-        <option [ngValue]="null" disabled>Mahalle seçiniz</option>
-        <option *ngFor="let item of mahalleler" [value]="item.id">
-          {{ item.mahalleAdi }}
-        </option>
-      </select>
-
-      <div
-        class="text-danger small"
-        *ngIf="
-          formGroup.get('mahalle')?.touched && formGroup.get('mahalle')?.invalid
-        "
-      >
-        Mahalle seçilmelidir
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >Ada <span class="text-danger">*</span></label
-      >
-      <input
-        type="number"
-        class="form-control"
-        formControlName="ada"
-        placeholder="Ada giriniz"
-      />
-
-      <div
-        class="text-danger small"
-        *ngIf="formGroup.get('ada')?.touched && formGroup.get('ada')?.invalid"
-      >
-        Ada bilgisi zorunludur
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >Parsel <span class="text-danger">*</span></label
-      >
-      <input
-        type="number"
-        class="form-control"
-        formControlName="parsel"
-        placeholder="Parsel giriniz"
-      />
-
-      <div
-        class="text-danger small"
-        *ngIf="
-          formGroup.get('parsel')?.touched && formGroup.get('parsel')?.invalid
-        "
-      >
-        Parsel bilgisi zorunludur
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >Adres <span class="text-danger">*</span></label
-      >
-      <input
-        type="text"
-        class="form-control"
-        formControlName="adres"
-        placeholder="Adres giriniz"
-      />
-
-      <div
-        class="text-danger small"
-        *ngIf="
-          formGroup.get('adres')?.touched && formGroup.get('adres')?.invalid
-        "
-      >
-        Adres zorunludur
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label fw-semibold"
-        >Emlak Tipi <span class="text-danger">*</span></label
-      >
-      <input
-        type="text"
-        class="form-control"
-        formControlName="emlakTipi"
-        placeholder="Emlak tipi giriniz (Konut, Arsa vb.)"
-      />
-
-      <div
-        class="text-danger small"
-        *ngIf="
-          formGroup.get('emlakTipi')?.touched &&
-          formGroup.get('emlakTipi')?.invalid
-        "
-      >
-        Emlak tipi zorunludur
-      </div>
-    </div>
-
-    <div class="mb-4">
-      <label class="form-label fw-semibold"
-        >Koordinat <span class="text-danger">*</span></label
-      >
-      <input
-        type="text"
-        class="form-control"
-        formControlName="koordinat"
-        placeholder="Koordinat giriniz"
-      />
-
-      <div
-        class="text-danger small"
-        *ngIf="
-          formGroup.get('koordinat')?.touched &&
-          formGroup.get('koordinat')?.invalid
-        "
-      >
-        Koordinat bilgisi zorunludur
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      class="btn btn-success"
-      [disabled]="formGroup.invalid"
-    >
-      <i class="bi bi-save me-1"></i>
-      Kaydet
-    </button>
   </form>
 </div>
