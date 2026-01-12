@@ -35,7 +35,6 @@ namespace RealEstateManagementProject.Dtos
         public string EmlakTipi { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Koordinat bilgisi zorunludur.")]
-        [MaxLength(100, ErrorMessage = "Koordinat en fazla 100 karakter olabilir.")]
         public string Koordinat { get; set; } = string.Empty;
     }
 }
