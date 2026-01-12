@@ -97,14 +97,5 @@ export class TasinmazListMapComponent
         extents.push(feature.getGeometry()!.getExtent());
       } catch {}
     });
-
-    if (extents.length > 0) {
-      const extent = boundingExtent(extents);
-      this.map.getView().fit(extent, {
-        padding: [40, 40, 40, 40],
-        duration: 700,
-        maxZoom: 17,
-      });
-    }
   }
 }

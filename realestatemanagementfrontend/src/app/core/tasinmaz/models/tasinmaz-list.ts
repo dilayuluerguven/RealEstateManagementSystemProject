@@ -12,4 +12,5 @@ export interface TasinmazList {
   adres: string;
   emlakTipi: string;
   koordinat: string;
+  olusturmaTarihi: string;
 }
