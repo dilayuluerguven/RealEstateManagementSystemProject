@@ -1,5 +1,5 @@
 ﻿using RealEstateManagementProject.Dtos;
-using RealEstateManagementProject.Entities;
+using RealEstateManagementProject.Entities.Concrete;
 
 namespace RealEstateManagementProject.Business.Abstract
 {
