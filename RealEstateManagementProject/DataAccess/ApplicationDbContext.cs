@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RealEstateManagementProject.Entities.Concrete;
-using RealEstateManagementProject.Entities;
 namespace RealEstateManagementProject.DataAccess
 {
     public class ApplicationDbContext:DbContext

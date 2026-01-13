@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Business.Concrete;
 using RealEstateManagementProject.Dtos;
-using RealEstateManagementProject.Entities;
+using RealEstateManagementProject.Entities.Concrete;
+
 using System.Security.Claims;
 
 namespace RealEstateManagementProject.Controllers
