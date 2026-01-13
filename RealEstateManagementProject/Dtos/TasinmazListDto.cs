@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int UserId { get; set; }
+        public string AdSoyad { get; set; } = string.Empty;
         public int IlId { get; set; }
         public int IlceId { get; set; }
         public int MahalleId { get; set; }
