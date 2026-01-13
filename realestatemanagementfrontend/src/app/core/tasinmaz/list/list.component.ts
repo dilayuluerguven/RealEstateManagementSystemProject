@@ -23,49 +23,43 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     const role = localStorage.getItem('role');
     this.isAdmin = role === 'Admin';
-
     this.getAll();
   }
+
   getAll() {
     this.tasinmazService.getAll().subscribe({
-      next: (x) => {
-        this.tasinmazlar = x;
-      },
-      error: () => {
-        this.toastr.error('Taşınmazlar yüklenemedi');
-      },
+      next: (x) => (this.tasinmazlar = x),
+      error: () => this.toastr.error('Taşınmazlar yüklenemedi'),
     });
   }
+
   isSelected(data: TasinmazList): boolean {
     return this.selectedTasinmazlar.some((x) => x.id === data.id);
   }
+
   toggleItem(data: TasinmazList) {
-    if (this.isSelected(data)) {
-      this.selectedTasinmazlar = this.selectedTasinmazlar.filter(
-        (x) => x.id !== data.id
-      );
-    } else {
-      this.selectedTasinmazlar.push(data);
-    }
+    this.isSelected(data)
+      ? (this.selectedTasinmazlar = this.selectedTasinmazlar.filter(
+          (x) => x.id !== data.id
+        ))
+      : this.selectedTasinmazlar.push(data);
   }
+
   deleteSelected() {
     const count = this.selectedTasinmazlar.length;
+
     const toast = this.toastr.warning(
       count === 1
         ? 'Seçili taşınmaz silinsin mi?'
         : `${count} taşınmaz silinsin mi?`,
       'Onay',
-      {
-        closeButton: true,
-        timeOut: 0,
-        tapToDismiss: false,
-      }
+      { closeButton: true, timeOut: 0, tapToDismiss: false }
     );
 
     toast.onTap.subscribe(() => {
-      this.selectedTasinmazlar.forEach((item) => {
-        this.tasinmazService.delete(item.id).subscribe();
-      });
+      this.selectedTasinmazlar.forEach((item) =>
+        this.tasinmazService.delete(item.id).subscribe()
+      );
 
       this.tasinmazlar = this.tasinmazlar.filter(
         (t) => !this.selectedTasinmazlar.some((s) => s.id === t.id)
@@ -75,35 +69,35 @@ export class ListComponent implements OnInit {
       this.toastr.success('Silme işlemi tamamlandı');
     });
   }
+
   goToUpdate() {
     if (this.selectedTasinmazlar.length !== 1) return;
 
     const id = this.selectedTasinmazlar[0].id;
     const role = localStorage.getItem('role');
 
-    if (role === 'Admin') {
-      this.router.navigate(['/core/admin/tasinmaz/update', id]);
-    } else {
-      this.router.navigate(['/core/tasinmaz/update', id]);
-    }
+    this.router.navigate(
+      role === 'Admin'
+        ? ['/core/admin/tasinmaz/update', id]
+        : ['/core/tasinmaz/update', id]
+    );
   }
 
   get deleteButtonText(): string {
-    return this.selectedTasinmazlar.length > 0
+    return this.selectedTasinmazlar.length
       ? `Sil (${this.selectedTasinmazlar.length})`
       : 'Sil';
   }
+
   isAllSelected(): boolean {
     return (
       this.tasinmazlar.length > 0 &&
       this.selectedTasinmazlar.length === this.tasinmazlar.length
     );
   }
-  toggleSelectAll(event: any) {
-    if (event.target.checked) {
-      this.selectedTasinmazlar = [...this.tasinmazlar];
-    } else {
-      this.selectedTasinmazlar = [];
-    }
+
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedTasinmazlar = checked ? [...this.tasinmazlar] : [];
   }
 }

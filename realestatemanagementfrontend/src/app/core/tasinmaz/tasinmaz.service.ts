@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 
-import { Tasinmaz } from './models/tasinmaz';
 import { TasinmazList } from './models/tasinmaz-list';
 import { TasinmazCreateUpdate } from './models/tasinmaz-create-update';
 
@@ -19,11 +18,12 @@ export class TasinmazService {
     return this.httpClient.get<TasinmazList[]>(this.apiUrl);
   }
 
-  getById(id: number): Observable<Tasinmaz> {
-    return this.httpClient.get<Tasinmaz>(`${this.apiUrl}/${id}`);
+  getById(id: number): Observable<TasinmazCreateUpdate> {
+    return this.httpClient.get<TasinmazCreateUpdate>(
+      `${this.apiUrl}/${id}`
+    );
   }
 
-  
   add(data: TasinmazCreateUpdate): Observable<any> {
     return this.httpClient.post(`${this.apiUrl}/add`, data);
   }
