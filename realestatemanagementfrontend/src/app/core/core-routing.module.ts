@@ -7,6 +7,7 @@ import { UpdateComponent } from './user-admin-control/update/update.component';
 import { AddComponent } from './user-admin-control/add/add.component';
 import { AdminGuard } from './guards/admin.guard';
 import { UserGuard } from './guards/user.guard';
+import { ProfileComponent } from './profile/profile.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,10 @@ const routes: Routes = [
         path: 'tasinmaz',
         loadChildren: () =>
           import('./tasinmaz/tasinmaz.module').then((m) => m.TasinmazModule),
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent,
       },
       {
         path: 'logs',
