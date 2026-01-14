@@ -126,8 +126,10 @@ namespace RealEstateManagementProject.Business.Concrete
 
                 user.AdSoyad = dto.AdSoyad;
                 user.Email = dto.Email;
-                user.Rol = dto.Rol;
-
+                if (!string.IsNullOrWhiteSpace(dto.Rol))
+                {
+                    user.Rol = dto.Rol;
+                }
                 if (!string.IsNullOrWhiteSpace(dto.Sifre))
                 {
                     user.Sifre = HashHelper.Sha256Hash(dto.Sifre);
