@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
-using RealEstateManagementProject.Business.Concrete;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities.Concrete;
-
 using System.Security.Claims;
 
 namespace RealEstateManagementProject.Controllers
@@ -15,7 +13,6 @@ namespace RealEstateManagementProject.Controllers
     {
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
-
 
         public AuthController(IAuthService authService, ILogService logService)
         {
@@ -50,6 +47,7 @@ namespace RealEstateManagementProject.Controllers
 
             return Ok("Kullanıcı başarıyla oluşturuldu.");
         }
+
         [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -60,18 +58,21 @@ namespace RealEstateManagementProject.Controllers
 
             var userId = int.Parse(userIdClaim.Value);
 
+            var userName =
+                User.FindFirst(ClaimTypes.Name)?.Value
+                ?? "Bilinmeyen Kullanıcı";
+
             await _logService.AddAsync(new Log
             {
                 UserId = userId,
                 IslemTipi = "LOGOUT",
                 Durum = "SUCCESS",
-                Aciklama = "Kullanıcı çıkış yaptı",
-                IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString()
-
+                Aciklama = $"{userName} çıkış yaptı",
+                IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Tarih = DateTime.UtcNow
             });
 
             return Ok();
         }
-
     }
 }

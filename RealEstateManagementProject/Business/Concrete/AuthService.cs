@@ -9,7 +9,6 @@ using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Helpers;
-
 using RealEstateManagementProject.Entities.Concrete;
 
 namespace RealEstateManagementProject.Business.Concrete
@@ -20,7 +19,10 @@ namespace RealEstateManagementProject.Business.Concrete
         private readonly ILogService _logService;
         private readonly IConfiguration _configuration;
 
-        public AuthService(ApplicationDbContext context, ILogService logService, IConfiguration configuration)
+        public AuthService(
+            ApplicationDbContext context,
+            ILogService logService,
+            IConfiguration configuration)
         {
             _context = context;
             _logService = logService;
@@ -44,8 +46,8 @@ namespace RealEstateManagementProject.Business.Concrete
             {
                 UserId = user.Id,
                 IslemTipi = "LOGIN",
-                Durum = "SUCCESS",
-                Aciklama = "Kullanıcı giriş yaptı",
+                Durum = "Success",
+                Aciklama = $"{user.AdSoyad} giriş yaptı",
                 IpAdresi = ipAddress,
                 Tarih = DateTime.UtcNow
             });
@@ -64,10 +66,10 @@ namespace RealEstateManagementProject.Business.Concrete
             UserForRegisterDto registerDto,
             string ipAddress)
         {
-            var result = await _context.Users.AnyAsync(x =>
+            var exists = await _context.Users.AnyAsync(x =>
                 x.Email == registerDto.Email);
 
-            if (result)
+            if (exists)
                 return false;
 
             var user = new User
@@ -85,8 +87,8 @@ namespace RealEstateManagementProject.Business.Concrete
             {
                 UserId = user.Id,
                 IslemTipi = "REGISTER",
-                Durum = "SUCCESS",
-                Aciklama = "Kullanıcı kaydı oluşturuldu",
+                Durum = "Success",
+                Aciklama = $"{user.AdSoyad} için kullanıcı kaydı oluşturuldu",
                 IpAdresi = ipAddress,
                 Tarih = DateTime.UtcNow
             });
@@ -99,6 +101,7 @@ namespace RealEstateManagementProject.Business.Concrete
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.AdSoyad),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Rol)
             };
@@ -107,7 +110,10 @@ namespace RealEstateManagementProject.Business.Concrete
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)
             );
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -121,7 +127,5 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-
     }
 }
