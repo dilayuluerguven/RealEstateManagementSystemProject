@@ -7,6 +7,7 @@ import { ListComponent } from './list/list.component';
 import { UpdateComponent } from './update/update.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CoreModule } from '../core.module';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 @NgModule({
@@ -17,7 +18,7 @@ import { CoreModule } from '../core.module';
   ],
   imports: [
     CommonModule,
-    TasinmazRoutingModule,ReactiveFormsModule,CoreModule
+    TasinmazRoutingModule,ReactiveFormsModule,SharedModule
   ]
 })
 export class TasinmazModule { }
