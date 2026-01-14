@@ -10,9 +10,8 @@ public class UserUpdateDto
     [EmailAddress(ErrorMessage = "Geçerli bir email giriniz.")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Rol zorunludur.")]
     [MaxLength(50)]
-    public string Rol { get; set; } = string.Empty;
+    public string? Rol { get; set; } = string.Empty;
 
     [MinLength(8, ErrorMessage = "Şifre en az 8 karakter olmalıdır.")]
     [MaxLength(12, ErrorMessage = "Şifre en fazla 12 karakter olabilir.")]
