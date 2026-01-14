@@ -5,7 +5,7 @@ import {
   Input,
   OnChanges,
   Output,
-  SimpleChanges
+  SimpleChanges,
 } from '@angular/core';
 
 import Map from 'ol/Map';
@@ -22,9 +22,7 @@ import { GeoJSON } from 'ol/format';
   templateUrl: './tasinmaz-map.component.html',
   styleUrls: ['./tasinmaz-map.component.css'],
 })
-export class TasinmazMapComponent
-  implements AfterViewInit, OnChanges {
-
+export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   @Input() initialGeometry?: string;
   @Output() geometryCreated = new EventEmitter<any>();
 
@@ -40,6 +38,10 @@ export class TasinmazMapComponent
   ngAfterViewInit(): void {
     this.initMap();
 
+    if (this.initialGeometry) {
+      this.drawExistingGeometry(this.initialGeometry);
+    }
+
     setTimeout(() => {
       this.map.updateSize();
     });
@@ -51,9 +53,7 @@ export class TasinmazMapComponent
       changes['initialGeometry'].currentValue &&
       this.map
     ) {
-      this.drawExistingGeometry(
-        changes['initialGeometry'].currentValue
-      );
+      this.drawExistingGeometry(changes['initialGeometry'].currentValue);
     }
   }
 
@@ -67,7 +67,7 @@ export class TasinmazMapComponent
         this.vectorLayer,
       ],
       view: new View({
-        center: [3900000, 4750000], 
+        center: [3900000, 4750000],
         zoom: 6,
       }),
     });
@@ -76,16 +76,20 @@ export class TasinmazMapComponent
   drawExistingGeometry(geoJsonString: string): void {
     const format = new GeoJSON();
 
-    const feature = format.readFeature(
-      JSON.parse(geoJsonString),
-      {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857',
-      }
-    );
+    const feature = format.readFeature(JSON.parse(geoJsonString), {
+      dataProjection: 'EPSG:4326',
+      featureProjection: 'EPSG:3857',
+    });
 
     this.vectorSource.clear();
     this.vectorSource.addFeature(feature);
+
+    const extent = this.vectorSource.getExtent();
+    this.map.getView().fit(extent, {
+      padding: [40, 40, 40, 40],
+      maxZoom: 17,
+      duration: 500,
+    });
   }
 
   startDraw(type: 'Point' | 'LineString' | 'Polygon'): void {
@@ -103,13 +107,10 @@ export class TasinmazMapComponent
     });
 
     this.draw.on('drawend', (event) => {
-      const geoJson = new GeoJSON().writeFeatureObject(
-        event.feature,
-        {
-          featureProjection: 'EPSG:3857',
-          dataProjection: 'EPSG:4326',
-        }
-      );
+      const geoJson = new GeoJSON().writeFeatureObject(event.feature, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326',
+      });
 
       this.geometryCreated.emit(geoJson);
     });

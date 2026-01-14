@@ -1,1 +1,23 @@
-<div id="list-map" class="map"></div>
+<div class="map-ui-panel">
+  <div class="opacity-control">
+    <i class="bi bi-layers"></i>
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.1"
+      [(ngModel)]="baseOpacity"
+      (ngModelChange)="onBaseOpacityChange()"
+    />
+  </div>
+</div>
+
+<div id="list-map" class="map-container"></div>
+
+<div
+  id="map-tooltip"
+  class="map-tooltip"
+  [style.display]="tooltipVisible ? 'block' : 'none'"
+>
+  {{ tooltipText }}
+</div>
