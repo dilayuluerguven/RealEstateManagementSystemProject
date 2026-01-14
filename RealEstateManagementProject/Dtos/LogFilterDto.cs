@@ -4,6 +4,7 @@ namespace RealEstateManagementProject.Dtos
     public class LogFilterDTO
     {
         public int Id { get; set; }
+        public string AdSoyad { get; set; }
         public int? UserId { get; set; }
         public string? Durum { get; set; }
         public string IslemTipi { get; set; } = string.Empty;

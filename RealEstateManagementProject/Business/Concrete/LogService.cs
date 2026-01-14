@@ -30,6 +30,10 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     Id = log.Id,
                     UserId = log.UserId,
+                    AdSoyad = _context.Users
+                    .Where(u => u.Id == log.UserId)
+                    .Select(u => u.AdSoyad)
+                    .FirstOrDefault() ?? "Sistem",
                     IslemTipi = log.IslemTipi,
                     Durum = log.Durum,
                     Aciklama = log.Aciklama,
@@ -118,6 +122,10 @@ namespace RealEstateManagementProject.Business.Concrete
                 {
                     Id = log.Id,
                     UserId = log.UserId,
+                    AdSoyad = _context.Users
+                    .Where(u => u.Id == log.UserId)
+                    .Select(u => u.AdSoyad)
+                    .FirstOrDefault() ?? "Sistem",
                     IslemTipi = log.IslemTipi,
                     Durum = log.Durum,
                     Aciklama = log.Aciklama,
