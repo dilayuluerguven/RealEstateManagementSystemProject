@@ -43,4 +43,12 @@ export class AuthService {
   logout() {
     return this.httpClient.post(`${environment.baseUrl}/api/Auth/logout`, {});
   }
+  getCurrentUser() {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  updateCurrentUser(user: any) {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
 }
