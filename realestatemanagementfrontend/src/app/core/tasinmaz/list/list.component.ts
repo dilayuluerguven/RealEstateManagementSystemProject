@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 export class ListComponent implements OnInit {
   tasinmazlar: TasinmazList[] = [];
   selectedTasinmazlar: TasinmazList[] = [];
-  isAdmin: boolean = false;
+  isAdmin = false;
 
   constructor(
     private tasinmazService: TasinmazService,
@@ -21,8 +21,8 @@ export class ListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const role = localStorage.getItem('role');
-    this.isAdmin = role === 'Admin';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.isAdmin = user?.rol === 'Admin';
     this.getAll();
   }
 
@@ -74,10 +74,10 @@ export class ListComponent implements OnInit {
     if (this.selectedTasinmazlar.length !== 1) return;
 
     const id = this.selectedTasinmazlar[0].id;
-    const role = localStorage.getItem('role');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     this.router.navigate(
-      role === 'Admin'
+      user?.rol === 'Admin'
         ? ['/core/admin/tasinmaz/update', id]
         : ['/core/tasinmaz/update', id]
     );
