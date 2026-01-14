@@ -5,7 +5,6 @@ import { CanActivate, CanActivateChild, Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AdminGuard implements CanActivate, CanActivateChild {
-
   constructor(private router: Router) {}
 
   canActivate(): boolean {
@@ -17,10 +16,9 @@ export class AdminGuard implements CanActivate, CanActivateChild {
   }
 
   private check(): boolean {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-    if (!token || role !== 'Admin') {
+    if (!user || user.rol !== 'Admin') {
       this.router.navigate(['/core']);
       return false;
     }
