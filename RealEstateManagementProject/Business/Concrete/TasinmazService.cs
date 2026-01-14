@@ -17,6 +17,17 @@ namespace RealEstateManagementProject.Business.Concrete
             _context = context;
             _logService = logService;
         }
+
+        // 🔹 Kullanıcı adını güvenli şekilde al
+        private async Task<string> GetUserNameAsync(int userId)
+        {
+            return await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.AdSoyad)
+                .FirstOrDefaultAsync()
+                ?? "Bilinmeyen Kullanıcı";
+        }
+
         public async Task<List<TasinmazListDto>> GetAllAsync(int? userId)
         {
             var query = _context.Tasinmazlar
@@ -54,6 +65,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 })
                 .ToListAsync();
         }
+
         public async Task<TasinmazCreateUpdateDto?> GetByIdAsync(int id, int userId, bool isAdmin)
         {
             var tasinmaz = isAdmin
@@ -77,8 +89,11 @@ namespace RealEstateManagementProject.Business.Concrete
                 Koordinat = tasinmaz.Koordinat
             };
         }
+
         public async Task<bool> AddAsync(TasinmazCreateUpdateDto dto)
         {
+            var userName = await GetUserNameAsync(dto.UserId);
+
             try
             {
                 var tasinmaz = new Tasinmaz
@@ -101,9 +116,9 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "CREATE",
-                    Durum = "Başarılı",
-                    Aciklama = "Taşınmaz başarıyla eklendi"
+                    IslemTipi = "Create",
+                    Durum = "Success",
+                    Aciklama = $"{userName} taşınmaz ekledi"
                 });
 
                 return true;
@@ -113,16 +128,19 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "CREATE",
-                    Durum = "Hata",
-                    Aciklama = "Taşınmaz eklenemedi"
+                    IslemTipi = "Create",
+                    Durum = "Error",
+                    Aciklama = $"{userName} taşınmaz ekleyemedi"
                 });
 
                 return false;
             }
         }
+
         public async Task<bool> UpdateAsync(int id, TasinmazCreateUpdateDto dto, bool isAdmin)
         {
+            var userName = await GetUserNameAsync(dto.UserId);
+
             try
             {
                 var tasinmaz = isAdmin
@@ -146,9 +164,9 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "UPDATE",
-                    Durum = "Başarılı",
-                    Aciklama = $"Taşınmaz başarıyla güncellendi (Id={id})"
+                    IslemTipi = "Update",
+                    Durum = "Success",
+                    Aciklama = $"{userName} taşınmaz güncelledi (Id={id})"
                 });
 
                 return true;
@@ -158,16 +176,19 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "UPDATE",
-                    Durum = "Hata",
-                    Aciklama = $"Taşınmaz güncellenemedi (Id={id})"
+                    IslemTipi = "Update",
+                    Durum = "Error",
+                    Aciklama = $"{userName} taşınmaz güncelleyemedi (Id={id})"
                 });
 
                 return false;
             }
         }
+
         public async Task<bool> DeleteAsync(int id, int userId, bool isAdmin)
         {
+            var userName = await GetUserNameAsync(userId);
+
             try
             {
                 var tasinmaz = isAdmin
@@ -183,9 +204,9 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = userId,
-                    IslemTipi = "DELETE",
-                    Durum = "Başarılı",
-                    Aciklama = $"Taşınmaz başarıyla silindi (Id={id})"
+                    IslemTipi = "Delete",
+                    Durum = "Success",
+                    Aciklama = $"{userName} taşınmaz sildi (Id={id})"
                 });
 
                 return true;
@@ -195,9 +216,9 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = userId,
-                    IslemTipi = "DELETE",
-                    Durum = "Hata",
-                    Aciklama = $"Taşınmaz silinemedi (Id={id})"
+                    IslemTipi = "Delete",
+                    Durum = "Error",
+                    Aciklama = $"{userName} taşınmaz silemedi (Id={id})"
                 });
 
                 return false;
