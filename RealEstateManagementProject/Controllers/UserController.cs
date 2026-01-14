@@ -134,5 +134,7 @@ namespace RealEstateManagementProject.Controllers
                 selfDeleted = actorUserId == id
             });
         }
+        
+
     }
 }
