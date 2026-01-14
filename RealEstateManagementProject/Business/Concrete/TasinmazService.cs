@@ -18,7 +18,6 @@ namespace RealEstateManagementProject.Business.Concrete
             _logService = logService;
         }
 
-        // 🔹 Kullanıcı adını güvenli şekilde al
         private async Task<string> GetUserNameAsync(int userId)
         {
             return await _context.Users
@@ -41,29 +40,27 @@ namespace RealEstateManagementProject.Business.Concrete
             if (userId.HasValue)
                 query = query.Where(x => x.UserId == userId.Value);
 
-            return await query
-                .Select(x => new TasinmazListDto
-                {
-                    Id = x.Id,
-                    UserId = x.UserId,
-                    AdSoyad = x.User.AdSoyad,
+            return await query.Select(x => new TasinmazListDto
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                AdSoyad = x.User.AdSoyad,
 
-                    IlId = x.IlId,
-                    IlceId = x.IlceId,
-                    MahalleId = x.MahalleId,
+                IlId = x.IlId,
+                IlceId = x.IlceId,
+                MahalleId = x.MahalleId,
 
-                    IlAdi = x.Il.IlAdi,
-                    IlceAdi = x.Ilce.IlceAdi,
-                    MahalleAdi = x.Mahalle.MahalleAdi,
+                IlAdi = x.Il.IlAdi,
+                IlceAdi = x.Ilce.IlceAdi,
+                MahalleAdi = x.Mahalle.MahalleAdi,
 
-                    Ada = x.Ada,
-                    Parsel = x.Parsel,
-                    Adres = x.Adres,
-                    EmlakTipi = x.EmlakTipi,
-                    Koordinat = x.Koordinat,
-                    OlusturmaTarihi = x.OlusturmaTarihi
-                })
-                .ToListAsync();
+                Ada = x.Ada,
+                Parsel = x.Parsel,
+                Adres = x.Adres,
+                EmlakTipi = x.EmlakTipi,
+                Koordinat = x.Koordinat,
+                OlusturmaTarihi = x.OlusturmaTarihi
+            }).ToListAsync();
         }
 
         public async Task<TasinmazCreateUpdateDto?> GetByIdAsync(int id, int userId, bool isAdmin)
@@ -139,16 +136,20 @@ namespace RealEstateManagementProject.Business.Concrete
 
         public async Task<bool> UpdateAsync(int id, TasinmazCreateUpdateDto dto, bool isAdmin)
         {
-            var userName = await GetUserNameAsync(dto.UserId);
+            string userName = "Bilinmeyen Kullanıcı";
 
             try
             {
                 var tasinmaz = isAdmin
-                    ? await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id)
-                    : await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
+                    ? await _context.Tasinmazlar.Include(x => x.User)
+                        .FirstOrDefaultAsync(x => x.Id == id)
+                    : await _context.Tasinmazlar.Include(x => x.User)
+                        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
 
                 if (tasinmaz == null)
                     return false;
+
+                userName = tasinmaz.User?.AdSoyad ?? userName;
 
                 tasinmaz.IlId = dto.IlId;
                 tasinmaz.IlceId = dto.IlceId;
@@ -163,7 +164,7 @@ namespace RealEstateManagementProject.Business.Concrete
 
                 await _logService.AddAsync(new Log
                 {
-                    UserId = dto.UserId,
+                    UserId = tasinmaz.UserId,
                     IslemTipi = "Update",
                     Durum = "Success",
                     Aciklama = $"{userName} taşınmaz güncelledi (Id={id})"
@@ -187,23 +188,27 @@ namespace RealEstateManagementProject.Business.Concrete
 
         public async Task<bool> DeleteAsync(int id, int userId, bool isAdmin)
         {
-            var userName = await GetUserNameAsync(userId);
+            string userName = await GetUserNameAsync(userId);
 
             try
             {
                 var tasinmaz = isAdmin
-                    ? await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id)
-                    : await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                    ? await _context.Tasinmazlar.Include(x => x.User)
+                        .FirstOrDefaultAsync(x => x.Id == id)
+                    : await _context.Tasinmazlar.Include(x => x.User)
+                        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
                 if (tasinmaz == null)
                     return false;
+
+                userName = tasinmaz.User?.AdSoyad ?? userName;
 
                 _context.Tasinmazlar.Remove(tasinmaz);
                 await _context.SaveChangesAsync();
 
                 await _logService.AddAsync(new Log
                 {
-                    UserId = userId,
+                    UserId = tasinmaz.UserId,
                     IslemTipi = "Delete",
                     Durum = "Success",
                     Aciklama = $"{userName} taşınmaz sildi (Id={id})"
