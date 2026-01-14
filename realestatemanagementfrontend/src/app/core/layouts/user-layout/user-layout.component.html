@@ -24,12 +24,21 @@
           Taşınmazlarım
         </a>
       </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/core/profile"
+          routerLinkActive="active"
+        >
+          <i class="bi bi-person-circle me-1"></i>
+          Profilim
+        </a>
+      </li>
     </ul>
 
     <div class="d-flex align-items-center gap-3">
       <span class="d-flex align-items-center text-dark">
-        <i class="bi bi-person-circle me-1"></i>
-        User
+        {{ userName }}
       </span>
 
       <button class="btn btn-outline-dark btn-sm" (click)="logout()">

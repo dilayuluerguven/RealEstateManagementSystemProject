@@ -8,13 +8,20 @@ import { AuthService } from 'src/app/auth/auth.service';
   styleUrls: ['./user-layout.component.css']
 })
 export class UserLayoutComponent implements OnInit {
-  constructor(private router:Router, private authService: AuthService) {
-    
-  }
+
+  userName: string = '';
+
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
   ngOnInit(): void {
-      
+    const user = this.authService.getCurrentUser();
+    this.userName = user?.adSoyad || 'Kullanıcı';
   }
-   logout() {
+
+  logout() {
     this.authService.logout().subscribe({
       next: () => {
         localStorage.removeItem('token');
@@ -28,5 +35,4 @@ export class UserLayoutComponent implements OnInit {
       }
     });
   }
-
 }
