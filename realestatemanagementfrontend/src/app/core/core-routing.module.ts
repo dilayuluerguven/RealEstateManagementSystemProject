@@ -26,6 +26,10 @@ const routes: Routes = [
         loadChildren: () =>
           import('./tasinmaz/tasinmaz.module').then((m) => m.TasinmazModule),
       },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+      },
     ],
   },
 
@@ -46,10 +50,6 @@ const routes: Routes = [
         path: 'tasinmaz',
         loadChildren: () =>
           import('./tasinmaz/tasinmaz.module').then((m) => m.TasinmazModule),
-      },
-      {
-        path: 'profile',
-        component: ProfileComponent,
       },
       {
         path: 'logs',
