@@ -2,7 +2,6 @@
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
-using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
 using RealEstateManagementProject.Helpers;
 
@@ -22,33 +21,34 @@ namespace RealEstateManagementProject.Business.Concrete
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
             var users = await _context.Users.ToListAsync();
-            var result = users.Select(x => new UserDto
+
+            return users.Select(x => new UserDto
             {
                 Id = x.Id,
                 AdSoyad = x.AdSoyad,
                 Email = x.Email,
                 Rol = x.Rol
             }).ToList();
-            return result;
         }
-        public async Task<UserDto> GetUserByIdAsync(int id)
+
+        public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             var user = await _context.Users.FindAsync(id);
-
             if (user == null)
                 return null;
 
-            var result = new UserDto
+            return new UserDto
             {
                 Id = user.Id,
                 AdSoyad = user.AdSoyad,
                 Email = user.Email,
                 Rol = user.Rol
             };
-            return result;
         }
 
-        public async Task<bool> CreateUserAsync(UserForRegisterDto dto)
+        public async Task<bool> CreateUserAsync(
+            UserForRegisterDto dto,
+            int actorUserId)
         {
             try
             {
@@ -69,11 +69,20 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _context.Users.AddAsync(yeniKullanici);
                 await _context.SaveChangesAsync();
 
+                string aciklama = actorUserId == yeniKullanici.Id
+                    ? $"{dto.AdSoyad} kendi hesabını oluşturdu"
+                    : $"admin, {dto.AdSoyad} kullanıcısını oluşturdu";
+
+                var logUserId = actorUserId == yeniKullanici.Id
+                    ? yeniKullanici.Id
+                    : actorUserId;
+
                 await _logService.AddAsync(new Log
                 {
+                    UserId = logUserId,  
                     IslemTipi = "CREATE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Kullanıcı oluşturuldu: {dto.Email}",
+                    Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
 
@@ -83,25 +92,34 @@ namespace RealEstateManagementProject.Business.Concrete
             {
                 await _logService.AddAsync(new Log
                 {
+                    UserId = actorUserId,
                     IslemTipi = "CREATE",
                     Durum = "ERROR",
-                    Aciklama = $"Kullanıcı oluşturulamadı: {dto.Email}",
+                    Aciklama = "Kullanıcı oluşturulamadı",
                     Tarih = DateTime.UtcNow
                 });
 
                 return false;
             }
         }
-        public async Task<bool> UpdateUserAsync(int id, UserUpdateDto dto)
+
+        public async Task<bool> UpdateUserAsync(
+            int targetUserId,
+            UserUpdateDto dto,
+            int actorUserId)
         {
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(x => x.Id == targetUserId);
+
                 if (user == null)
                     return false;
 
+                var targetName = user.AdSoyad;
+
                 var emailKontrol = await _context.Users
-                    .AnyAsync(x => x.Email == dto.Email && x.Id != id);
+                    .AnyAsync(x => x.Email == dto.Email && x.Id != targetUserId);
 
                 if (emailKontrol)
                     return false;
@@ -117,78 +135,116 @@ namespace RealEstateManagementProject.Business.Concrete
 
                 await _context.SaveChangesAsync();
 
+                string aciklama = actorUserId == targetUserId
+                    ? $"{targetName} kendi bilgilerini güncelledi"
+                    : $"admin, {targetName} kullanıcısını güncelledi";
+
+                var logUserId = actorUserId == targetUserId
+                                ? targetUserId
+                                : actorUserId;
+
                 await _logService.AddAsync(new Log
                 {
+                    UserId = logUserId,   
                     IslemTipi = "UPDATE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Kullanıcı güncellendi (Id={id})",
+                    Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
-
                 return true;
             }
-            catch (Exception)
+            catch
             {
+                var logUserId = actorUserId == targetUserId
+                    ? targetUserId
+                    : actorUserId;
+
                 await _logService.AddAsync(new Log
                 {
+                    UserId = logUserId,
                     IslemTipi = "UPDATE",
                     Durum = "ERROR",
-                    Aciklama = $"Kullanıcı güncellenemedi (Id={id})",
+                    Aciklama = "Kullanıcı güncellenemedi",
                     Tarih = DateTime.UtcNow
                 });
 
                 return false;
             }
+
         }
-        public async Task<bool> DeleteUserAsync(int id)
+
+        public async Task<bool> DeleteUserAsync(
+            int targetUserId,
+            int actorUserId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(x => x.Id == targetUserId);
+
                 if (user == null)
                     return false;
 
                 if (user.Rol == "Admin")
                 {
-                    var adminCount = await _context.Users.CountAsync(x => x.Rol == "Admin");
+                    var adminCount = await _context.Users
+                        .CountAsync(x => x.Rol == "Admin");
+
                     if (adminCount <= 1)
                         return false;
                 }
 
-                var tasinmazlar = _context.Tasinmazlar.Where(t => t.UserId == id);
+                var targetName = user.AdSoyad;
+
+                var tasinmazlar = _context.Tasinmazlar
+                    .Where(t => t.UserId == targetUserId);
+
                 _context.Tasinmazlar.RemoveRange(tasinmazlar);
                 _context.Users.Remove(user);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                 string aciklama = actorUserId == targetUserId
+                  ? $"{targetName} kendi hesabını sildi"
+                  : $"admin, {targetName} kullanıcısını sildi";
+
+                var logUserId = actorUserId == targetUserId
+                    ? targetUserId
+                    : actorUserId;
+
                 await _logService.AddAsync(new Log
                 {
+                    UserId = logUserId,  
                     IslemTipi = "DELETE",
                     Durum = "SUCCESS",
-                    Aciklama = $"Kullanıcı silindi (Id={id})",
+                    Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
+
 
                 return true;
             }
             catch
             {
+                var logUserId = actorUserId == targetUserId
+                    ? targetUserId
+                    : actorUserId;
                 await transaction.RollbackAsync();
 
                 await _logService.AddAsync(new Log
                 {
+                    UserId = logUserId,
                     IslemTipi = "DELETE",
                     Durum = "ERROR",
-                    Aciklama = $"Kullanıcı silinemedi (Id={id})",
+                    Aciklama = "Kullanıcı silinemedi",
                     Tarih = DateTime.UtcNow
                 });
 
                 return false;
             }
         }
-
     }
 }

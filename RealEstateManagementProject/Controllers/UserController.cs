@@ -52,7 +52,11 @@ namespace RealEstateManagementProject.Controllers
                 });
             }
 
-            var result = await _userService.CreateUserAsync(dto);
+            var actorUserId = int.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
+
+            var result = await _userService.CreateUserAsync(dto, actorUserId);
 
             if (!result)
             {
@@ -68,6 +72,7 @@ namespace RealEstateManagementProject.Controllers
             });
         }
 
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDto dto)
         {
@@ -79,7 +84,15 @@ namespace RealEstateManagementProject.Controllers
                 });
             }
 
-            var result = await _userService.UpdateUserAsync(id, dto);
+            var actorUserId = int.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
+
+            var result = await _userService.UpdateUserAsync(
+                id,
+                dto,
+                actorUserId
+            );
 
             if (!result)
             {
@@ -98,7 +111,14 @@ namespace RealEstateManagementProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var result = await _userService.DeleteUserAsync(id);
+            var actorUserId = int.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
+
+            var result = await _userService.DeleteUserAsync(
+                id,
+                actorUserId
+            );
 
             if (!result)
             {
@@ -108,14 +128,10 @@ namespace RealEstateManagementProject.Controllers
                 });
             }
 
-            var currentUserId = int.Parse(
-                User.FindFirstValue(ClaimTypes.NameIdentifier)!
-            );
-
             return Ok(new
             {
                 message = "Kullanıcı başarıyla silindi.",
-                selfDeleted = currentUserId == id
+                selfDeleted = actorUserId == id
             });
         }
     }
