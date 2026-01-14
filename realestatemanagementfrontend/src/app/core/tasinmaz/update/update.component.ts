@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { TasinmazService } from '../tasinmaz.service';
-import { LocationService } from '../../shared/location.service';
+import { LocationService } from '../../shared/services/location.service';
 
 @Component({
   selector: 'app-update',

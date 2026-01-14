@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TasinmazService } from '../tasinmaz.service';
-import { LocationService } from '../../shared/location.service';
+import { LocationService } from '../../shared/services/location.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
