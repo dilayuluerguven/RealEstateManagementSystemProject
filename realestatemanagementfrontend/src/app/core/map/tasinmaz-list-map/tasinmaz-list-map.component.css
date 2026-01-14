@@ -51,3 +51,14 @@
   pointer-events: none;
   z-index: 1000;
 }
+.area-operations {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.area-operations button {
+  min-width: 64px;
+  font-weight: 600;
+}

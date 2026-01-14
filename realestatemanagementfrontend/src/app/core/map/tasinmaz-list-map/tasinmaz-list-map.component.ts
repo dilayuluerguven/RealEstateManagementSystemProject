@@ -38,6 +38,7 @@ export class TasinmazListMapComponent implements AfterViewInit, OnChanges {
 
   tooltipVisible = false;
   tooltipText = '';
+  canCalculate = false;
 
   private readonly POLYGON_ZOOM_THRESHOLD = 10;
 
@@ -77,6 +78,13 @@ export class TasinmazListMapComponent implements AfterViewInit, OnChanges {
     this.baseLayer.setOpacity(this.baseOpacity);
 
     this.vectorLayer.setOpacity(this.baseOpacity);
+  }
+  calculateUnion(): void {
+    console.log('Union (A ∪ B) clicked');
+  }
+
+  calculateIntersection(): void {
+    console.log('Intersection (A ∩ B) clicked');
   }
 
   private initMap(): void {
