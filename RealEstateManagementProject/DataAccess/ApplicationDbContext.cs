@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
 namespace RealEstateManagementProject.DataAccess
 {
@@ -16,6 +17,7 @@ namespace RealEstateManagementProject.DataAccess
         public DbSet<User> Users { get; set; }
         public DbSet<Tasinmaz> Tasinmazlar { get; set; }
         public DbSet<Log> Loglar { get; set; }
+        public DbSet<AlanAnaliz> AlanAnalizleri { get; set; }
 
     }
 
