@@ -4,7 +4,6 @@ using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.DataAccess;
 using System.Text.Json;
-
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 
@@ -40,6 +39,7 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return true;
         }
+
         public async Task<List<AlanAnalizSonucDto>> KayitliGeometrileriGetirAsync(int kullaniciId)
         {
             return await _context.AlanAnalizleri
@@ -66,8 +66,16 @@ namespace RealEstateManagementProject.Business.Concrete
             if (geo1 == null || geo2 == null)
                 return null;
 
-            string yeniGeoJson = "{}";
-            double alan = 0;
+            Geometry geom1 = _geoReader.Read<Geometry>(geo1.GeometriJson);
+            Geometry geom2 = _geoReader.Read<Geometry>(geo2.GeometriJson);
+
+            Geometry intersectionGeom = geom1.Intersection(geom2);
+
+            if (intersectionGeom.IsEmpty)
+                return null;
+
+            string yeniGeoJson = _geoWriter.Write(intersectionGeom);
+            double alan = intersectionGeom.Area;
 
             return new AlanAnalizSonucDto
             {
@@ -99,7 +107,6 @@ namespace RealEstateManagementProject.Business.Concrete
             Geometry unionGeom = geom1.Union(geom2);
 
             string yeniGeoJson = _geoWriter.Write(unionGeom);
-
             double alan = unionGeom.Area;
 
             var kayit = new AlanAnaliz
