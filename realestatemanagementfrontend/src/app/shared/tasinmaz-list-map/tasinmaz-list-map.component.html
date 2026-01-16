@@ -10,26 +10,6 @@
       (ngModelChange)="onBaseOpacityChange()"
     />
   </div>
-
-  <div class="area-operations">
-    <button
-      class="btn btn-outline-dark btn-sm"
-      (click)="calculateUnion()"
-      [disabled]="!canCalculate"
-      title="Birleşim (A ∪ B)"
-    >
-      A ∪ B
-    </button>
-
-    <button
-      class="btn btn-outline-danger btn-sm"
-      (click)="calculateIntersection()"
-      [disabled]="!canCalculate"
-      title="Kesişim (A ∩ B)"
-    >
-      A ∩ B
-    </button>
-  </div>
 </div>
 
 <div id="list-map" class="map-container"></div>
