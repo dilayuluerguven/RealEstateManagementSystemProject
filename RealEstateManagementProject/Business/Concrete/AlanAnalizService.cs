@@ -3,12 +3,18 @@ using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.DataAccess;
+using System.Text.Json;
+
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 
 namespace RealEstateManagementProject.Business.Concrete
 {
     public class AlanAnalizService : IAlanAnalizService
     {
         private readonly ApplicationDbContext _context;
+        private readonly GeoJsonReader _geoReader = new GeoJsonReader();
+        private readonly GeoJsonWriter _geoWriter = new GeoJsonWriter();
 
         public AlanAnalizService(ApplicationDbContext context)
         {
@@ -17,13 +23,15 @@ namespace RealEstateManagementProject.Business.Concrete
 
         public async Task<bool> GeometriKaydetAsync(int kullaniciId, AlanAnalizCreateDto dto)
         {
+            double alan = AlanHesapla(dto.GeometriJson);
+
             var kayit = new AlanAnaliz
             {
                 KullaniciId = kullaniciId,
                 GeometriAdi = dto.GeometriAdi,
                 GeometriTuru = "Orijinal",
                 GeometriJson = dto.GeometriJson,
-                AlanMetrekare = dto.AlanMetrekare,
+                AlanMetrekare = alan,
                 OlusturmaTarihi = DateTime.Now
             };
 
@@ -32,7 +40,6 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return true;
         }
-
         public async Task<List<AlanAnalizSonucDto>> KayitliGeometrileriGetirAsync(int kullaniciId)
         {
             return await _context.AlanAnalizleri
@@ -50,8 +57,8 @@ namespace RealEstateManagementProject.Business.Concrete
         {
             var parca = dto.IslemTuru.Split("_");
 
-            string g1 = parca[0]; 
-            string g2 = parca[2]; 
+            string g1 = parca[0];
+            string g2 = parca[2];
 
             var geo1 = await GetGeometriAsync(kullaniciId, g1);
             var geo2 = await GetGeometriAsync(kullaniciId, g2);
@@ -59,8 +66,7 @@ namespace RealEstateManagementProject.Business.Concrete
             if (geo1 == null || geo2 == null)
                 return null;
 
-
-            string yeniGeoJson = "{}"; 
+            string yeniGeoJson = "{}";
             double alan = 0;
 
             return new AlanAnalizSonucDto
@@ -75,8 +81,8 @@ namespace RealEstateManagementProject.Business.Concrete
         {
             var parca = dto.IslemTuru.Split("_");
 
-            string ilk = parca[0]; 
-            string ikinci = parca[2]; 
+            string ilk = parca[0];
+            string ikinci = parca[2];
             string ucuncu = parca.Length > 3 ? "C" : null;
 
             var geo1 = await GetGeometriAsync(kullaniciId, ilk);
@@ -87,8 +93,14 @@ namespace RealEstateManagementProject.Business.Concrete
 
             string yeniGeometriAdi = ucuncu == null ? "D" : "E";
 
-            string yeniGeoJson = "{}";
-            double alan = 0;
+            Geometry geom1 = _geoReader.Read<Geometry>(geo1.GeometriJson);
+            Geometry geom2 = _geoReader.Read<Geometry>(geo2.GeometriJson);
+
+            Geometry unionGeom = geom1.Union(geom2);
+
+            string yeniGeoJson = _geoWriter.Write(unionGeom);
+
+            double alan = unionGeom.Area;
 
             var kayit = new AlanAnaliz
             {
@@ -132,6 +144,29 @@ namespace RealEstateManagementProject.Business.Concrete
                     x.KullaniciId == kullaniciId &&
                     x.GeometriAdi == geometriAdi &&
                     x.GeometriTuru == "Orijinal");
+        }
+
+        private double AlanHesapla(string geoJson)
+        {
+            using var doc = JsonDocument.Parse(geoJson);
+
+            var coordinates = doc.RootElement
+                .GetProperty("coordinates")[0];
+
+            double alan = 0;
+            int n = coordinates.GetArrayLength();
+
+            for (int i = 0; i < n - 1; i++)
+            {
+                double x1 = coordinates[i][0].GetDouble();
+                double y1 = coordinates[i][1].GetDouble();
+                double x2 = coordinates[i + 1][0].GetDouble();
+                double y2 = coordinates[i + 1][1].GetDouble();
+
+                alan += (x1 * y2) - (x2 * y1);
+            }
+
+            return Math.Abs(alan) / 2;
         }
     }
 }
