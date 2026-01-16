@@ -30,6 +30,13 @@ const routes: Routes = [
         path: 'profile',
         component: ProfileComponent,
       },
+      {
+        path: 'alan-analizi',
+        loadChildren: () =>
+          import('./alan-analizi/alan-analizi.module').then(
+            (m) => m.AlanAnaliziModule
+          ),
+      },
     ],
   },
 
