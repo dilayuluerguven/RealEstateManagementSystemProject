@@ -1,1 +1,169 @@
-<p>alan-analizi works!</p>
+<div class="container mt-4">
+
+  <h2 class="mb-3">Alan Analizi</h2>
+
+  <!-- Başarı Mesajı -->
+  <div *ngIf="successMessage" class="alert alert-success text-center">
+    {{ successMessage }}
+  </div>
+
+  <!-- Hata Mesajı -->
+  <div *ngIf="errorMessage" class="alert alert-danger text-center">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Mod Seçimi -->
+  <div class="btn-group mb-3">
+    <button
+      class="btn btn-primary"
+      [class.active]="mode === 'manual'"
+      (click)="loadManualSelect()"
+    >
+      Manuel Çizim
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      [class.active]="mode === 'auto'"
+      (click)="loadAutoSelect()"
+    >
+      Otomatik Yükle
+    </button>
+  </div>
+
+  <app-map
+    [resetTrigger]="resetCounter"
+    (geometryDrawn)="onGeometryDrawn($event)"
+  ></app-map>
+
+  <!-- Çizim Bilgileri -->
+  <div class="mt-4 p-3 border rounded">
+
+    <h4>Çizilen Alanlar</h4>
+
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr>
+          <th>Alan</th>
+          <th>Durum</th>
+          <th>Alan (m²)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A</td>
+          <td>{{ manualAreas.A.geometry ? "Hazır" : "-" }}</td>
+          <td>{{ manualAreas.A.area | number: "1.0-2" }}</td>
+        </tr>
+
+        <tr>
+          <td>B</td>
+          <td>{{ manualAreas.B.geometry ? "Hazır" : "-" }}</td>
+          <td>{{ manualAreas.B.area | number: "1.0-2" }}</td>
+        </tr>
+
+        <tr>
+          <td>C</td>
+          <td>{{ manualAreas.C.geometry ? "Hazır" : "-" }}</td>
+          <td>{{ manualAreas.C.area | number: "1.0-2" }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- İşlem Butonları -->
+  <div class="mt-4">
+
+    <h4>İşlemler</h4>
+
+    <!-- Kesişim -->
+    <div class="mb-3">
+      <button class="btn btn-outline-dark me-2"
+              (click)="calculateIntersection('A','B')"
+              [disabled]="!manualAreas.A.geometry || !manualAreas.B.geometry">
+        A ∩ B
+      </button>
+
+      <button class="btn btn-outline-dark me-2"
+              (click)="calculateIntersection('B','C')"
+              [disabled]="!manualAreas.B.geometry || !manualAreas.C.geometry">
+        B ∩ C
+      </button>
+
+      <button class="btn btn-outline-dark"
+              (click)="calculateIntersection('A','C')"
+              [disabled]="!manualAreas.A.geometry || !manualAreas.C.geometry">
+        A ∩ C
+      </button>
+    </div>
+
+    <!-- Birleşim -->
+    <div class="mb-3">
+      <button class="btn btn-success me-2"
+              (click)="calculateUnionAB()"
+              [disabled]="!manualAreas.A.geometry || !manualAreas.B.geometry">
+        A ∪ B
+      </button>
+
+      <button class="btn btn-success"
+              (click)="calculateUnionABC()"
+              [disabled]="!manualAreas.A.geometry || !manualAreas.B.geometry || !manualAreas.C.geometry">
+        A ∪ B ∪ C
+      </button>
+    </div>
+  </div>
+
+  <!-- Sonuç -->
+  <div class="mt-4 p-3 border rounded" *ngIf="currentOperation">
+    <h5>İşlem: {{ currentOperation }}</h5>
+    <h6>Alan: {{ formatArea(alan) }}</h6>
+  </div>
+
+  <!-- Haritada Sonuç Göster -->
+  <app-map-result
+    *ngIf="geometryResult"
+    [result]="geometryResult"
+  ></app-map-result>
+
+  <!-- Kayıtlı Sonuçlar -->
+  <div class="mt-5">
+    <h4>Kayıtlı Sonuçlar</h4>
+    <button class="btn btn-outline-primary mb-3" (click)="loadSavedResults()">
+      Yenile
+    </button>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>İsim</th>
+          <th>İşlem</th>
+          <th>Alan</th>
+          <th>Göster</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of savedResults">
+          <td>{{ item.name }}</td>
+          <td>{{ item.operation }}</td>
+          <td>{{ formatArea(item.area) }}</td>
+          <td>
+            <button class="btn btn-sm btn-info" (click)="showResultOnMap(item)">
+              Göster
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Reset -->
+  <button class="btn btn-danger mt-3" (click)="resetAreas()">
+    Alanları Temizle
+  </button>
+
+  <button class="btn btn-danger ms-2 mt-3" (click)="resetAnaliz()">
+    DB'deki Tüm Analizleri Sil
+  </button>
+
+</div>
