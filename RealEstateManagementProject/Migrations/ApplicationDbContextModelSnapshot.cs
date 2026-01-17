@@ -33,19 +33,16 @@ namespace RealEstateManagementProject.Migrations
                     b.Property<double>("AlanMetrekare")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("AnalizTuru")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("GeometriAdi")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("GeometriJson")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("GeometriTuru")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IslemTuru")
                         .HasColumnType("text");
 
                     b.Property<int>("KullaniciId")
@@ -55,8 +52,6 @@ namespace RealEstateManagementProject.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("KullaniciId");
 
                     b.ToTable("AlanAnalizleri");
                 });
@@ -238,17 +233,6 @@ namespace RealEstateManagementProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("RealEstateManagementProject.Entities.AlanAnaliz", b =>
-                {
-                    b.HasOne("RealEstateManagementProject.Entities.Concrete.User", "Kullanici")
-                        .WithMany()
-                        .HasForeignKey("KullaniciId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Kullanici");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Ilce", b =>
