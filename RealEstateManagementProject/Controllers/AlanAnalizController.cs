@@ -1,87 +1,80 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Dtos;
+using RealEstateManagementProject.Business.Abstract;
 using System.Security.Claims;
-using NetTopologySuite.IO;
 
-[ApiController]
-[Route("api/[controller]")]
-[Authorize]
-public class AlanAnalizController : ControllerBase
+namespace RealEstateManagementProject.Controllers
 {
-    private readonly IAlanAnalizService _service;
-    private readonly GeoJsonWriter _writer = new GeoJsonWriter();
-
-    public AlanAnalizController(IAlanAnalizService service)
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class AlanAnalizController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly IAlanAnalizService _service;
 
-    private int GetUserId()
-    {
-        var claim = User?.Claims?.FirstOrDefault(c =>
-            c.Type == "UserId" || c.Type == ClaimTypes.NameIdentifier);
-
-        if (claim == null)
-            throw new UnauthorizedAccessException("UserId bulunamadı!");
-
-        return int.Parse(claim.Value);
-    }
-
-    [HttpPost("geometri-kaydet")]
-    public async Task<IActionResult> GeometriKaydet([FromBody] AlanAnalizCreateDto dto)
-    {
-        int userId = GetUserId();
-        var result = await _service.KaydetAsync(userId, dto);
-
-        return Ok(new
+        public AlanAnalizController(IAlanAnalizService service)
         {
-            success = true,
-            message = $"{dto.GeometriAdi} kaydedildi.",
-            data = result
-        });
-    }
+            _service = service;
+        }
 
-    [HttpPost("kesisim")]
-    public async Task<IActionResult> Kesisim([FromBody] AlanAnalizIslemDto dto)
-    {
-        int userId = GetUserId();
-        var geometry = await _service.KesisimAsync(userId, dto.A, dto.B);
-
-        if (geometry == null)
-            return Ok(new { success = false, message = "Kesişim yok." });
-
-        return Ok(new
+        private int GetKullaniciId()
         {
-            success = true,
-            geoJson = _writer.Write(geometry),
-            area = geometry.Area
-        });
-    }
+            var claim = User.Claims.FirstOrDefault(c =>
+                c.Type == "UserId" || c.Type == ClaimTypes.NameIdentifier);
 
-    [HttpPost("birlesim-ab")]
-    public async Task<IActionResult> BirlesimAB()
-    {
-        int userId = GetUserId();
-        var result = await _service.BirlesimABAsync(userId);
+            if (claim == null)
+                throw new UnauthorizedAccessException("Kullanıcı bulunamadı.");
 
-        return Ok(new
+            return int.Parse(claim.Value);
+        }
+
+        [HttpPost("kaydet")]
+        public async Task<IActionResult> Kaydet([FromBody] AlanAnalizCreateDto dto)
         {
-            success = true,
-            data = result
-        });
-    }
+            int kullaniciId = GetKullaniciId();
+            var sonuc = await _service.KaydetAsync(kullaniciId, dto);
 
-    [HttpPost("birlesim-abc")]
-    public async Task<IActionResult> BirlesimABC()
-    {
-        int userId = GetUserId();
-        var result = await _service.BirlesimABCAsync(userId);
+            return Ok(new { success = true, data = sonuc });
+        }
 
-        return Ok(new
+        [HttpGet("getir/{adi}")]
+        public async Task<IActionResult> Getir(string adi)
         {
-            success = true,
-            data = result
-        });
+            int kullaniciId = GetKullaniciId();
+            var sonuc = await _service.GetirAsync(kullaniciId, adi);
+
+            if (sonuc == null)
+                return Ok(new { success = false, data = (object)null });
+
+            return Ok(new { success = true, data = sonuc });
+        }
+
+        [HttpGet("liste")]
+        public async Task<IActionResult> Liste()
+        {
+            int kullaniciId = GetKullaniciId();
+            var list = await _service.ListeAsync(kullaniciId);
+
+            return Ok(new { success = true, data = list });
+        }
+
+        [HttpDelete("sil/{id}")]
+        public async Task<IActionResult> Sil(int id)
+        {
+            int kullaniciId = GetKullaniciId();
+            bool sonuc = await _service.SilAsync(kullaniciId, id);
+
+            return Ok(new { success = sonuc });
+        }
+
+        [HttpDelete("temizle/{adi}")]
+        public async Task<IActionResult> Temizle(string adi)
+        {
+            int kullaniciId = GetKullaniciId();
+            bool sonuc = await _service.GeometriyeGoreSilAsync(kullaniciId, adi);
+
+            return Ok(new { success = sonuc });
+        }
     }
 }
