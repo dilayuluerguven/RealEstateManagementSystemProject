@@ -23,13 +23,15 @@ export class AlanAnalizComponent implements AfterViewInit {
   sonuc: any = null;
   map!: Map;
   draw!: Draw;
+  loadedLayers: string[] = [];
+  private firstLoadDone = false;
 
   sourceA = new VectorSource();
   sourceB = new VectorSource();
   sourceC = new VectorSource();
-  sourceD = new VectorSource();
-  sourceE = new VectorSource();
-  sourceF = new VectorSource();
+  sourceD = new VectorSource(); 
+  sourceE = new VectorSource(); 
+  sourceF = new VectorSource(); 
 
   layerA = new VectorLayer({ source: this.sourceA });
   layerB = new VectorLayer({ source: this.sourceB });
@@ -123,7 +125,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.info('A ve B dolu olmalıdır.');
+      this.toastr.warning('Analiz için A ve B katmanlarında çizim bulunmalıdır.', 'Eksik Veri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -140,7 +142,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     const b = this.sourceB.getFeatures();
     const c = this.sourceC.getFeatures();
     if (!a.length || !b.length || !c.length) {
-      this.toastr.info('A, B ve C dolu olmalıdır.');
+      this.toastr.warning('Analiz için A, B ve C katmanlarında çizim bulunmalıdır.', 'Eksik Veri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -157,24 +159,45 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.info('Kesişim için A ve B gereklidir.');
+      this.toastr.warning('Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.', 'Uyarı');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
     const intersect = turf.intersect(turf.featureCollection([fa as any, fb as any]));
+    
     if (intersect) {
-      this.sadeceGorselGoster(intersect);
+      this.sadeceGorselGoster(intersect, 'A ∩ B');
     } else {
-      this.toastr.warning('Kesişim bulunamadı.');
+      this.sonuc = null; 
+      this.toastr.warning('A ve B alanları arasında kesişim bulunamadı.');
     }
   }
 
-  sadeceGorselGoster(geo: any): void {
+  kesisimBA(): void {
+    const a = this.sourceA.getFeatures();
+    const b = this.sourceB.getFeatures();
+    if (!a.length || !b.length) {
+      this.toastr.warning('Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.', 'Uyarı');
+      return;
+    }
+    const fa = this.geoJson.writeFeatureObject(a[0]);
+    const fb = this.geoJson.writeFeatureObject(b[0]);
+    const intersect = turf.intersect(turf.featureCollection([fb as any, fa as any]));
+    
+    if (intersect) {
+      this.sadeceGorselGoster(intersect, 'B ∩ A');
+    } else {
+      this.sonuc = null;
+      this.toastr.warning('B ve A alanları arasında kesişim bulunamadı.');
+    }
+  }
+
+  sadeceGorselGoster(geo: any, islemAdi: string): void {
     this.sourceF.clear();
     this.sourceF.addFeature(this.geoJson.readFeature(geo));
     this.hizliGosterimAyari('F');
-    this.sonuc = { mesaj: 'Kesişim gösteriliyor', alan: turf.area(geo) };
+    this.sonuc = { mesaj: `${islemAdi} gösteriliyor`, alan: turf.area(geo) };
   }
 
   showAndSave(geo: any, ad: 'D' | 'E', islem: string): void {
@@ -191,7 +214,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     };
     this.alanAnalizService.kaydet(dto).subscribe((r) => {
       this.sonuc = r;
-      this.toastr.success(`${ad} kaydedildi.`);
+      this.toastr.success(`${ad} katmanına kaydedildi.`);
       this.loadFromDb();
     });
   }
@@ -203,21 +226,34 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   loadFromDb(): void {
-    ['A', 'B', 'C', 'D', 'E'].forEach((g) => {
-      this.alanAnalizService.getir(g).pipe(catchError(() => of(null))).subscribe((res) => {
-        if (res?.data?.geometriJson) {
-          const source = this.getLayer(g).getSource()!;
-          source.clear();
-          source.addFeature(this.geoJson.readFeature(JSON.parse(res.data.geometriJson)));
-        }
-      });
+    this.loadedLayers = [];
+    ['A', 'B', 'C', 'D', 'E'].forEach((g, index) => {
+      this.alanAnalizService.getir(g)
+        .pipe(catchError(() => of(null)))
+        .subscribe((res) => {
+          if (res?.data?.geometriJson) {
+            const source = this.getLayer(g).getSource()!;
+            source.clear();
+            source.addFeature(
+              this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
+            );
+            this.loadedLayers.push(g);
+          }
+          if (index === 4 && !this.firstLoadDone) {
+            this.ilkHaliGoster();
+            this.firstLoadDone = true;
+          }
+        });
     });
   }
 
   sadeceGoster(harf: string): void {
-    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(h => {
-      this.getLayer(h).setVisible(h === harf);
-    });
+    const source = this.getLayer(harf).getSource();
+    if (!source || source.getFeatures().length === 0) {
+      this.toastr.warning(`${harf} katmanında görüntülenecek veri bulunmuyor.`);
+      return;
+    }
+    this.hizliGosterimAyari(harf);
     this.toastr.info(`Sadece ${harf} gösteriliyor.`);
   }
 
@@ -232,12 +268,12 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   hepsiniTemizle(): void {
-    const toast = this.toastr.warning('Silmek için tıkla.', 'Onay', { timeOut: 5000 });
+    const toast = this.toastr.warning('Tüm kayıtları silmek için tıkla.', 'Onay', { timeOut: 5000 });
     toast.onTap.subscribe(() => {
       ['A', 'B', 'C', 'D', 'E'].forEach(g => this.alanAnalizService.temizle(g).subscribe());
       [this.sourceA, this.sourceB, this.sourceC, this.sourceD, this.sourceE, this.sourceF].forEach(s => s.clear());
       this.ilkHaliGoster();
-      this.toastr.success('Temizlendi.');
+      this.toastr.success('Tüm veriler temizlendi.');
     });
   }
 
@@ -246,9 +282,6 @@ export class AlanAnalizComponent implements AfterViewInit {
     const feature = source?.getFeatures()[0];
     if (!feature) return null;
     const geojson = this.geoJson.writeFeatureObject(feature);
-    let sembol = harf + ' (Orijinal)';
-    if (harf === 'D') sembol = 'A ∪ B';
-    else if (harf === 'E') sembol = 'A ∪ B ∪ C';
-    return { islemSembol: sembol, alanMetrekare: turf.area(geojson as any) };
+    return { alanMetrekare: turf.area(geojson as any) };
   }
 }
