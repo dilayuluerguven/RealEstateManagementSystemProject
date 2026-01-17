@@ -1,113 +1,87 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RealEstateManagementProject.Business.Abstract;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Dtos;
+using System.Security.Claims;
+using NetTopologySuite.IO;
 
-namespace RealEstateManagementProject.Controllers
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class AlanAnalizController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AlanAnalizController : ControllerBase
+    private readonly IAlanAnalizService _service;
+    private readonly GeoJsonWriter _writer = new GeoJsonWriter();
+
+    public AlanAnalizController(IAlanAnalizService service)
     {
-        private readonly IAlanAnalizService _service;
+        _service = service;
+    }
 
-        public AlanAnalizController(IAlanAnalizService service)
+    private int GetUserId()
+    {
+        var claim = User?.Claims?.FirstOrDefault(c =>
+            c.Type == "UserId" || c.Type == ClaimTypes.NameIdentifier);
+
+        if (claim == null)
+            throw new UnauthorizedAccessException("UserId bulunamadı!");
+
+        return int.Parse(claim.Value);
+    }
+
+    [HttpPost("geometri-kaydet")]
+    public async Task<IActionResult> GeometriKaydet([FromBody] AlanAnalizCreateDto dto)
+    {
+        int userId = GetUserId();
+        var result = await _service.KaydetAsync(userId, dto);
+
+        return Ok(new
         {
-            _service = service;
-        }
+            success = true,
+            message = $"{dto.GeometriAdi} kaydedildi.",
+            data = result
+        });
+    }
 
-        [HttpPost("geometri-kaydet")]
-        public async Task<IActionResult> GeometriKaydet(
-            [FromQuery] int kullaniciId,
-            [FromBody] AlanAnalizCreateDto dto)
+    [HttpPost("kesisim")]
+    public async Task<IActionResult> Kesisim([FromBody] AlanAnalizIslemDto dto)
+    {
+        int userId = GetUserId();
+        var geometry = await _service.KesisimAsync(userId, dto.A, dto.B);
+
+        if (geometry == null)
+            return Ok(new { success = false, message = "Kesişim yok." });
+
+        return Ok(new
         {
-            var sonuc = await _service.GeometriKaydetAsync(kullaniciId, dto);
+            success = true,
+            geoJson = _writer.Write(geometry),
+            area = geometry.Area
+        });
+    }
 
-            return Ok(new
-            {
-                success = sonuc,
-                message = sonuc
-                    ? "Geometri başarıyla kaydedildi."
-                    : "Geometri kaydedilemedi.",
-                data = (object?)null
-            });
-        }
+    [HttpPost("birlesim-ab")]
+    public async Task<IActionResult> BirlesimAB()
+    {
+        int userId = GetUserId();
+        var result = await _service.BirlesimABAsync(userId);
 
-        [HttpGet("geometriler")]
-        public async Task<IActionResult> Geometriler(
-            [FromQuery] int kullaniciId)
+        return Ok(new
         {
-            var liste = await _service.KayitliGeometrileriGetirAsync(kullaniciId);
+            success = true,
+            data = result
+        });
+    }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Geometriler başarıyla getirildi.",
-                data = liste
-            });
-        }
+    [HttpPost("birlesim-abc")]
+    public async Task<IActionResult> BirlesimABC()
+    {
+        int userId = GetUserId();
+        var result = await _service.BirlesimABCAsync(userId);
 
-        [HttpPost("kesisim")]
-        public async Task<IActionResult> Kesisim(
-            [FromQuery] int kullaniciId,
-            [FromBody] AlanAnalizIslemDto dto)
+        return Ok(new
         {
-            var sonuc = await _service.KesisimHesaplaAsync(kullaniciId, dto);
-
-            if (sonuc == null)
-            {
-                return Ok(new
-                {
-                    success = false,
-                    message = "Kesişim bulunamadı.",
-                    data = (object?)null
-                });
-            }
-
-            return Ok(new
-            {
-                success = true,
-                message = "Kesişim başarıyla hesaplandı.",
-                data = sonuc
-            });
-        }
-
-        [HttpPost("birlesim")]
-        public async Task<IActionResult> Birlesim(
-            [FromQuery] int kullaniciId,
-            [FromBody] AlanAnalizIslemDto dto)
-        {
-            var sonuc = await _service.BirlesimHesaplaAsync(kullaniciId, dto);
-
-            if (sonuc == null)
-            {
-                return Ok(new
-                {
-                    success = false,
-                    message = "Birleşim işlemi gerçekleştirilemedi.",
-                    data = (object?)null
-                });
-            }
-
-            return Ok(new
-            {
-                success = true,
-                message = "Birleşim işlemi başarıyla gerçekleştirildi.",
-                data = sonuc
-            });
-        }
-
-        [HttpGet("tum-analizler")]
-        public async Task<IActionResult> TumAnalizler(
-            [FromQuery] int kullaniciId)
-        {
-            var liste = await _service.TumAnalizleriGetirAsync(kullaniciId);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Analiz geçmişi başarıyla getirildi.",
-                data = liste
-            });
-        }
+            success = true,
+            data = result
+        });
     }
 }
