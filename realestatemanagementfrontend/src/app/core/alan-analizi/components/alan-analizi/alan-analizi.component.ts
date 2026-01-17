@@ -12,6 +12,7 @@ import Draw from 'ol/interaction/Draw';
 import GeoJSON from 'ol/format/GeoJSON';
 import * as turf from '@turf/turf';
 import { catchError, of } from 'rxjs';
+import ScaleLine from 'ol/control/ScaleLine';
 
 @Component({
   selector: 'app-alan-analizi',
@@ -25,13 +26,15 @@ export class AlanAnalizComponent implements AfterViewInit {
   draw!: Draw;
   loadedLayers: string[] = [];
   private firstLoadDone = false;
+  opacity: number = 1;
+  baseLayer!: TileLayer<OSM>;
 
   sourceA = new VectorSource();
   sourceB = new VectorSource();
   sourceC = new VectorSource();
-  sourceD = new VectorSource(); 
-  sourceE = new VectorSource(); 
-  sourceF = new VectorSource(); 
+  sourceD = new VectorSource();
+  sourceE = new VectorSource();
+  sourceF = new VectorSource();
 
   layerA = new VectorLayer({ source: this.sourceA });
   layerB = new VectorLayer({ source: this.sourceB });
@@ -47,7 +50,7 @@ export class AlanAnalizComponent implements AfterViewInit {
 
   constructor(
     private alanAnalizService: AlanAnalizService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -57,17 +60,44 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   initMap(): void {
+    this.baseLayer = new TileLayer({
+      source: new OSM(),
+      opacity: this.opacity,
+    });
+
     this.map = new Map({
       target: 'map',
       layers: [
-        new TileLayer({ source: new OSM() }),
-        this.layerA, this.layerB, this.layerC, 
-        this.layerD, this.layerE, this.layerF
+        this.baseLayer,
+        this.layerA,
+        this.layerB,
+        this.layerC,
+        this.layerD,
+        this.layerE,
+        this.layerF,
       ],
       view: new View({
         center: [3660000, 4860000],
         zoom: 6,
       }),
+      controls: [
+        new ScaleLine({
+          units: 'metric',
+          bar: true,
+          steps: 4,
+          text: true,
+        }),
+      ],
+    });
+  }
+
+  opacityDegisti(): void {
+    if (this.baseLayer) {
+      this.baseLayer.setOpacity(this.opacity);
+    }
+
+    ['A', 'B', 'C', 'D', 'E', 'F'].forEach((h) => {
+      this.getLayer(h).setOpacity(this.opacity);
     });
   }
 
@@ -98,7 +128,9 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   kaydetABC(): void {
-    const features = this.getLayer(this.seciliGeometri).getSource()?.getFeatures();
+    const features = this.getLayer(this.seciliGeometri)
+      .getSource()
+      ?.getFeatures();
     if (!features?.length) {
       this.toastr.warning('Lütfen önce çizim yapın.', 'Uyarı');
       return;
@@ -117,7 +149,7 @@ export class AlanAnalizComponent implements AfterViewInit {
         this.toastr.success(`${this.seciliGeometri} kaydedildi.`, 'Başarılı');
         this.loadFromDb();
       },
-      error: () => this.toastr.error('Hata oluştu.', 'Hata')
+      error: () => this.toastr.error('Hata oluştu.', 'Hata'),
     });
   }
 
@@ -125,12 +157,17 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning('Analiz için A ve B katmanlarında çizim bulunmalıdır.', 'Eksik Veri');
+      this.toastr.warning(
+        'Analiz için A ve B katmanlarında çizim bulunmalıdır.',
+        'Eksik Veri',
+      );
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const unionResult = turf.union(turf.featureCollection([fa as any, fb as any]));
+    const unionResult = turf.union(
+      turf.featureCollection([fa as any, fb as any]),
+    );
     if (unionResult) {
       const buffered = turf.buffer(unionResult, 0);
       if (buffered) this.showAndSave(buffered, 'D', 'A ∪ B');
@@ -142,13 +179,18 @@ export class AlanAnalizComponent implements AfterViewInit {
     const b = this.sourceB.getFeatures();
     const c = this.sourceC.getFeatures();
     if (!a.length || !b.length || !c.length) {
-      this.toastr.warning('Analiz için A, B ve C katmanlarında çizim bulunmalıdır.', 'Eksik Veri');
+      this.toastr.warning(
+        'Analiz için A, B ve C katmanlarında çizim bulunmalıdır.',
+        'Eksik Veri',
+      );
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
     const fc = this.geoJson.writeFeatureObject(c[0]);
-    const unionResult = turf.union(turf.featureCollection([fa as any, fb as any, fc as any]));
+    const unionResult = turf.union(
+      turf.featureCollection([fa as any, fb as any, fc as any]),
+    );
     if (unionResult) {
       const buffered = turf.buffer(unionResult, 0);
       if (buffered) this.showAndSave(buffered, 'E', 'A ∪ B ∪ C');
@@ -159,17 +201,22 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning('Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.', 'Uyarı');
+      this.toastr.warning(
+        'Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.',
+        'Uyarı',
+      );
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(turf.featureCollection([fa as any, fb as any]));
-    
+    const intersect = turf.intersect(
+      turf.featureCollection([fa as any, fb as any]),
+    );
+
     if (intersect) {
       this.sadeceGorselGoster(intersect, 'A ∩ B');
     } else {
-      this.sonuc = null; 
+      this.sonuc = null;
       this.toastr.warning('A ve B alanları arasında kesişim bulunamadı.');
     }
   }
@@ -178,13 +225,18 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning('Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.', 'Uyarı');
+      this.toastr.warning(
+        'Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.',
+        'Uyarı',
+      );
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(turf.featureCollection([fb as any, fa as any]));
-    
+    const intersect = turf.intersect(
+      turf.featureCollection([fb as any, fa as any]),
+    );
+
     if (intersect) {
       this.sadeceGorselGoster(intersect, 'B ∩ A');
     } else {
@@ -220,7 +272,7 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   hizliGosterimAyari(aktif: string): void {
-    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(h => {
+    ['A', 'B', 'C', 'D', 'E', 'F'].forEach((h) => {
       this.getLayer(h).setVisible(h === aktif);
     });
   }
@@ -228,14 +280,15 @@ export class AlanAnalizComponent implements AfterViewInit {
   loadFromDb(): void {
     this.loadedLayers = [];
     ['A', 'B', 'C', 'D', 'E'].forEach((g, index) => {
-      this.alanAnalizService.getir(g)
+      this.alanAnalizService
+        .getir(g)
         .pipe(catchError(() => of(null)))
         .subscribe((res) => {
           if (res?.data?.geometriJson) {
             const source = this.getLayer(g).getSource()!;
             source.clear();
             source.addFeature(
-              this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
+              this.geoJson.readFeature(JSON.parse(res.data.geometriJson)),
             );
             this.loadedLayers.push(g);
           }
@@ -268,10 +321,23 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   hepsiniTemizle(): void {
-    const toast = this.toastr.warning('Tüm kayıtları silmek için tıkla.', 'Onay', { timeOut: 5000 });
+    const toast = this.toastr.warning(
+      'Tüm kayıtları silmek için tıkla.',
+      'Onay',
+      { timeOut: 5000 },
+    );
     toast.onTap.subscribe(() => {
-      ['A', 'B', 'C', 'D', 'E'].forEach(g => this.alanAnalizService.temizle(g).subscribe());
-      [this.sourceA, this.sourceB, this.sourceC, this.sourceD, this.sourceE, this.sourceF].forEach(s => s.clear());
+      ['A', 'B', 'C', 'D', 'E'].forEach((g) =>
+        this.alanAnalizService.temizle(g).subscribe(),
+      );
+      [
+        this.sourceA,
+        this.sourceB,
+        this.sourceC,
+        this.sourceD,
+        this.sourceE,
+        this.sourceF,
+      ].forEach((s) => s.clear());
       this.ilkHaliGoster();
       this.toastr.success('Tüm veriler temizlendi.');
     });
