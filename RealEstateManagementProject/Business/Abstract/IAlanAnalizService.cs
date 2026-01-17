@@ -1,15 +1,14 @@
-﻿using NetTopologySuite.Geometries;
-using RealEstateManagementProject.Dtos;
+﻿using RealEstateManagementProject.Dtos;
 
 public interface IAlanAnalizService
 {
-    Task<AlanAnalizSonucDto> KaydetAsync(int userId, AlanAnalizCreateDto dto);
+    Task<AlanAnalizSonucDto> KaydetAsync(int kullaniciId, AlanAnalizCreateDto dto);
 
-    Task<Geometry?> GetGeometryAsync(int userId, string geometriAdi);
+    Task<AlanAnalizSonucDto?> GetirAsync(int kullaniciId, string geometriAdi);
 
-    Task<Geometry?> KesisimAsync(int userId, string a, string b);
+    Task<List<AlanAnalizSonucDto>> ListeAsync(int kullaniciId);
 
-    Task<AlanAnalizSonucDto> BirlesimABAsync(int userId);
+    Task<bool> SilAsync(int kullaniciId, int id);
 
-    Task<AlanAnalizSonucDto> BirlesimABCAsync(int userId);
+    Task<bool> GeometriyeGoreSilAsync(int kullaniciId, string geometriAdi);
 }
