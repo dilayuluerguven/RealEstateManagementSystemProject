@@ -10,6 +10,6 @@ namespace RealEstateManagementProject.Entities
         public string AnalizTuru { get; set; }
         public string GeometriJson { get; set; }
         public double AlanMetrekare { get; set; }
-        public DateTime OlusturmaTarihi { get; set; } = DateTime.Now;
+        public DateTime OlusturmaTarihi { get; set; } = DateTime.UtcNow;
     }
 }
