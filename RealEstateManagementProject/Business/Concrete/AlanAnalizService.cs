@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using NetTopologySuite.Features;
 using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
@@ -15,9 +16,25 @@ public class AlanAnalizService : IAlanAnalizService
     {
         _context = context;
     }
-    public async Task<AlanAnaliz> KaydetAsync(int userId, AlanAnalizCreateDto dto)
+
+    public async Task<AlanAnalizSonucDto> KaydetAsync(int userId, AlanAnalizCreateDto dto)
     {
-        var geom = _reader.Read<Geometry>(dto.GeometriJson);
+        FeatureCollection fc;
+
+        try
+        {
+            fc = _reader.Read<FeatureCollection>(dto.GeometriJson);
+        }
+        catch
+        {
+            throw new Exception("Geçersiz GeoJSON formatı (FeatureCollection bekleniyor).");
+        }
+
+        if (fc.Count == 0)
+            throw new Exception("FeatureCollection içinde feature yok!");
+
+        var geom = fc[0].Geometry;
+        geom.SRID = 4326;
 
         var kayit = new AlanAnaliz
         {
@@ -26,22 +43,37 @@ public class AlanAnalizService : IAlanAnalizService
             GeometriJson = dto.GeometriJson,
             AnalizTuru = "ORIJINAL",
             AlanMetrekare = geom.Area,
-            OlusturmaTarihi = DateTime.Now
+            OlusturmaTarihi = DateTime.UtcNow
         };
 
         _context.AlanAnalizleri.Add(kayit);
         await _context.SaveChangesAsync();
 
-        return kayit;
+        return new AlanAnalizSonucDto
+        {
+            GeometriAdi = kayit.GeometriAdi,
+            GeometriJson = kayit.GeometriJson,
+            AlanMetrekare = kayit.AlanMetrekare
+        };
     }
 
     public async Task<Geometry?> GetGeometryAsync(int userId, string name)
     {
         var geo = await _context.AlanAnalizleri
-            .FirstOrDefaultAsync(x => x.KullaniciId == userId && x.GeometriAdi == name);
+            .Where(x => x.KullaniciId == userId && x.GeometriAdi == name)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync();
 
-        return geo == null ? null : _reader.Read<Geometry>(geo.GeometriJson);
+        if (geo == null)
+            return null;
+
+        var fc = _reader.Read<FeatureCollection>(geo.GeometriJson);
+        if (fc.Count == 0)
+            return null;
+
+        return fc[0].Geometry;
     }
+
 
     public async Task<Geometry?> KesisimAsync(int userId, string a, string b)
     {
@@ -51,61 +83,78 @@ public class AlanAnalizService : IAlanAnalizService
         if (g1 == null || g2 == null)
             return null;
 
-        var intersection = g1.Intersection(g2);
+        g1.SRID = 4326;
+        g2.SRID = 4326;
 
+        var intersection = g1.Intersection(g2);
         return intersection.IsEmpty ? null : intersection;
     }
 
-    public async Task<AlanAnaliz> BirlesimABAsync(int userId)
+    public async Task<AlanAnalizSonucDto> BirlesimABAsync(int userId)
     {
         var A = await GetGeometryAsync(userId, "A");
         var B = await GetGeometryAsync(userId, "B");
 
         if (A == null || B == null)
-            throw new Exception("A veya B bulunamadı.");
+            throw new Exception("A veya B bulunamadı!");
+
+        A.SRID = 4326;
+        B.SRID = 4326;
 
         var union = A.Union(B);
+
+        var json = _writer.Write(union);
 
         var kayit = new AlanAnaliz
         {
             KullaniciId = userId,
-            GeometriAdi = "D",
-            AnalizTuru = "UNION",
-            GeometriJson = _writer.Write(union),
+            GeometriAdi = $"D-{Guid.NewGuid().ToString()[..6]}",
+            AnalizTuru = "UNION A+B",
+            GeometriJson = json,
             AlanMetrekare = union.Area,
-            OlusturmaTarihi = DateTime.Now
+            OlusturmaTarihi = DateTime.UtcNow
         };
 
         _context.AlanAnalizleri.Add(kayit);
         await _context.SaveChangesAsync();
 
-        return kayit;
+        return new AlanAnalizSonucDto
+        {
+            GeometriAdi = kayit.GeometriAdi,
+            GeometriJson = kayit.GeometriJson,
+            AlanMetrekare = kayit.AlanMetrekare
+        };
     }
 
-    public async Task<AlanAnaliz> BirlesimABCAsync(int userId)
+    public async Task<AlanAnalizSonucDto> BirlesimABCAsync(int userId)
     {
         var A = await GetGeometryAsync(userId, "A");
         var B = await GetGeometryAsync(userId, "B");
         var C = await GetGeometryAsync(userId, "C");
 
         if (A == null || B == null || C == null)
-            throw new Exception("A, B, C bulunamadı.");
+            throw new Exception("A, B veya C bulunamadı");
 
         var union = A.Union(B).Union(C);
 
         var kayit = new AlanAnaliz
         {
             KullaniciId = userId,
-            GeometriAdi = "E",
-            AnalizTuru = "UNION",
+            GeometriAdi = $"E-{Guid.NewGuid().ToString()[..6]}",
+            AnalizTuru = "UNION A+B+C",
             GeometriJson = _writer.Write(union),
             AlanMetrekare = union.Area,
-            OlusturmaTarihi = DateTime.Now
+            OlusturmaTarihi = DateTime.UtcNow
         };
 
         _context.AlanAnalizleri.Add(kayit);
         await _context.SaveChangesAsync();
 
-        return kayit;
+        return new AlanAnalizSonucDto
+        {
+            GeometriAdi = kayit.GeometriAdi,
+            GeometriJson = kayit.GeometriJson,
+            AlanMetrekare = kayit.AlanMetrekare
+        };
     }
 }
