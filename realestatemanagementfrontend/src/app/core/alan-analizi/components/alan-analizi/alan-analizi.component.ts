@@ -27,12 +27,16 @@ export class AlanAnalizComponent implements AfterViewInit {
   sourceA = new VectorSource();
   sourceB = new VectorSource();
   sourceC = new VectorSource();
-  sourceResult = new VectorSource();
+  sourceD = new VectorSource();
+  sourceE = new VectorSource();
+  sourceF = new VectorSource();
 
   layerA = new VectorLayer({ source: this.sourceA });
   layerB = new VectorLayer({ source: this.sourceB });
   layerC = new VectorLayer({ source: this.sourceC });
-  layerResult = new VectorLayer({ source: this.sourceResult, zIndex: 10 });
+  layerD = new VectorLayer({ source: this.sourceD, zIndex: 5 });
+  layerE = new VectorLayer({ source: this.sourceE, zIndex: 6 });
+  layerF = new VectorLayer({ source: this.sourceF, zIndex: 10 });
 
   geoJson = new GeoJSON({
     dataProjection: 'EPSG:4326',
@@ -55,7 +59,8 @@ export class AlanAnalizComponent implements AfterViewInit {
       target: 'map',
       layers: [
         new TileLayer({ source: new OSM() }),
-        this.layerA, this.layerB, this.layerC, this.layerResult
+        this.layerA, this.layerB, this.layerC, 
+        this.layerD, this.layerE, this.layerF
       ],
       view: new View({
         center: [3660000, 4860000],
@@ -70,17 +75,13 @@ export class AlanAnalizComponent implements AfterViewInit {
     this.draw = new Draw({ source: activeSource, type: 'Polygon' });
     this.draw.on('drawstart', () => {
       activeSource.clear();
-      this.sourceResult.clear();
       this.sonuc = null;
     });
     this.map.addInteraction(this.draw);
   }
 
   geometriDegisti(): void {
-    this.layerA.setVisible(true);
-    this.layerB.setVisible(true);
-    this.layerC.setVisible(true);
-    this.layerResult.setVisible(true);
+    this.ilkHaliGoster();
     this.startDraw();
     this.toastr.info(`${this.seciliGeometri} katmanı aktif.`, 'Bilgi');
   }
@@ -89,7 +90,9 @@ export class AlanAnalizComponent implements AfterViewInit {
     if (adi === 'A') return this.layerA;
     if (adi === 'B') return this.layerB;
     if (adi === 'C') return this.layerC;
-    return this.layerResult;
+    if (adi === 'D') return this.layerD;
+    if (adi === 'E') return this.layerE;
+    return this.layerF;
   }
 
   kaydetABC(): void {
@@ -120,7 +123,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.info('A ve B katmanları dolu olmalıdır.');
+      this.toastr.info('A ve B dolu olmalıdır.');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -137,7 +140,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     const b = this.sourceB.getFeatures();
     const c = this.sourceC.getFeatures();
     if (!a.length || !b.length || !c.length) {
-      this.toastr.info('A, B ve C katmanları dolu olmalıdır.');
+      this.toastr.info('A, B ve C dolu olmalıdır.');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -154,7 +157,7 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.info('Kesişim için A ve B çizilmiş olmalıdır.');
+      this.toastr.info('Kesişim için A ve B gereklidir.');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -168,24 +171,17 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   sadeceGorselGoster(geo: any): void {
-    this.sourceResult.clear();
-    const feature = this.geoJson.readFeature(geo);
-    this.sourceResult.addFeature(feature);
-    this.layerA.setVisible(false);
-    this.layerB.setVisible(false);
-    this.layerC.setVisible(false);
-    this.layerResult.setVisible(true);
-    this.sonuc = { mesaj: 'Kesişim görsel olarak gösteriliyor', alan: turf.area(geo) };
-    this.toastr.info('Kesişim haritada (F).');
+    this.sourceF.clear();
+    this.sourceF.addFeature(this.geoJson.readFeature(geo));
+    this.hizliGosterimAyari('F');
+    this.sonuc = { mesaj: 'Kesişim gösteriliyor', alan: turf.area(geo) };
   }
 
   showAndSave(geo: any, ad: 'D' | 'E', islem: string): void {
-    this.sourceResult.clear();
-    this.sourceResult.addFeature(this.geoJson.readFeature(geo));
-    this.layerA.setVisible(false);
-    this.layerB.setVisible(false);
-    this.layerC.setVisible(false);
-    this.layerResult.setVisible(true);
+    const source = this.getLayer(ad).getSource()!;
+    source.clear();
+    source.addFeature(this.geoJson.readFeature(geo));
+    this.hizliGosterimAyari(ad);
     const dto: AlanAnalizCreate = {
       geometriAdi: ad,
       analizTuru: 'BIRLESIM',
@@ -195,14 +191,19 @@ export class AlanAnalizComponent implements AfterViewInit {
     };
     this.alanAnalizService.kaydet(dto).subscribe((r) => {
       this.sonuc = r;
-      this.toastr.success(`${ad} analizi kaydedildi.`);
+      this.toastr.success(`${ad} kaydedildi.`);
       this.loadFromDb();
     });
   }
 
+  hizliGosterimAyari(aktif: string): void {
+    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(h => {
+      this.getLayer(h).setVisible(h === aktif);
+    });
+  }
+
   loadFromDb(): void {
-    const tipler: ('A' | 'B' | 'C' | 'D' | 'E')[] = ['A', 'B', 'C', 'D', 'E'];
-    tipler.forEach((g) => {
+    ['A', 'B', 'C', 'D', 'E'].forEach((g) => {
       this.alanAnalizService.getir(g).pipe(catchError(() => of(null))).subscribe((res) => {
         if (res?.data?.geometriJson) {
           const source = this.getLayer(g).getSource()!;
@@ -214,10 +215,9 @@ export class AlanAnalizComponent implements AfterViewInit {
   }
 
   sadeceGoster(harf: string): void {
-    this.layerA.setVisible(harf === 'A');
-    this.layerB.setVisible(harf === 'B');
-    this.layerC.setVisible(harf === 'C');
-    this.layerResult.setVisible(harf === 'D' || harf === 'E' || harf === 'F');
+    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(h => {
+      this.getLayer(h).setVisible(h === harf);
+    });
     this.toastr.info(`Sadece ${harf} gösteriliyor.`);
   }
 
@@ -225,18 +225,18 @@ export class AlanAnalizComponent implements AfterViewInit {
     this.layerA.setVisible(true);
     this.layerB.setVisible(true);
     this.layerC.setVisible(true);
-    this.layerResult.setVisible(false);
+    this.layerD.setVisible(false);
+    this.layerE.setVisible(false);
+    this.layerF.setVisible(false);
     this.sonuc = null;
-    this.toastr.success('A, B ve C gösteriliyor.');
   }
 
   hepsiniTemizle(): void {
     const toast = this.toastr.warning('Silmek için tıkla.', 'Onay', { timeOut: 5000 });
     toast.onTap.subscribe(() => {
       ['A', 'B', 'C', 'D', 'E'].forEach(g => this.alanAnalizService.temizle(g).subscribe());
-      this.sourceA.clear(); this.sourceB.clear(); this.sourceC.clear(); this.sourceResult.clear();
-      this.layerA.setVisible(true); this.layerB.setVisible(true); this.layerC.setVisible(true);
-      this.sonuc = null;
+      [this.sourceA, this.sourceB, this.sourceC, this.sourceD, this.sourceE, this.sourceF].forEach(s => s.clear());
+      this.ilkHaliGoster();
       this.toastr.success('Temizlendi.');
     });
   }
