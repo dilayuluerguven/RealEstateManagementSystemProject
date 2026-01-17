@@ -53,7 +53,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AlanAnalizleri");
+                    b.ToTable("AlanAnalizleri", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Il", b =>
@@ -70,7 +70,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Iller");
+                    b.ToTable("Iller", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Ilce", b =>
@@ -92,7 +92,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("IlId");
 
-                    b.ToTable("Ilceler");
+                    b.ToTable("Ilceler", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Log", b =>
@@ -127,7 +127,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Loglar");
+                    b.ToTable("Loglar", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Mahalle", b =>
@@ -149,7 +149,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("IlceId");
 
-                    b.ToTable("Mahalleler");
+                    b.ToTable("Mahalleler", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Tasinmaz", b =>
@@ -203,7 +203,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tasinmazlar");
+                    b.ToTable("Tasinmazlar", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.User", b =>
@@ -232,7 +232,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Ilce", b =>
