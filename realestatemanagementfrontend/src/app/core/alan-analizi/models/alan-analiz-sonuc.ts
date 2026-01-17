@@ -1,7 +1,10 @@
 export interface AlanAnalizSonuc {
-  geometriAdi: string;
+geometriAdi: string;
+  analizTuru: string;
+  islem: string;
   geometriJson: string;
   alanMetrekare: number;
+  olusturmaTarihi: string;
 }
 
 export interface ApiResponse<T> {
