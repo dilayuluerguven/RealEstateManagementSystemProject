@@ -1,30 +1,48 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { ApiResponse, AlanAnalizSonuc } from '../models/alan-analiz-sonuc';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
-export class AlanAnaliziService {
+export class AlanAnalizService {
 
-  private apiUrl = `${environment.baseUrl}/api/AlanAnaliz`;
+  private apiUrl = 'https://localhost:7275/api/AlanAnaliz';
 
   constructor(private http: HttpClient) {}
 
-  geometriKaydet(body: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/geometri-kaydet`, body);
+  geometriKaydet(dto: {
+    geometriAdi: string;
+    geometriJson: string;
+  }): Observable<ApiResponse<AlanAnalizSonuc>> {
+    return this.http.post<ApiResponse<AlanAnalizSonuc>>(
+      `${this.apiUrl}/geometri-kaydet`,
+      dto
+    );
   }
 
-  kesisim(a: string, b: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/kesisim`, { a, b });
+  kesisim(dto: {
+    a: string;
+    b: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/kesisim`,
+      dto
+    );
   }
 
-  birlesimAB(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/birlesim-ab`, {});
+  birlesimAB(): Observable<ApiResponse<AlanAnalizSonuc>> {
+    return this.http.post<ApiResponse<AlanAnalizSonuc>>(
+      `${this.apiUrl}/birlesim-ab`,
+      {}
+    );
   }
 
-  birlesimABC(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/birlesim-abc`, {});
+  birlesimABC(): Observable<ApiResponse<AlanAnalizSonuc>> {
+    return this.http.post<ApiResponse<AlanAnalizSonuc>>(
+      `${this.apiUrl}/birlesim-abc`,
+      {}
+    );
   }
 }
