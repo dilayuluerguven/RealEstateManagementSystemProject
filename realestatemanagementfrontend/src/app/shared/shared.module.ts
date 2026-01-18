@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { TasinmazMapComponent } from './tasinmaz-map/tasinmaz-map.component';
 import { TasinmazListMapComponent } from './tasinmaz-list-map/tasinmaz-list-map.component';
 import { FormsModule } from '@angular/forms';
+import { MapControlsComponent } from './components/map-controls/map-controls/map-controls.component';
 
 
 
 @NgModule({
   declarations: [
     TasinmazMapComponent,
-    TasinmazListMapComponent
+    TasinmazListMapComponent,
+    MapControlsComponent
   ],
   imports: [
     CommonModule,FormsModule
