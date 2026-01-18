@@ -12,7 +12,7 @@ import Draw from 'ol/interaction/Draw';
 import GeoJSON from 'ol/format/GeoJSON';
 import * as turf from '@turf/turf';
 import { catchError, of } from 'rxjs';
-import ScaleLine from 'ol/control/ScaleLine';
+import { MapHelperService } from 'src/app/shared/services/map-helper.service';
 
 @Component({
   selector: 'app-alan-analizi',
@@ -24,8 +24,6 @@ export class AlanAnalizComponent implements AfterViewInit {
   sonuc: any = null;
   map!: Map;
   draw!: Draw;
-  loadedLayers: string[] = [];
-  private firstLoadDone = false;
   opacity: number = 1;
   baseLayer!: TileLayer<OSM>;
 
@@ -50,56 +48,53 @@ export class AlanAnalizComponent implements AfterViewInit {
 
   constructor(
     private alanAnalizService: AlanAnalizService,
-    private toastr: ToastrService,
+    private toastr: ToastrService, private mapHelper: MapHelperService
   ) {}
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.startDraw();
-    this.loadFromDb();
+    this.ilkHaliGoster();
+    this.toastr.info("Manuel veya Auto-Select modunu seçin.", "Bilgi");
   }
 
   initMap(): void {
-    this.baseLayer = new TileLayer({
-      source: new OSM(),
-      opacity: this.opacity,
-    });
+  this.baseLayer = new TileLayer({
+    source: new OSM(),
+    opacity: this.opacity,
+  });
 
-    this.map = new Map({
-      target: 'map',
-      layers: [
-        this.baseLayer,
-        this.layerA,
-        this.layerB,
-        this.layerC,
-        this.layerD,
-        this.layerE,
-        this.layerF,
-      ],
-      view: new View({
-        center: [3660000, 4860000],
-        zoom: 6,
-      }),
-      controls: [
-        new ScaleLine({
-          units: 'metric',
-          bar: true,
-          steps: 4,
-          text: true,
-        }),
-      ],
-    });
+  this.map = new Map({
+    target: 'map',
+    layers: [
+      this.baseLayer,
+      this.layerA,
+      this.layerB,
+      this.layerC,
+      this.layerD,
+      this.layerE,
+      this.layerF,
+    ],
+    view: new View({
+      center: [3660000, 4860000],
+      zoom: 6,
+    }),
+  });
+
+  this.mapHelper.addScale(this.map);
+}
+opacityDegisti(): void {
+  this.mapHelper.setAllLayersOpacity(this.map, this.opacity);
+}
+
+
+  getLayer(adi: string) {
+    if (adi === 'A') return this.layerA;
+    if (adi === 'B') return this.layerB;
+    if (adi === 'C') return this.layerC;
+    if (adi === 'D') return this.layerD;
+    if (adi === 'E') return this.layerE;
+    return this.layerF;
   }
-
-  opacityDegisti(): void {
-    if (this.baseLayer) {
-      this.baseLayer.setOpacity(this.opacity);
-    }
-    ['A', 'B', 'C', 'D', 'E', 'F'].forEach((h) => {
-      this.getLayer(h).setOpacity(this.opacity);
-    });
-  }
-
   startDraw(): void {
     if (this.draw) this.map.removeInteraction(this.draw);
     const activeSource = this.getLayer(this.seciliGeometri).getSource()!;
@@ -110,26 +105,13 @@ export class AlanAnalizComponent implements AfterViewInit {
     });
     this.map.addInteraction(this.draw);
   }
-
   geometriDegisti(): void {
     this.ilkHaliGoster();
     this.startDraw();
     this.toastr.info(`${this.seciliGeometri} katmanı aktif.`, 'Bilgi');
   }
-
-  getLayer(adi: string): VectorLayer<VectorSource> {
-    if (adi === 'A') return this.layerA;
-    if (adi === 'B') return this.layerB;
-    if (adi === 'C') return this.layerC;
-    if (adi === 'D') return this.layerD;
-    if (adi === 'E') return this.layerE;
-    return this.layerF;
-  }
-
   kaydetABC(): void {
-    const features = this.getLayer(this.seciliGeometri)
-      .getSource()
-      ?.getFeatures();
+    const features = this.getLayer(this.seciliGeometri).getSource()?.getFeatures();
     if (!features?.length) {
       this.toastr.warning('Lütfen önce çizim yapın.', 'Uyarı');
       return;
@@ -142,38 +124,40 @@ export class AlanAnalizComponent implements AfterViewInit {
       geometriJson: JSON.stringify(geo),
       alanMetrekare: turf.area(geo),
     };
+
     this.alanAnalizService.kaydet(dto).subscribe({
-      next: (r) => {
-        this.sonuc = r;
-        this.toastr.success(`${this.seciliGeometri} kaydedildi.`, 'Başarılı');
-        this.loadFromDb();
-      },
+      next: () => this.toastr.success(`${this.seciliGeometri} kaydedildi.`, 'Başarılı'),
       error: () => this.toastr.error('Hata oluştu.', 'Hata'),
     });
   }
-
   birlesimAB(): void {
+    this.ilkHaliGoster();
+    this.sourceF.clear();
+    this.sonuc = null;
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
+      this.toastr.warning("A ve B geometrileri eksik.", "Uyarı");
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
     const unionResult = turf.union(turf.featureCollection([fa as any, fb as any]));
+
     if (unionResult) {
       const buffered = turf.buffer(unionResult, 0);
       if (buffered) this.showAndSave(buffered, 'D', 'A ∪ B');
     }
   }
-
   birlesimABC(): void {
+    this.ilkHaliGoster();
+    this.sourceF.clear();
+    this.sonuc = null;
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     const c = this.sourceC.getFeatures();
     if (!a.length || !b.length || !c.length) {
-      this.toastr.warning('Lütfen A, B ve C geometrilerini tamamlayın.', 'Eksik Geometri');
+      this.toastr.warning("A, B ve C eksik.", "Uyarı");
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
@@ -185,55 +169,60 @@ export class AlanAnalizComponent implements AfterViewInit {
       if (buffered) this.showAndSave(buffered, 'E', 'A ∪ B ∪ C');
     }
   }
-
   kesisim(): void {
+    this.ilkHaliGoster();
+    this.sourceF.clear();
+    this.sonuc = null;
+
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
+
     if (!a.length || !b.length) {
-      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
+      this.toastr.warning("A ve B geometrileri eksik.", "Uyarı");
       return;
     }
+
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(turf.featureCollection([fa as any, fb as any]));
-    if (intersect) {
-      this.sadeceGorselGoster(intersect, 'A ∩ B');
-    } else {
-      this.sonuc = null;
-      this.toastr.warning('Kesişim bulunamadı.', 'Kesişim');
-    }
-  }
+    const result = turf.intersect(turf.featureCollection([fa as any, fb as any]));
 
+    if (result) this.sadeceGorselGoster(result, "A ∩ B");
+    else this.toastr.warning("Kesişim yok.", "Bilgi");
+  }
   kesisimBA(): void {
+    this.ilkHaliGoster();
+    this.sourceF.clear();
+    this.sonuc = null;
+
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
+
     if (!a.length || !b.length) {
-      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
+      this.toastr.warning("A ve B geometrileri eksik.", "Uyarı");
       return;
     }
+
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(turf.featureCollection([fb as any, fa as any]));
-    if (intersect) {
-      this.sadeceGorselGoster(intersect, 'B ∩ A');
-    } else {
-      this.sonuc = null;
-      this.toastr.warning('Kesişim bulunamadı.', 'Kesişim');
-    }
-  }
+    const result = turf.intersect(turf.featureCollection([fb as any, fa as any]));
 
+    if (result) this.sadeceGorselGoster(result, "B ∩ A");
+    else this.toastr.warning("Kesişim yok.", "Bilgi");
+  }
   sadeceGorselGoster(geo: any, islemAdi: string): void {
     this.sourceF.clear();
     this.sourceF.addFeature(this.geoJson.readFeature(geo));
     this.hizliGosterimAyari('F');
     this.sonuc = { mesaj: `${islemAdi} gösteriliyor`, alan: turf.area(geo) };
   }
-
   showAndSave(geo: any, ad: 'D' | 'E', islem: string): void {
+    this.sourceF.clear();
+    this.sonuc = null;
+
     const source = this.getLayer(ad).getSource()!;
     source.clear();
     source.addFeature(this.geoJson.readFeature(geo));
-    this.hizliGosterimAyari(ad);
+
     const dto: AlanAnalizCreate = {
       geometriAdi: ad,
       analizTuru: 'BIRLESIM',
@@ -241,52 +230,18 @@ export class AlanAnalizComponent implements AfterViewInit {
       geometriJson: JSON.stringify(geo),
       alanMetrekare: turf.area(geo),
     };
-    this.alanAnalizService.kaydet(dto).subscribe((r) => {
-      this.sonuc = null;
-      this.toastr.success('Birleşim sonucu kaydedildi.', 'Birleşim');
-      this.loadFromDb();
-    });
-  }
 
+    this.alanAnalizService.kaydet(dto).subscribe(() => {
+      this.toastr.success("Birleşim kaydedildi.", "Başarılı");
+    });
+
+    this.hizliGosterimAyari(ad);
+  }
   hizliGosterimAyari(aktif: string): void {
-    ['A', 'B', 'C', 'D', 'E', 'F'].forEach((h) => {
+    ['A','B','C','D','E','F'].forEach(h => {
       this.getLayer(h).setVisible(h === aktif);
     });
   }
-
-  loadFromDb(): void {
-    this.loadedLayers = [];
-    ['A', 'B', 'C', 'D', 'E'].forEach((g, index) => {
-      this.alanAnalizService
-        .getir(g)
-        .pipe(catchError(() => of(null)))
-        .subscribe((res) => {
-          if (res?.data?.geometriJson) {
-            const source = this.getLayer(g).getSource()!;
-            source.clear();
-            source.addFeature(
-              this.geoJson.readFeature(JSON.parse(res.data.geometriJson)),
-            );
-            this.loadedLayers.push(g);
-          }
-          if (index === 4 && !this.firstLoadDone) {
-            this.ilkHaliGoster();
-            this.firstLoadDone = true;
-          }
-        });
-    });
-  }
-
-  sadeceGoster(harf: string): void {
-    const source = this.getLayer(harf).getSource();
-    if (!source || source.getFeatures().length === 0) {
-      this.toastr.warning(`${harf} katmanında görüntülenecek veri bulunmuyor.`);
-      return;
-    }
-    this.hizliGosterimAyari(harf);
-    this.toastr.info(`Sadece ${harf} gösteriliyor.`);
-  }
-
   ilkHaliGoster(): void {
     this.layerA.setVisible(true);
     this.layerB.setVisible(true);
@@ -296,83 +251,71 @@ export class AlanAnalizComponent implements AfterViewInit {
     this.layerF.setVisible(false);
     this.sonuc = null;
   }
-
-  hepsiniTemizle(): void {
+  sadeceGoster(harf: string): void {
+    const s = this.getLayer(harf).getSource();
+    if (!s || s.getFeatures().length === 0) {
+      this.toastr.warning(`${harf} katmanı boş.`);
+      return;
+    }
+    this.hizliGosterimAyari(harf);
+  }
+  ekraniTemizle(): void {
+    this.sourceA.clear();
+    this.sourceB.clear();
+    this.sourceC.clear();
+    this.sourceF.clear();
+    this.sonuc = null;
+    this.ilkHaliGoster();
+    this.toastr.info("Ekran temizlendi.", "Bilgi");
+  }
+  kaliciSil(): void {
     const toast = this.toastr.warning(
-      'Tüm kayıtları silmek için tıkla.',
-      'Onay',
-      { timeOut: 5000 },
+      "A–B–C kayıtlarını kalıcı olarak silmek için tıklayın.",
+      "Kalıcı Sil",
+      { timeOut: 5000 }
     );
+
     toast.onTap.subscribe(() => {
-      ['A', 'B', 'C', 'D', 'E'].forEach((g) =>
-        this.alanAnalizService.temizle(g).subscribe(),
-      );
-      [
-        this.sourceA,
-        this.sourceB,
-        this.sourceC,
-        this.sourceD,
-        this.sourceE,
-        this.sourceF,
-      ].forEach((s) => s.clear());
-      this.ilkHaliGoster();
-      this.toastr.success('Tüm veriler temizlendi.');
+      ["A", "B", "C"].forEach(g => this.alanAnalizService.temizle(g).subscribe());
+      this.ekraniTemizle();
+      this.toastr.success("Kayıtlar silindi.", "Başarılı");
     });
   }
-
   getGeometriVerisi(harf: string) {
     const source = this.getLayer(harf).getSource();
-    const feature = source?.getFeatures()[0];
-    if (!feature) return null;
-    const geojson = this.geoJson.writeFeatureObject(feature);
-    return { alanMetrekare: turf.area(geojson as any) };
+    const f = source?.getFeatures()[0];
+    if (!f) return null;
+    const geo = this.geoJson.writeFeatureObject(f);
+    return { alanMetrekare: turf.area(geo as any) };
   }
   autoSelect(): void {
-  const geometriler = ['A', 'B', 'C'];
-  let eksik = false;
+    if (this.draw) this.map.removeInteraction(this.draw);
 
-  geometriler.forEach((g) => {
-    const source = this.getLayer(g).getSource()!;
-    source.clear();
-  });
+    const geometriler = ['A','B','C'];
+    let eksik = false;
 
-  geometriler.forEach((g) => {
-    this.alanAnalizService
-      .getir(g)
-      .pipe(catchError(() => of(null)))
-      .subscribe((res) => {
-        if (res?.data?.geometriJson) {
-          const source = this.getLayer(g).getSource()!;
-          source.addFeature(
-            this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
-          );
-        } else {
-          eksik = true;
-        }
+    geometriler.forEach(g => this.getLayer(g).getSource()!.clear());
+    geometriler.forEach(g => {
+      this.alanAnalizService.getir(g)
+        .pipe(catchError(() => of(null)))
+        .subscribe(res => {
+          if (res?.data?.geometriJson) {
+            this.getLayer(g).getSource()!.addFeature(
+              this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
+            );
+          } else eksik = true;
 
-        if (g === 'C') {
-          if (eksik) {
+          if (g === 'C') {
             this.ilkHaliGoster();
-            this.toastr.warning(
-              'Kayıtlı geometri bulunamadı. Lütfen Manuel Çizim kullanın.',
-              'Auto Select'
-            );
-          } else {
-            this.layerA.setVisible(true);
-            this.layerB.setVisible(true);
-            this.layerC.setVisible(true);
-            this.layerD.setVisible(false);
-            this.layerE.setVisible(false);
-            this.layerF.setVisible(false);
-
-            this.toastr.success(
-              'A, B ve C geometrileri otomatik olarak yüklendi.',
-              'Auto Select'
-            );
+            if (eksik) this.toastr.warning("Kayıtlı geometri bulunamadı.", "Auto-Select");
+            else this.toastr.success("A–B–C otomatik yüklendi.", "Auto-Select");
           }
-        }
-      });
-  });
-}
-
+        });
+    });
+  }
+  manuelMod(): void {
+    this.ilkHaliGoster();
+    this.startDraw();
+    this.toastr.info("Manuel çizim modu aktif.", "Bilgi");
+  }
 }
