@@ -17,6 +17,8 @@ import OSM from 'ol/source/OSM';
 import Draw from 'ol/interaction/Draw';
 import { GeoJSON } from 'ol/format';
 
+import { MapHelperService } from '../../shared/services/map-helper.service';
+
 @Component({
   selector: 'app-tasinmaz-map',
   templateUrl: './tasinmaz-map.component.html',
@@ -24,9 +26,12 @@ import { GeoJSON } from 'ol/format';
 })
 export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   @Input() initialGeometry?: string;
+  @Input() opacity: number = 1;
   @Output() geometryCreated = new EventEmitter<any>();
 
   map!: Map;
+
+  baseLayer!: TileLayer<OSM>;
 
   vectorSource = new VectorSource();
   vectorLayer = new VectorLayer({
@@ -34,6 +39,8 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   });
 
   draw?: Draw;
+
+  constructor(private mapHelper: MapHelperService) {}
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -47,23 +54,35 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
     });
   }
 
+  
   ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['initialGeometry'] &&
-      changes['initialGeometry'].currentValue &&
-      this.map
-    ) {
-      this.drawExistingGeometry(changes['initialGeometry'].currentValue);
-    }
+  if (
+    changes['initialGeometry'] &&
+    changes['initialGeometry'].currentValue &&
+    this.map
+  ) {
+    this.drawExistingGeometry(changes['initialGeometry'].currentValue);
   }
 
+  if (changes['opacity'] && this.map) {
+    this.mapHelper.setAllLayersOpacity(
+      this.map,
+      changes['opacity'].currentValue
+    );
+  }
+}
+
+
   initMap(): void {
+    this.baseLayer = new TileLayer({
+      source: new OSM(),
+      opacity: this.opacity,
+    });
+
     this.map = new Map({
       target: 'map',
       layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
+        this.baseLayer,
         this.vectorLayer,
       ],
       view: new View({
@@ -71,6 +90,8 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
         zoom: 6,
       }),
     });
+
+    this.mapHelper.addScale(this.map);
   }
 
   drawExistingGeometry(geoJsonString: string): void {
