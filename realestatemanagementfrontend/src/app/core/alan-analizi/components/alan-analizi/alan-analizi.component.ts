@@ -95,7 +95,6 @@ export class AlanAnalizComponent implements AfterViewInit {
     if (this.baseLayer) {
       this.baseLayer.setOpacity(this.opacity);
     }
-
     ['A', 'B', 'C', 'D', 'E', 'F'].forEach((h) => {
       this.getLayer(h).setOpacity(this.opacity);
     });
@@ -157,17 +156,12 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning(
-        'Analiz için A ve B katmanlarında çizim bulunmalıdır.',
-        'Eksik Veri',
-      );
+      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const unionResult = turf.union(
-      turf.featureCollection([fa as any, fb as any]),
-    );
+    const unionResult = turf.union(turf.featureCollection([fa as any, fb as any]));
     if (unionResult) {
       const buffered = turf.buffer(unionResult, 0);
       if (buffered) this.showAndSave(buffered, 'D', 'A ∪ B');
@@ -179,18 +173,13 @@ export class AlanAnalizComponent implements AfterViewInit {
     const b = this.sourceB.getFeatures();
     const c = this.sourceC.getFeatures();
     if (!a.length || !b.length || !c.length) {
-      this.toastr.warning(
-        'Analiz için A, B ve C katmanlarında çizim bulunmalıdır.',
-        'Eksik Veri',
-      );
+      this.toastr.warning('Lütfen A, B ve C geometrilerini tamamlayın.', 'Eksik Geometri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
     const fc = this.geoJson.writeFeatureObject(c[0]);
-    const unionResult = turf.union(
-      turf.featureCollection([fa as any, fb as any, fc as any]),
-    );
+    const unionResult = turf.union(turf.featureCollection([fa as any, fb as any, fc as any]));
     if (unionResult) {
       const buffered = turf.buffer(unionResult, 0);
       if (buffered) this.showAndSave(buffered, 'E', 'A ∪ B ∪ C');
@@ -201,23 +190,17 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning(
-        'Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.',
-        'Uyarı',
-      );
+      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(
-      turf.featureCollection([fa as any, fb as any]),
-    );
-
+    const intersect = turf.intersect(turf.featureCollection([fa as any, fb as any]));
     if (intersect) {
       this.sadeceGorselGoster(intersect, 'A ∩ B');
     } else {
       this.sonuc = null;
-      this.toastr.warning('A ve B alanları arasında kesişim bulunamadı.');
+      this.toastr.warning('Kesişim bulunamadı.', 'Kesişim');
     }
   }
 
@@ -225,23 +208,17 @@ export class AlanAnalizComponent implements AfterViewInit {
     const a = this.sourceA.getFeatures();
     const b = this.sourceB.getFeatures();
     if (!a.length || !b.length) {
-      this.toastr.warning(
-        'Kesişim analizi için A ve B katmanlarında çizim bulunmalıdır.',
-        'Uyarı',
-      );
+      this.toastr.warning('Lütfen A ve B geometrilerini tamamlayın.', 'Eksik Geometri');
       return;
     }
     const fa = this.geoJson.writeFeatureObject(a[0]);
     const fb = this.geoJson.writeFeatureObject(b[0]);
-    const intersect = turf.intersect(
-      turf.featureCollection([fb as any, fa as any]),
-    );
-
+    const intersect = turf.intersect(turf.featureCollection([fb as any, fa as any]));
     if (intersect) {
       this.sadeceGorselGoster(intersect, 'B ∩ A');
     } else {
       this.sonuc = null;
-      this.toastr.warning('B ve A alanları arasında kesişim bulunamadı.');
+      this.toastr.warning('Kesişim bulunamadı.', 'Kesişim');
     }
   }
 
@@ -265,8 +242,8 @@ export class AlanAnalizComponent implements AfterViewInit {
       alanMetrekare: turf.area(geo),
     };
     this.alanAnalizService.kaydet(dto).subscribe((r) => {
-      this.sonuc = r;
-      this.toastr.success(`${ad} katmanına kaydedildi.`);
+      this.sonuc = null;
+      this.toastr.success('Birleşim sonucu kaydedildi.', 'Birleşim');
       this.loadFromDb();
     });
   }
@@ -350,4 +327,52 @@ export class AlanAnalizComponent implements AfterViewInit {
     const geojson = this.geoJson.writeFeatureObject(feature);
     return { alanMetrekare: turf.area(geojson as any) };
   }
+  autoSelect(): void {
+  const geometriler = ['A', 'B', 'C'];
+  let eksik = false;
+
+  geometriler.forEach((g) => {
+    const source = this.getLayer(g).getSource()!;
+    source.clear();
+  });
+
+  geometriler.forEach((g) => {
+    this.alanAnalizService
+      .getir(g)
+      .pipe(catchError(() => of(null)))
+      .subscribe((res) => {
+        if (res?.data?.geometriJson) {
+          const source = this.getLayer(g).getSource()!;
+          source.addFeature(
+            this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
+          );
+        } else {
+          eksik = true;
+        }
+
+        if (g === 'C') {
+          if (eksik) {
+            this.ilkHaliGoster();
+            this.toastr.warning(
+              'Kayıtlı geometri bulunamadı. Lütfen Manuel Çizim kullanın.',
+              'Auto Select'
+            );
+          } else {
+            this.layerA.setVisible(true);
+            this.layerB.setVisible(true);
+            this.layerC.setVisible(true);
+            this.layerD.setVisible(false);
+            this.layerE.setVisible(false);
+            this.layerF.setVisible(false);
+
+            this.toastr.success(
+              'A, B ve C geometrileri otomatik olarak yüklendi.',
+              'Auto Select'
+            );
+          }
+        }
+      });
+  });
+}
+
 }
