@@ -2,7 +2,6 @@
   <div class="card shadow-sm mb-4 border-0 bg-white">
     <div class="card-body py-3">
       <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
-        
         <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
           <div class="d-flex align-items-center gap-2">
             <h5 class="mb-0 fw-bold d-flex align-items-center gap-2 text-nowrap">
@@ -13,9 +12,8 @@
               Seçili: <strong>{{ selectedTasinmazlar.length }}</strong>
             </span>
           </div>
-
-          <div class="position-relative w-100" style="max-width: 350px;">
-            <i class="bi bi-search position-absolute text-muted" 
+          <div class="position-relative w-100" style="max-width: 350px">
+            <i class="bi bi-search position-absolute text-muted"
                style="top: 50%; left: 12px; transform: translateY(-50%); font-size: 0.85rem"></i>
             <input
               type="text"
@@ -28,50 +26,32 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end gap-2 w-100">
-          
           <div class="btn-group shadow-sm" *ngIf="!isAdmin">
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-primary px-3"
-              (click)="goToUpdate()"
-              [disabled]="selectedTasinmazlar.length !== 1"
-              title="Güncelle"
-            >
+            <button type="button" class="btn btn-sm btn-outline-primary px-3" (click)="goToUpdate()" [disabled]="selectedTasinmazlar.length !== 1">
               <i class="bi bi-pencil-fill"></i>
             </button>
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-danger px-3"
-              (click)="deleteSelected()"
-              [disabled]="selectedTasinmazlar.length === 0"
-              title="Sil"
-            >
+            <button type="button" class="btn btn-sm btn-outline-danger px-3" (click)="deleteSelected()" [disabled]="selectedTasinmazlar.length === 0">
               <i class="bi bi-trash3-fill"></i>
             </button>
           </div>
 
           <div class="btn-group shadow-sm">
-            <button type="button" class="btn btn-sm btn-outline-success border-success-subtle px-3 d-flex align-items-center gap-1" (click)="exportExcel()">
+            <button type="button" class="btn btn-sm btn-outline-success px-3 d-flex align-items-center gap-1" (click)="exportExcel()">
               <i class="bi bi-file-earmark-excel"></i>
               <span class="fw-medium">Excel</span>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger border-danger-subtle px-3 d-flex align-items-center gap-1" (click)="exportPdf()">
+
+            <button type="button" class="btn btn-sm btn-outline-danger px-3 d-flex align-items-center gap-1" (click)="exportPdf()">
               <i class="bi bi-file-earmark-pdf"></i>
               <span class="fw-medium">PDF</span>
             </button>
           </div>
 
-          <button 
-            type="button" 
-            class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center gap-1" 
-            routerLink="/core/tasinmaz/add"
-            *ngIf="!isAdmin"
-          >
+          <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center gap-1" routerLink="/core/tasinmaz/add" *ngIf="!isAdmin">
             <i class="bi bi-plus-lg"></i>
             <span class="text-nowrap fw-medium">Yeni</span>
           </button>
         </div>
-
       </div>
     </div>
   </div>
@@ -80,14 +60,10 @@
     <table class="table table-bordered table-hover align-middle text-nowrap mb-0">
       <thead class="table-light">
         <tr>
-          <th class="text-nowrap" style="width: 50px;">
-            <input
-              class="form-check-input ms-1"
-              type="checkbox"
-              [checked]="isAllSelected()"
-              (change)="toggleSelectAll($event)"
-            />
+          <th style="width: 50px">
+            <input class="form-check-input ms-1" type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
           </th>
+          <th class="small text-uppercase fw-bold text-center">Görsel</th>
           <th *ngIf="isAdmin" class="small text-uppercase fw-bold">User Id</th>
           <th *ngIf="isAdmin" class="small text-uppercase fw-bold">Adı Soyadı</th>
           <th class="small text-uppercase fw-bold">İl</th>
@@ -104,13 +80,18 @@
       <tbody>
         <tr *ngFor="let item of filteredTasinmazlar">
           <td>
-            <input
-              class="form-check-input ms-1"
-              type="checkbox"
-              [checked]="isSelected(item)"
-              (change)="toggleItem(item)"
+            <input class="form-check-input ms-1" type="checkbox" [checked]="isSelected(item)" (change)="toggleItem(item)" />
+          </td>
+
+          <td class="text-center">
+            <img
+              [src]="apiUrl + '/api/Tasinmaz/' + item.id + '/image?t=' + item.cacheBuster"
+              (error)="onImageError($event)"
+              class="tasinmaz-img"
+              style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px"
             />
           </td>
+
           <td *ngIf="isAdmin" class="text-muted small">{{ item.userId }}</td>
           <td *ngIf="isAdmin" class="fw-medium">{{ item.adSoyad }}</td>
           <td>{{ item.ilAdi }}</td>
@@ -120,13 +101,11 @@
           <td class="d-none d-md-table-cell">{{ item.ada }}</td>
           <td class="d-none d-md-table-cell">{{ item.parsel }}</td>
           <td class="d-none d-lg-table-cell">
-            <span class="d-inline-block text-truncate" style="max-width: 150px;" [title]="item.adres">
+            <span class="d-inline-block text-truncate" style="max-width: 150px" [title]="item.adres">
               {{ item.adres }}
             </span>
           </td>
-          <td class="text-nowrap">
-            {{ item.olusturmaTarihi | date: "dd.MM.yyyy" }}
-          </td>
+          <td class="text-nowrap">{{ item.olusturmaTarihi | date: 'dd.MM.yyyy' }}</td>
         </tr>
       </tbody>
     </table>
@@ -137,7 +116,6 @@
       <i class="bi bi-geo-alt me-1 text-danger"></i>
       Taşınmaz Konumları
     </div>
-
     <div class="card-body p-0" style="height: 450px">
       <app-tasinmaz-list-map [tasinmazlar]="filteredTasinmazlar"></app-tasinmaz-list-map>
     </div>
