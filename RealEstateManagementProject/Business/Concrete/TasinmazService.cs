@@ -4,6 +4,8 @@ using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
+using System.ComponentModel;
+
 
 namespace RealEstateManagementProject.Business.Concrete
 {
