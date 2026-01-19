@@ -30,14 +30,11 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   @Output() geometryCreated = new EventEmitter<any>();
 
   map!: Map;
-
   baseLayer!: TileLayer<OSM>;
-
   vectorSource = new VectorSource();
   vectorLayer = new VectorLayer({
     source: this.vectorSource,
   });
-
   draw?: Draw;
 
   constructor(private mapHelper: MapHelperService) {}
@@ -54,24 +51,15 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  
   ngOnChanges(changes: SimpleChanges): void {
-  if (
-    changes['initialGeometry'] &&
-    changes['initialGeometry'].currentValue &&
-    this.map
-  ) {
-    this.drawExistingGeometry(changes['initialGeometry'].currentValue);
-  }
+    if (changes['initialGeometry'] && changes['initialGeometry'].currentValue && this.map) {
+      this.drawExistingGeometry(changes['initialGeometry'].currentValue);
+    }
 
-  if (changes['opacity'] && this.map) {
-    this.mapHelper.setAllLayersOpacity(
-      this.map,
-      changes['opacity'].currentValue
-    );
+    if (changes['opacity'] && this.map) {
+      this.mapHelper.setAllLayersOpacity(this.map, changes['opacity'].currentValue);
+    }
   }
-}
-
 
   initMap(): void {
     this.baseLayer = new TileLayer({
@@ -81,10 +69,7 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
 
     this.map = new Map({
       target: 'map',
-      layers: [
-        this.baseLayer,
-        this.vectorLayer,
-      ],
+      layers: [this.baseLayer, this.vectorLayer],
       view: new View({
         center: [3900000, 4750000],
         zoom: 6,
@@ -96,7 +81,6 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
 
   drawExistingGeometry(geoJsonString: string): void {
     const format = new GeoJSON();
-
     const feature = format.readFeature(JSON.parse(geoJsonString), {
       dataProjection: 'EPSG:4326',
       featureProjection: 'EPSG:3857',
@@ -109,6 +93,17 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
     this.map.getView().fit(extent, {
       padding: [40, 40, 40, 40],
       maxZoom: 17,
+      duration: 500,
+    });
+  }
+
+  focusToGeometry(): void {
+    if (!this.vectorSource.getFeatures().length) return;
+
+    const extent = this.vectorSource.getExtent();
+    this.map.getView().fit(extent, {
+      padding: [40, 40, 40, 40],
+      maxZoom: 18,
       duration: 500,
     });
   }
