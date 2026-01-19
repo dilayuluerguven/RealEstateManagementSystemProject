@@ -20,12 +20,12 @@ import { MapHelperService } from 'src/app/shared/services/map-helper.service';
   styleUrls: ['./alan-analizi.component.css'],
 })
 export class AlanAnalizComponent implements AfterViewInit {
-  seciliGeometri: 'A' | 'B' | 'C' = 'A';
   sonuc: any = null;
   map!: Map;
   draw!: Draw;
   opacity: number = 1;
   baseLayer!: TileLayer<OSM>;
+  seciliGeometri: string | null = null;
 
   sourceA = new VectorSource();
   sourceB = new VectorSource();
@@ -96,40 +96,64 @@ opacityDegisti(): void {
     return this.layerF;
   }
   startDraw(): void {
-    if (this.draw) this.map.removeInteraction(this.draw);
-    const activeSource = this.getLayer(this.seciliGeometri).getSource()!;
-    this.draw = new Draw({ source: activeSource, type: 'Polygon' });
-    this.draw.on('drawstart', () => {
-      activeSource.clear();
-      this.sonuc = null;
-    });
-    this.map.addInteraction(this.draw);
+  if (!this.seciliGeometri) {
+    this.toastr.warning("Lütfen önce bir çalışma katmanı seçiniz.", "Uyarı");
+    return;
   }
-  geometriDegisti(): void {
-    this.ilkHaliGoster();
-    this.startDraw();
-    this.toastr.info(`${this.seciliGeometri} katmanı aktif.`, 'Bilgi');
-  }
-  kaydetABC(): void {
-    const features = this.getLayer(this.seciliGeometri).getSource()?.getFeatures();
-    if (!features?.length) {
-      this.toastr.warning('Lütfen önce çizim yapın.', 'Uyarı');
-      return;
-    }
-    const geo = this.geoJson.writeFeatureObject(features[0]) as any;
-    const dto: AlanAnalizCreate = {
-      geometriAdi: this.seciliGeometri,
-      analizTuru: 'ORIJINAL',
-      islem: 'Kaydet',
-      geometriJson: JSON.stringify(geo),
-      alanMetrekare: turf.area(geo),
-    };
 
-    this.alanAnalizService.kaydet(dto).subscribe({
-      next: () => this.toastr.success(`${this.seciliGeometri} kaydedildi.`, 'Başarılı'),
-      error: () => this.toastr.error('Hata oluştu.', 'Hata'),
-    });
+  if (this.draw) this.map.removeInteraction(this.draw);
+
+  const activeSource = this.getLayer(this.seciliGeometri).getSource()!;
+  this.draw = new Draw({ source: activeSource, type: 'Polygon' });
+
+  this.draw.on('drawstart', () => {
+    activeSource.clear();
+    this.sonuc = null;
+  });
+
+  this.map.addInteraction(this.draw);
+}
+
+ geometriDegisti(): void {
+  if (!this.seciliGeometri) {
+    this.toastr.warning("Lütfen bir çalışma katmanı seçiniz.", "Uyarı");
+    return;
   }
+
+  this.ilkHaliGoster();
+  this.startDraw();
+  this.toastr.info(`${this.seciliGeometri} katmanı aktif.`, 'Bilgi');
+}
+
+ kaydetABC(): void {
+  if (!this.seciliGeometri) {
+    this.toastr.warning('Lütfen bir çalışma katmanı seçiniz.', 'Uyarı');
+    return;
+  }
+
+  const features = this.getLayer(this.seciliGeometri).getSource()?.getFeatures();
+  if (!features?.length) {
+    this.toastr.warning('Lütfen önce çizim yapın.', 'Uyarı');
+    return;
+  }
+
+  const geo = this.geoJson.writeFeatureObject(features[0]) as any;
+
+  const dto: AlanAnalizCreate = {
+    geometriAdi: this.seciliGeometri,
+    analizTuru: 'ORIJINAL',
+    islem: 'Kaydet',
+    geometriJson: JSON.stringify(geo),
+    alanMetrekare: turf.area(geo),
+  };
+
+  this.alanAnalizService.kaydet(dto).subscribe({
+    next: () =>
+      this.toastr.success(`${this.seciliGeometri} kaydedildi.`, 'Başarılı'),
+    error: () => this.toastr.error('Hata oluştu.', 'Hata'),
+  });
+}
+
   birlesimAB(): void {
     this.ilkHaliGoster();
     this.sourceF.clear();
