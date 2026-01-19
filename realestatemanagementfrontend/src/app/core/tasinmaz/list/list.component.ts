@@ -12,8 +12,10 @@ import { ExportService } from 'src/app/shared/services/export.service';
 })
 export class ListComponent implements OnInit {
   tasinmazlar: TasinmazList[] = [];
+  filteredTasinmazlar: TasinmazList[] = [];
   selectedTasinmazlar: TasinmazList[] = [];
   isAdmin = false;
+  filterText: string = '';
 
   constructor(
     private tasinmazService: TasinmazService,
@@ -30,9 +32,26 @@ export class ListComponent implements OnInit {
 
   getAll() {
     this.tasinmazService.getAll().subscribe({
-      next: (x) => (this.tasinmazlar = x),
+      next: (x) => {
+        this.tasinmazlar = x;
+        this.filteredTasinmazlar = x;
+      },
       error: () => this.toastr.error('Taşınmazlar yüklenemedi'),
     });
+  }
+
+  applyFilter() {
+    const t = this.filterText.toLowerCase();
+    this.filteredTasinmazlar = this.tasinmazlar.filter((x) =>
+      x.adSoyad.toLowerCase().includes(t) ||
+      x.ilAdi.toLowerCase().includes(t) ||
+      x.ilceAdi.toLowerCase().includes(t) ||
+      x.mahalleAdi.toLowerCase().includes(t) ||
+      x.ada.toString().includes(t) ||
+      x.parsel.toString().includes(t) ||
+      x.adres.toLowerCase().includes(t) ||
+      x.emlakTipi.toLowerCase().includes(t)
+    );
   }
 
   isSelected(data: TasinmazList): boolean {
@@ -51,6 +70,7 @@ export class ListComponent implements OnInit {
 
   deleteSelected() {
     const count = this.selectedTasinmazlar.length;
+
     const toast = this.toastr.warning(
       count === 1
         ? 'Seçili taşınmaz silinecek.<br><strong>Onaylamak için buraya tıklayın.</strong>'
@@ -68,6 +88,7 @@ export class ListComponent implements OnInit {
         (t) => !this.selectedTasinmazlar.some((s) => s.id === t.id)
       );
 
+      this.filteredTasinmazlar = this.tasinmazlar;
       this.selectedTasinmazlar = [];
       this.toastr.success('Silme işlemi tamamlandı');
     });
@@ -78,9 +99,10 @@ export class ListComponent implements OnInit {
     const id = this.selectedTasinmazlar[0].id;
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const url = user?.rol === 'Admin'
-      ? ['/core/admin/tasinmaz/update', id]
-      : ['/core/tasinmaz/update', id];
+    const url =
+      user?.rol === 'Admin'
+        ? ['/core/admin/tasinmaz/update', id]
+        : ['/core/tasinmaz/update', id];
 
     this.router.navigate(url);
   }
@@ -93,21 +115,21 @@ export class ListComponent implements OnInit {
 
   isAllSelected(): boolean {
     return (
-      this.tasinmazlar.length > 0 &&
-      this.selectedTasinmazlar.length === this.tasinmazlar.length
+      this.filteredTasinmazlar.length > 0 &&
+      this.selectedTasinmazlar.length === this.filteredTasinmazlar.length
     );
   }
 
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-    this.selectedTasinmazlar = checked ? [...this.tasinmazlar] : [];
+    this.selectedTasinmazlar = checked ? [...this.filteredTasinmazlar] : [];
   }
 
   exportExcel() {
     const data =
       this.selectedTasinmazlar.length > 0
         ? this.selectedTasinmazlar
-        : this.tasinmazlar;
+        : this.filteredTasinmazlar;
 
     const fileName =
       this.selectedTasinmazlar.length > 0
@@ -127,10 +149,12 @@ export class ListComponent implements OnInit {
     const data =
       this.selectedTasinmazlar.length > 0
         ? this.selectedTasinmazlar
-        : this.tasinmazlar;
+        : this.filteredTasinmazlar;
 
     const fileName =
-      data === this.tasinmazlar ? 'tasinmazlar.pdf' : 'secili_tasinmazlar.pdf';
+      data === this.filteredTasinmazlar
+        ? 'tasinmazlar.pdf'
+        : 'secili_tasinmazlar.pdf';
 
     const headers = [
       'Id',
@@ -163,7 +187,7 @@ export class ListComponent implements OnInit {
     this.exportService.exportPdf('Taşınmaz Listesi', headers, rows, fileName);
 
     this.toastr.success(
-      data === this.tasinmazlar
+      data === this.filteredTasinmazlar
         ? 'Tüm taşınmazlar PDF’e aktarıldı'
         : 'Seçili taşınmazlar PDF’e aktarıldı'
     );
