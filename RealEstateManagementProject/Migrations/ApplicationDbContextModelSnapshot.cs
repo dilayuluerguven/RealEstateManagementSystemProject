@@ -53,7 +53,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AlanAnalizleri", (string)null);
+                    b.ToTable("AlanAnalizleri");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Il", b =>
@@ -70,7 +70,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Iller", (string)null);
+                    b.ToTable("Iller");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Ilce", b =>
@@ -92,7 +92,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("IlId");
 
-                    b.ToTable("Ilceler", (string)null);
+                    b.ToTable("Ilceler");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Log", b =>
@@ -127,7 +127,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Loglar", (string)null);
+                    b.ToTable("Loglar");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Mahalle", b =>
@@ -149,7 +149,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("IlceId");
 
-                    b.ToTable("Mahalleler", (string)null);
+                    b.ToTable("Mahalleler");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Tasinmaz", b =>
@@ -177,6 +177,9 @@ namespace RealEstateManagementProject.Migrations
                     b.Property<int>("IlceId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text");
+
                     b.Property<string>("Koordinat")
                         .IsRequired()
                         .HasColumnType("text");
@@ -203,7 +206,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tasinmazlar", (string)null);
+                    b.ToTable("Tasinmazlar");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.User", b =>
@@ -232,7 +235,7 @@ namespace RealEstateManagementProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("RealEstateManagementProject.Entities.Concrete.Ilce", b =>
