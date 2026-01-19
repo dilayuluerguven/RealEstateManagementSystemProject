@@ -48,10 +48,12 @@
             [(ngModel)]="seciliGeometri"
             (change)="geometriDegisti()"
           >
+            <option [ngValue]="null" disabled selected>Seçiniz</option>
             <option value="A">A – Birincil</option>
             <option value="B">B – İkincil</option>
             <option value="C">C – Üçüncül</option>
           </select>
+
           <div class="text-muted" style="font-size: 0.55rem">
             İşlemler seçili katmanda yapılır
           </div>
