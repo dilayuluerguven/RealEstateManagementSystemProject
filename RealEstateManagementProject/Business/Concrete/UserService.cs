@@ -27,7 +27,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 Id = x.Id,
                 AdSoyad = x.AdSoyad,
                 Email = x.Email,
-                Rol = x.Rol
+                Rol = x.Rol,
             }).ToList();
         }
 
@@ -42,7 +42,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 Id = user.Id,
                 AdSoyad = user.AdSoyad,
                 Email = user.Email,
-                Rol = user.Rol
+                Rol = user.Rol            
             };
         }
 
@@ -80,8 +80,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = logUserId,  
-                    IslemTipi = "CREATE",
-                    Durum = "SUCCESS",
+                    IslemTipi = "Create",
+                    Durum = "Success",
                     Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
@@ -93,8 +93,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = actorUserId,
-                    IslemTipi = "CREATE",
-                    Durum = "ERROR",
+                    IslemTipi = "Create",
+                    Durum = "Error",
                     Aciklama = "Kullanıcı oluşturulamadı",
                     Tarih = DateTime.UtcNow
                 });
@@ -148,8 +148,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = logUserId,   
-                    IslemTipi = "UPDATE",
-                    Durum = "SUCCESS",
+                    IslemTipi = "Update",
+                    Durum = "Success",
                     Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
@@ -164,8 +164,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = logUserId,
-                    IslemTipi = "UPDATE",
-                    Durum = "ERROR",
+                    IslemTipi = "Update",
+                    Durum = "Error",
                     Aciklama = "Kullanıcı güncellenemedi",
                     Tarih = DateTime.UtcNow
                 });
@@ -220,8 +220,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = logUserId,  
-                    IslemTipi = "DELETE",
-                    Durum = "SUCCESS",
+                    IslemTipi = "Delete",
+                    Durum = "Success",
                     Aciklama = aciklama,
                     Tarih = DateTime.UtcNow
                 });
@@ -239,8 +239,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = logUserId,
-                    IslemTipi = "DELETE",
-                    Durum = "ERROR",
+                    IslemTipi = "Delete",
+                    Durum = "error",
                     Aciklama = "Kullanıcı silinemedi",
                     Tarih = DateTime.UtcNow
                 });
