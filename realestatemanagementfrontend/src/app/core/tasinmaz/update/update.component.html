@@ -1,109 +1,103 @@
 <div class="container mt-4 mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0 fw-semibold text-dark">Taşınmaz Bilgilerini Güncelle</h4>
-    <button
-      class="btn btn-outline-secondary btn-sm"
-      routerLink="/core/tasinmaz/list"
-      type="button"
-    >
-      <i class="bi bi-arrow-left me-1"></i>
-      Listeye Dön
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/core/tasinmaz/list" type="button">
+      <i class="bi bi-arrow-left me-1"></i> Listeye Dön
     </button>
   </div>
+
   <form [formGroup]="formGroup" (ngSubmit)="update()">
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-4">
         <h6 class="fw-semibold mb-4 text-primary">
-          <i class="bi bi-info-circle me-1"></i>
-          Temel Bilgiler
+          <i class="bi bi-info-circle me-1"></i> Temel Bilgiler
         </h6>
+
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label required">İl</label>
             <select class="form-select" formControlName="il">
               <option [ngValue]="null" disabled>İl seçiniz</option>
-              <option *ngFor="let item of iller" [value]="item.id">
-                {{ item.ilAdi }}
-              </option>
+              <option *ngFor="let item of iller" [value]="item.id">{{ item.ilAdi }}</option>
             </select>
           </div>
+
           <div class="col-md-4">
             <label class="form-label required">İlçe</label>
             <select class="form-select" formControlName="ilce">
               <option [ngValue]="null" disabled>İlçe seçiniz</option>
-              <option *ngFor="let item of ilceler" [value]="item.id">
-                {{ item.ilceAdi }}
-              </option>
+              <option *ngFor="let item of ilceler" [value]="item.id">{{ item.ilceAdi }}</option>
             </select>
           </div>
+
           <div class="col-md-4">
             <label class="form-label required">Mahalle</label>
             <select class="form-select" formControlName="mahalle">
               <option [ngValue]="null" disabled>Mahalle seçiniz</option>
-              <option *ngFor="let item of mahalleler" [value]="item.id">
-                {{ item.mahalleAdi }}
-              </option>
+              <option *ngFor="let item of mahalleler" [value]="item.id">{{ item.mahalleAdi }}</option>
             </select>
           </div>
+
           <div class="col-md-4">
             <label class="form-label required">Ada</label>
             <input type="number" class="form-control" formControlName="ada" />
           </div>
+
           <div class="col-md-4">
             <label class="form-label required">Parsel</label>
-            <input
-              type="number"
-              class="form-control"
-              formControlName="parsel"
-            />
+            <input type="number" class="form-control" formControlName="parsel" />
           </div>
+
           <div class="col-md-4">
             <label class="form-label required">Emlak Tipi</label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="emlakTipi"
-            />
+            <input type="text" class="form-control" formControlName="emlakTipi" />
           </div>
+
           <div class="col-12">
             <label class="form-label required">Adres</label>
-            <textarea
-              class="form-control"
-              rows="3"
-              formControlName="adres"
-            ></textarea>
+            <textarea class="form-control" rows="3" formControlName="adres"></textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Yeni Resim Yükle</label>
+            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" />
+            <small class="text-muted">JPG, PNG — max 100MB</small>
+          </div>
+
+          <div class="col-md-6" *ngIf="previewUrl">
+            <label class="form-label d-block">Yeni Resim Önizleme</label>
+            <img [src]="previewUrl" class="img-thumbnail" style="max-height: 180px" />
+          </div>
+
+          <div class="col-md-12 mt-3" *ngIf="currentImageUrl && !previewUrl">
+            <label class="form-label d-block">Mevcut Resim</label>
+            <img [src]="currentImageUrl" class="img-thumbnail" style="max-height: 180px" />
           </div>
         </div>
       </div>
     </div>
+
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">
         <h6 class="fw-semibold mb-3 text-primary required">
-          <i class="bi bi-geo-alt-fill me-1"></i>
-          Harita Konumu
+          <i class="bi bi-geo-alt-fill me-1"></i> Harita Konumu
         </h6>
+
+        <button class="btn btn-outline-primary btn-sm mb-2" (click)="focusToGeometry()" type="button">
+          <i class="bi bi-focus"></i> Arsaya Odaklan
+        </button>
+
         <div class="border rounded overflow-hidden mb-4" style="height: 420px">
           <app-tasinmaz-map
             [initialGeometry]="formGroup.get('koordinat')?.value || undefined"
-            (geometryCreated)="onGeometryCreated($event)"
-          >
+            (geometryCreated)="onGeometryCreated($event)">
           </app-tasinmaz-map>
         </div>
+
         <div class="d-flex justify-content-end gap-2 border-top pt-3">
-          <button
-            type="button"
-            class="btn btn-outline-secondary"
-            routerLink="/core/tasinmaz/list"
-          >
-            İptal
-          </button>
-          <button
-            type="submit"
-            class="btn btn-success px-5"
-            [disabled]="formGroup.invalid"
-          >
-            <i class="bi bi-save me-1"></i>
-            Güncelle
+          <button type="button" class="btn btn-outline-secondary" routerLink="/core/tasinmaz/list">İptal</button>
+          <button type="submit" class="btn btn-success px-5" [disabled]="formGroup.invalid">
+            <i class="bi bi-save me-1"></i> Güncelle
           </button>
         </div>
       </div>
