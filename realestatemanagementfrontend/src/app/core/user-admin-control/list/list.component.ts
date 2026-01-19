@@ -11,7 +11,9 @@ import { ExportService } from 'src/app/shared/services/export.service';
 })
 export class ListComponent implements OnInit {
   users: any[] = [];
+  filteredUsers: any[] = [];
   selectedUsers: any[] = [];
+  filterText: string = "";
 
   constructor(
     private userService: AdminControlService,
@@ -22,9 +24,28 @@ export class ListComponent implements OnInit {
 
   ngOnInit(): void {
     this.userService.getUsers().subscribe({
-      next: (x) => (this.users = x),
+      next: (x) => {
+        this.users = x;
+        this.filteredUsers = x; 
+      },
       error: () => this.toastr.error('Kullanıcılar yüklenemedi'),
     });
+  }
+
+  applyFilter() {
+    const t = this.filterText.toLowerCase().trim();
+
+    if (!t) {
+      this.filteredUsers = [...this.users];
+      return;
+    }
+
+    this.filteredUsers = this.users.filter((u) =>
+      u.adSoyad.toLowerCase().includes(t) ||
+      u.email.toLowerCase().includes(t) ||
+      u.rol.toLowerCase().includes(t) ||
+      u.id.toString().includes(t)
+    );
   }
 
   isSelected(user: any): boolean {
@@ -72,6 +93,7 @@ export class ListComponent implements OnInit {
       });
 
       this.users = this.users.filter((u) => !ids.includes(u.id));
+      this.filteredUsers = [...this.users];
       this.selectedUsers = [];
 
       this.toastr.success(
@@ -92,18 +114,18 @@ export class ListComponent implements OnInit {
 
   isAllSelected(): boolean {
     return (
-      this.users.length > 0 &&
-      this.selectedUsers.length === this.users.length
+      this.filteredUsers.length > 0 &&
+      this.selectedUsers.length === this.filteredUsers.length
     );
   }
 
   toggleSelectAll(event: any) {
-    this.selectedUsers = event.target.checked ? [...this.users] : [];
+    this.selectedUsers = event.target.checked ? [...this.filteredUsers] : [];
   }
 
   exportExcel() {
     const rawData =
-      this.selectedUsers.length > 0 ? this.selectedUsers : this.users;
+      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
 
     const data = rawData.map(({ token, ...rest }) => rest);
 
@@ -123,7 +145,7 @@ export class ListComponent implements OnInit {
 
   exportPdf() {
     const rawData =
-      this.selectedUsers.length > 0 ? this.selectedUsers : this.users;
+      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
 
     const data = rawData.map(({ token, ...rest }) => rest);
 
