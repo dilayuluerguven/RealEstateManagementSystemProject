@@ -4,7 +4,7 @@ import { ListComponent } from './list/list.component';
 import { AddComponent } from './add/add.component';
 import { UpdateComponent } from './update/update.component';
 import { UserAdminControlRoutingModule } from './admin-control-routing.module';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -17,7 +17,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   exports:[ListComponent],  
   imports: [
     CommonModule,
-    UserAdminControlRoutingModule,ReactiveFormsModule
+    UserAdminControlRoutingModule,ReactiveFormsModule,FormsModule
   ]
 })
 export class UserAdminControlModule { }
