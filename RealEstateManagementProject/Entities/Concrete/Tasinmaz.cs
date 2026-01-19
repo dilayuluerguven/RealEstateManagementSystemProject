@@ -17,7 +17,7 @@
         public string EmlakTipi { get; set; } = string.Empty;
         public string Koordinat { get; set; } = string.Empty;
         public DateTime OlusturmaTarihi { get; set; }
-        public string? ImagePath { get; set; }
-
+        public byte[]? ImageData { get; set; }
+        public string? ImageContentType { get; set; }
     }
 }
