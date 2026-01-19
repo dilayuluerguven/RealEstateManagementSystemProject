@@ -12,112 +12,107 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AddComponent implements OnInit {
   formGroup = new FormGroup({
-  il: new FormControl<number | null>(null, Validators.required),
-  ilce: new FormControl<number | null>(null, Validators.required),
-  mahalle: new FormControl<number | null>(null, Validators.required),
-  ada: new FormControl<number | null>(null, Validators.required),
-  parsel: new FormControl<number | null>(null, Validators.required),
-  adres: new FormControl('', Validators.required),
-  emlakTipi: new FormControl('', Validators.required),
-  koordinat: new FormControl<string | null>(null, Validators.required),
-});
-
+    il: new FormControl<number | null>(null, Validators.required),
+    ilce: new FormControl<number | null>(null, Validators.required),
+    mahalle: new FormControl<number | null>(null, Validators.required),
+    ada: new FormControl<number | null>(null, Validators.required),
+    parsel: new FormControl<number | null>(null, Validators.required),
+    adres: new FormControl('', Validators.required),
+    emlakTipi: new FormControl('', Validators.required),
+    koordinat: new FormControl<string | null>(null, Validators.required),
+    image: new FormControl<File | null>(null),
+  });
 
   iller: any[] = [];
   ilceler: any[] = [];
   mahalleler: any[] = [];
+
+  selectedFile: File | null = null;
+  previewUrl: string | ArrayBuffer | null = null;
+
   constructor(
     private tasinmazService: TasinmazService,
     private locService: LocationService,
     private router: Router,
-    private toastr:ToastrService
+    private toastr: ToastrService
   ) {}
- ngOnInit(): void {
-  this.locService.getIller().subscribe(res => {
-    this.iller = res;
-  });
 
-  this.formGroup.get('il')?.valueChanges.subscribe(ilId => {
-
-    this.ilceler = [];
-    this.mahalleler = [];
-
-    this.formGroup.patchValue(
-      {
-        ilce: null,
-        mahalle: null
-      },
-      { emitEvent: false }
-    );
-
-    if (!ilId) return;
-
-    this.locService.getIlceler(ilId).subscribe(res => {
-      this.ilceler = res;
+  ngOnInit(): void {
+    this.locService.getIller().subscribe(res => {
+      this.iller = res;
     });
-  });
 
-  this.formGroup.get('ilce')?.valueChanges.subscribe(ilceId => {
-
-    this.mahalleler = [];
-
-    this.formGroup.patchValue(
-      { mahalle: null },
-      { emitEvent: false }
-    );
-
-    if (!ilceId) return;
-
-    this.locService.getMahalleler(ilceId).subscribe(res => {
-      this.mahalleler = res;
+    this.formGroup.get('il')?.valueChanges.subscribe(ilId => {
+      this.ilceler = [];
+      this.mahalleler = [];
+      this.formGroup.patchValue({ ilce: null, mahalle: null }, { emitEvent: false });
+      if (!ilId) return;
+      this.locService.getIlceler(ilId).subscribe(res => {
+        this.ilceler = res;
+      });
     });
-  });
-}
+
+    this.formGroup.get('ilce')?.valueChanges.subscribe(ilceId => {
+      this.mahalleler = [];
+      this.formGroup.patchValue({ mahalle: null }, { emitEvent: false });
+      if (!ilceId) return;
+      this.locService.getMahalleler(ilceId).subscribe(res => {
+        this.mahalleler = res;
+      });
+    });
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => (this.previewUrl = e.target?.result || null);
+    reader.readAsDataURL(file);
+    this.formGroup.patchValue({ image: file });
+  }
 
   submit() {
-  if (!this.formGroup.value.koordinat) {
-    this.toastr.warning('Lütfen harita üzerinden taşınmaz çizin');
-    return;
-  }
-
-  if (this.formGroup.invalid) {
-    this.formGroup.markAllAsTouched();
-    return;
-  }
-
-  const dto = {
-    ilId: this.formGroup.value.il!,
-    ilceId: this.formGroup.value.ilce!,
-    mahalleId: this.formGroup.value.mahalle!,
-    ada: Number(this.formGroup.value.ada),
-    parsel: Number(this.formGroup.value.parsel),
-    adres: this.formGroup.value.adres!,
-    emlakTipi: this.formGroup.value.emlakTipi!,
-    koordinat: this.formGroup.value.koordinat!,
-  };
-
-  this.tasinmazService.add(dto).subscribe({
-    next: () => {
-      this.toastr.success('Taşınmaz başarıyla eklendi');
-      this.router.navigate(['/core/tasinmaz/list']);
-    },
-    error: () => {
-      this.toastr.error('Taşınmaz eklenemedi');
+    if (!this.formGroup.value.koordinat) {
+      this.toastr.warning('Lütfen harita üzerinden taşınmaz çizin');
+      return;
     }
-  });
+
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('ilId', String(this.formGroup.value.il));
+    formData.append('ilceId', String(this.formGroup.value.ilce));
+    formData.append('mahalleId', String(this.formGroup.value.mahalle));
+    formData.append('ada', String(this.formGroup.value.ada));
+    formData.append('parsel', String(this.formGroup.value.parsel));
+    formData.append('adres', this.formGroup.value.adres!);
+    formData.append('emlakTipi', this.formGroup.value.emlakTipi!);
+    formData.append('koordinat', this.formGroup.value.koordinat!);
+
+    if (this.selectedFile) {
+      formData.append('Image', this.selectedFile);
+    }
+
+    this.tasinmazService.add(formData).subscribe({
+      next: () => {
+        this.toastr.success('Taşınmaz başarıyla eklendi');
+        this.router.navigate(['/core/tasinmaz/list']);
+      },
+      error: () => {
+        this.toastr.error('Taşınmaz eklenemedi');
+      },
+    });
+  }
+
+  onGeometryCreated(geometry: any) {
+    this.formGroup.patchValue({
+      koordinat: JSON.stringify(geometry),
+    });
+    this.formGroup.get('koordinat')?.markAsTouched();
+    this.formGroup.get('koordinat')?.updateValueAndValidity();
+  }
 }
-
-onGeometryCreated(geometry: any) {
-  console.log('Geometry:', geometry); 
-
-  this.formGroup.patchValue({
-    koordinat: JSON.stringify(geometry)
-  });
-
-  this.formGroup.get('koordinat')?.markAsTouched();
-  this.formGroup.get('koordinat')?.updateValueAndValidity();
-}
-
-
-}
-
