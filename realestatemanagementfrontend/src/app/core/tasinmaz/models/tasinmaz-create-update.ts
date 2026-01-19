@@ -7,4 +7,5 @@ export interface TasinmazCreateUpdate {
   adres: string;
   emlakTipi: string;
   koordinat: string;
+  imagePath?: string | null;
 }
