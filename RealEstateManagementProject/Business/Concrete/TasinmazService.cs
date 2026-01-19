@@ -4,8 +4,6 @@ using RealEstateManagementProject.DataAccess;
 using RealEstateManagementProject.Dtos;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
-using System.ComponentModel;
-
 
 namespace RealEstateManagementProject.Business.Concrete
 {
@@ -47,15 +45,12 @@ namespace RealEstateManagementProject.Business.Concrete
                 Id = x.Id,
                 UserId = x.UserId,
                 AdSoyad = x.User.AdSoyad,
-
                 IlId = x.IlId,
                 IlceId = x.IlceId,
                 MahalleId = x.MahalleId,
-
                 IlAdi = x.Il.IlAdi,
                 IlceAdi = x.Ilce.IlceAdi,
                 MahalleAdi = x.Mahalle.MahalleAdi,
-
                 Ada = x.Ada,
                 Parsel = x.Parsel,
                 Adres = x.Adres,
@@ -95,6 +90,17 @@ namespace RealEstateManagementProject.Business.Concrete
 
             try
             {
+                byte[]? imageBytes = null;
+                string? contentType = null;
+
+                if (dto.Image != null && dto.Image.Length > 0)
+                {
+                    using var ms = new MemoryStream();
+                    await dto.Image.CopyToAsync(ms);
+                    imageBytes = ms.ToArray();
+                    contentType = dto.Image.ContentType;
+                }
+
                 var tasinmaz = new Tasinmaz
                 {
                     IlId = dto.IlId,
@@ -106,7 +112,9 @@ namespace RealEstateManagementProject.Business.Concrete
                     Adres = dto.Adres,
                     EmlakTipi = dto.EmlakTipi,
                     Koordinat = dto.Koordinat,
-                    OlusturmaTarihi = DateTime.UtcNow
+                    OlusturmaTarihi = DateTime.UtcNow,
+                    ImageData = imageBytes,
+                    ImageContentType = contentType
                 };
 
                 await _context.Tasinmazlar.AddAsync(tasinmaz);
@@ -143,10 +151,8 @@ namespace RealEstateManagementProject.Business.Concrete
             try
             {
                 var tasinmaz = isAdmin
-                    ? await _context.Tasinmazlar.Include(x => x.User)
-                        .FirstOrDefaultAsync(x => x.Id == id)
-                    : await _context.Tasinmazlar.Include(x => x.User)
-                        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
+                    ? await _context.Tasinmazlar.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id)
+                    : await _context.Tasinmazlar.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id && x.UserId == dto.UserId);
 
                 if (tasinmaz == null)
                     return false;
@@ -161,6 +167,14 @@ namespace RealEstateManagementProject.Business.Concrete
                 tasinmaz.Adres = dto.Adres;
                 tasinmaz.EmlakTipi = dto.EmlakTipi;
                 tasinmaz.Koordinat = dto.Koordinat;
+
+                if (dto.Image != null && dto.Image.Length > 0)
+                {
+                    using var ms = new MemoryStream();
+                    await dto.Image.CopyToAsync(ms);
+                    tasinmaz.ImageData = ms.ToArray();
+                    tasinmaz.ImageContentType = dto.Image.ContentType;
+                }
 
                 await _context.SaveChangesAsync();
 
@@ -195,10 +209,8 @@ namespace RealEstateManagementProject.Business.Concrete
             try
             {
                 var tasinmaz = isAdmin
-                    ? await _context.Tasinmazlar.Include(x => x.User)
-                        .FirstOrDefaultAsync(x => x.Id == id)
-                    : await _context.Tasinmazlar.Include(x => x.User)
-                        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                    ? await _context.Tasinmazlar.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id)
+                    : await _context.Tasinmazlar.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
                 if (tasinmaz == null)
                     return false;
@@ -231,5 +243,19 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
+        public async Task<(byte[] Data, string ContentType)?> GetImageAsync(int id)
+        {
+            var t = await _context.Tasinmazlar
+                .AsNoTracking()
+                .Where(x => x.Id == id)
+                .Select(x => new { x.ImageData, x.ImageContentType })
+                .FirstOrDefaultAsync();
+
+            if (t == null || t.ImageData == null)
+                return null;
+
+            return (t.ImageData, t.ImageContentType ?? "image/jpeg");
+        }
+
     }
 }

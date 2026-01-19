@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
-using RealEstateManagementProject.Entities.Concrete;
 using System.Security.Claims;
 
 [Authorize]
@@ -22,7 +22,6 @@ public class TasinmazController : ControllerBase
         userId = 0;
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (claim == null) return false;
-
         return int.TryParse(claim.Value, out userId);
     }
 
@@ -49,57 +48,42 @@ public class TasinmazController : ControllerBase
             return Unauthorized();
 
         bool isAdmin = User.IsInRole("Admin");
-
         var result = await _tasinmazService.GetByIdAsync(id, userId, isAdmin);
 
         if (result == null)
-            return NotFound("Taşınmaz bulunamadı.");
+            return NotFound();
 
         return Ok(result);
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> Add([FromBody] TasinmazCreateUpdateDto dto)
+    public async Task<IActionResult> Add([FromForm] TasinmazCreateUpdateDto dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
         dto.UserId = userId;
 
         var result = await _tasinmazService.AddAsync(dto);
-
-        if (!result)
-            return BadRequest();
+        if (!result) return BadRequest();
 
         return Ok();
     }
 
-
     [HttpPut("update/{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] TasinmazCreateUpdateDto dto)
+    public async Task<IActionResult> Update(int id, [FromForm] TasinmazCreateUpdateDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         if (!TryGetUserId(out int userId))
             return Unauthorized();
 
         dto.UserId = userId;
         bool isAdmin = User.IsInRole("Admin");
 
-        var result = await _tasinmazService.UpdateAsync(id, dto,isAdmin);
-
-        if (!result)
-            return NotFound();
+        var result = await _tasinmazService.UpdateAsync(id, dto, isAdmin);
+        if (!result) return NotFound();
 
         return Ok();
     }
-
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -108,12 +92,23 @@ public class TasinmazController : ControllerBase
             return Unauthorized();
 
         bool isAdmin = User.IsInRole("Admin");
-
         var result = await _tasinmazService.DeleteAsync(id, userId, isAdmin);
 
-        if (!result)
-            return NotFound();
+        if (!result) return NotFound();
 
         return Ok();
     }
+    [AllowAnonymous]
+    [HttpGet("{id}/image")]
+    public async Task<IActionResult> GetImage(int id)
+    {
+        var result = await _tasinmazService.GetImageAsync(id);
+        if (result == null)
+            return NotFound();
+
+        return File(result.Value.Data, result.Value.ContentType);
+    }
+
+
+
 }

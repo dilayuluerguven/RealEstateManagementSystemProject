@@ -9,5 +9,7 @@ namespace RealEstateManagementProject.Business.Abstract
         Task<bool> AddAsync(TasinmazCreateUpdateDto dto);
         Task<bool> UpdateAsync(int id, TasinmazCreateUpdateDto dto,bool isAdmin);
         Task<bool> DeleteAsync(int id, int userId,bool isAdmin);
+        Task<(byte[] Data, string ContentType)?> GetImageAsync(int id);
+
     }
 }
