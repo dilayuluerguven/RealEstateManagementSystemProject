@@ -36,5 +36,6 @@ namespace RealEstateManagementProject.Dtos
 
         [Required(ErrorMessage = "Koordinat bilgisi zorunludur.")]
         public string Koordinat { get; set; } = string.Empty;
+        public IFormFile? Image { get; set; }
     }
 }
