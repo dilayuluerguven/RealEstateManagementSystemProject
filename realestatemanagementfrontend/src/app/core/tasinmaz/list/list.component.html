@@ -1,22 +1,33 @@
 <div class="container mt-4">
   <div class="mb-3">
     <div class="card shadow-sm w-100">
-      <div
-        class="card-body py-2 px-3 d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-center justify-content-between"
-      >
+      <div class="card-body py-2 px-3 d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-center justify-content-between">
         <h5 class="mb-0 fw-semibold">
           <i class="bi bi-list-check me-1 text-primary"></i>
           Taşınmaz Listesi
         </h5>
 
-        <button
-          class="btn btn-success btn-sm px-3"
-          routerLink="/core/tasinmaz/add"
-          *ngIf="!isAdmin"
-        >
-          <i class="bi bi-plus-circle me-1"></i>
-          Yeni Taşınmaz
-        </button>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-success" (click)="exportExcel()">
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Excel
+          </button>
+
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="exportPdf()">
+            <i class="bi bi-file-earmark-pdf me-1"></i>
+            PDF
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-success btn-sm px-3"
+            routerLink="/core/tasinmaz/add"
+            *ngIf="!isAdmin"
+          >
+            <i class="bi bi-plus-circle me-1"></i>
+            Yeni Taşınmaz
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -25,58 +36,49 @@
     <table class="table table-bordered table-hover align-middle text-nowrap">
       <thead class="table-light">
         <tr>
-          <th *ngIf="!isAdmin" class="text-nowrap">
+          <th>
             <input
-              class="form-check-input me-1 align-middle"
+              class="form-check-input me-1"
               type="checkbox"
               [checked]="isAllSelected()"
               (change)="toggleSelectAll($event)"
             />
             Hepsini Seç
           </th>
-
-          <th *ngIf="isAdmin"></th>
           <th *ngIf="isAdmin">User Id</th>
           <th *ngIf="isAdmin">Adı Soyadı</th>
           <th>İl</th>
           <th>İlçe</th>
           <th>Mahalle</th>
           <th>Nitelik</th>
-
           <th class="d-none d-md-table-cell">Ada</th>
           <th class="d-none d-md-table-cell">Parsel</th>
           <th class="d-none d-lg-table-cell">Adres</th>
-
           <th>Eklenme Tarihi</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let item of tasinmazlar">
-          <td *ngIf="!isAdmin">
+          <td>
             <input
-              class="form-check-input align-middle"
+              class="form-check-input"
               type="checkbox"
               [checked]="isSelected(item)"
               (change)="toggleItem(item)"
             />
           </td>
-
-          <td *ngIf="isAdmin"></td>
           <td *ngIf="isAdmin">{{ item.userId }}</td>
-
           <td *ngIf="isAdmin">{{ item.adSoyad }}</td>
           <td>{{ item.ilAdi }}</td>
           <td>{{ item.ilceAdi }}</td>
           <td>{{ item.mahalleAdi }}</td>
           <td>{{ item.emlakTipi }}</td>
-
           <td class="d-none d-md-table-cell">{{ item.ada }}</td>
           <td class="d-none d-md-table-cell">{{ item.parsel }}</td>
           <td class="d-none d-lg-table-cell">{{ item.adres }}</td>
-
           <td class="text-nowrap">
-            {{ item.olusturmaTarihi | date : "dd.MM.yyyy" }}
+            {{ item.olusturmaTarihi | date: 'dd.MM.yyyy' }}
           </td>
         </tr>
       </tbody>
@@ -84,7 +86,7 @@
   </div>
 
   <div
-    class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mt-3 gap-2"
+    class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 gap-2"
     *ngIf="!isAdmin"
   >
     <span class="text-muted small">
@@ -92,11 +94,9 @@
       <strong>{{ selectedTasinmazlar.length }}</strong>
     </span>
 
-    <div
-      class="d-flex justify-content-end align-items-center gap-2"
-      
-    >
+    <div class="d-flex gap-2">
       <button
+        type="button"
         class="btn btn-outline-danger btn-sm px-3"
         (click)="deleteSelected()"
         [disabled]="selectedTasinmazlar.length === 0"
@@ -106,6 +106,7 @@
       </button>
 
       <button
+        type="button"
         class="btn btn-outline-primary btn-sm px-3"
         (click)="goToUpdate()"
         [disabled]="selectedTasinmazlar.length !== 1"
@@ -121,10 +122,9 @@
       <i class="bi bi-geo-alt me-1 text-danger"></i>
       Taşınmaz Konumları
     </div>
+
     <div class="card-body p-0" style="height: 450px">
-      <app-tasinmaz-list-map
-        [tasinmazlar]="tasinmazlar"
-      ></app-tasinmaz-list-map>
+      <app-tasinmaz-list-map [tasinmazlar]="tasinmazlar"></app-tasinmaz-list-map>
     </div>
   </div>
 </div>
