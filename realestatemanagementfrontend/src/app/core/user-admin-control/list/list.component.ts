@@ -13,7 +13,12 @@ export class ListComponent implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   selectedUsers: any[] = [];
-  filterText: string = "";
+  
+  filterCriteria = {
+    adSoyad: '',
+    email: '',
+    rol: ''
+  };
 
   constructor(
     private userService: AdminControlService,
@@ -23,29 +28,37 @@ export class ListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  loadUsers() {
     this.userService.getUsers().subscribe({
       next: (x) => {
         this.users = x;
-        this.filteredUsers = x; 
+        this.applyFilter();
       },
       error: () => this.toastr.error('Kullanıcılar yüklenemedi'),
     });
   }
 
   applyFilter() {
-    const t = this.filterText.toLowerCase().trim();
+    this.filteredUsers = this.users.filter((u) => {
+      const nameMatch = !this.filterCriteria.adSoyad || 
+                        u.adSoyad.toLowerCase().includes(this.filterCriteria.adSoyad.toLowerCase());
+      
+      const emailMatch = !this.filterCriteria.email || 
+                         u.email.toLowerCase().includes(this.filterCriteria.email.toLowerCase());
+      
+      const rolMatch = !this.filterCriteria.rol || u.rol === this.filterCriteria.rol;
 
-    if (!t) {
-      this.filteredUsers = [...this.users];
-      return;
-    }
+      return nameMatch && emailMatch && rolMatch;
+    });
+    this.selectedUsers = [];
+  }
 
-    this.filteredUsers = this.users.filter((u) =>
-      u.adSoyad.toLowerCase().includes(t) ||
-      u.email.toLowerCase().includes(t) ||
-      u.rol.toLowerCase().includes(t) ||
-      u.id.toString().includes(t)
-    );
+  resetFilters() {
+    this.filterCriteria = { adSoyad: '', email: '', rol: '' };
+    this.applyFilter();
   }
 
   isSelected(user: any): boolean {
@@ -60,58 +73,6 @@ export class ListComponent implements OnInit {
     }
   }
 
-  deleteSelected() {
-    const count = this.selectedUsers.length;
-
-    const toast = this.toastr.warning(
-      count === 1
-        ? 'Seçili kullanıcı silinecek.<br><strong>Onaylamak için buraya tıklayın.</strong>'
-        : `${count} kullanıcı silinecek.<br><strong>Onaylamak için buraya tıklayın.</strong>`,
-      'Onay Gerekli',
-      {
-        enableHtml: true,
-        closeButton: true,
-        timeOut: 0,
-        extendedTimeOut: 0,
-        tapToDismiss: false,
-      }
-    );
-
-    toast.onTap.subscribe(() => {
-      const ids = this.selectedUsers.map((u) => u.id);
-
-      ids.forEach((id) => {
-        this.userService.deleteUser(id).subscribe({
-          next: (res: any) => {
-            if (res.selfDeleted) {
-              localStorage.clear();
-              this.router.navigate(['/login']);
-              this.toastr.info('Hesabınız silindi, çıkış yapıldı');
-            }
-          },
-        });
-      });
-
-      this.users = this.users.filter((u) => !ids.includes(u.id));
-      this.filteredUsers = [...this.users];
-      this.selectedUsers = [];
-
-      this.toastr.success(
-        count === 1 ? 'Kullanıcı silindi' : 'Kullanıcılar silindi'
-      );
-    });
-  }
-
-  goToUpdate() {
-    this.router.navigate(['/core/admin/update', this.selectedUsers[0].id]);
-  }
-
-  get deleteButtonText(): string {
-    return this.selectedUsers.length > 1
-      ? `Sil (${this.selectedUsers.length})`
-      : 'Sil';
-  }
-
   isAllSelected(): boolean {
     return (
       this.filteredUsers.length > 0 &&
@@ -123,59 +84,63 @@ export class ListComponent implements OnInit {
     this.selectedUsers = event.target.checked ? [...this.filteredUsers] : [];
   }
 
-  exportExcel() {
-    const rawData =
-      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
+  deleteSelected() {
+    if (this.selectedUsers.length === 0) {
+      this.toastr.info("Lütfen silmek istediğiniz kullanıcıları seçin.");
+      return;
+    }
 
-    const data = rawData.map(({ token, ...rest }) => rest);
-
-    const fileName =
-      this.selectedUsers.length > 0
-        ? 'secili_kullanicilar.xlsx'
-        : 'kullanicilar.xlsx';
-
-    this.exportService.exportExcel(data, fileName, 'Kullanicilar');
-
-    this.toastr.success(
-      this.selectedUsers.length > 0
-        ? 'Seçili kullanıcılar Excel’e aktarıldı'
-        : 'Tüm kullanıcılar Excel’e aktarıldı'
+    const count = this.selectedUsers.length;
+    const toast = this.toastr.warning(
+      `Seçili ${count} kullanıcı silinecek. Onaylamak için buraya tıklayın.`,
+      'Onay Gerekli',
+      { enableHtml: true, timeOut: 0, tapToDismiss: false }
     );
+
+    toast.onTap.subscribe(() => {
+      const ids = this.selectedUsers.map((u) => u.id);
+      ids.forEach((id) => {
+        this.userService.deleteUser(id).subscribe({
+          next: (res: any) => {
+            if (res.selfDeleted) {
+              localStorage.clear();
+              this.router.navigate(['/login']);
+            }
+          },
+        });
+      });
+
+      this.users = this.users.filter(u => !ids.includes(u.id));
+      this.applyFilter();
+      this.selectedUsers = [];
+      this.toastr.success('Silme işlemi tamamlandı');
+    });
+  }
+
+  goToUpdate() {
+    if (this.selectedUsers.length === 0) {
+      this.toastr.info("Lütfen güncellemek istediğiniz kullanıcıyı seçin.");
+      return;
+    }
+    
+    if (this.selectedUsers.length > 1) {
+      this.toastr.warning("Aynı anda sadece bir kullanıcıyı güncelleyebilirsiniz.");
+      return;
+    }
+
+    this.router.navigate(['/core/admin/update', this.selectedUsers[0].id]);
+  }
+
+  exportExcel() {
+    const rawData = this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
+    const data = rawData.map(({ token, ...rest }) => rest);
+    this.exportService.exportExcel(data, 'kullanicilar.xlsx', 'Kullanicilar');
   }
 
   exportPdf() {
-    const rawData =
-      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
-
-    const data = rawData.map(({ token, ...rest }) => rest);
-
+    const rawData = this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
     const headers = ['Id', 'Ad Soyad', 'Email', 'Rol'];
-
-    const rows = data.map((u) => [
-      u.id,
-      u.adSoyad,
-      u.email,
-      u.rol,
-    ]);
-
-    const fileName =
-      this.selectedUsers.length > 0
-        ? 'secili_kullanicilar.pdf'
-        : 'kullanicilar.pdf';
-
-    this.exportService.exportPdf(
-      this.selectedUsers.length > 0
-        ? 'Seçili Kullanıcılar'
-        : 'Kullanıcı Listesi',
-      headers,
-      rows,
-      fileName
-    );
-
-    this.toastr.success(
-      this.selectedUsers.length > 0
-        ? 'Seçili kullanıcılar PDF’e aktarıldı'
-        : 'Tüm kullanıcılar PDF’e aktarıldı'
-    );
+    const rows = rawData.map((u) => [u.id, u.adSoyad, u.email, u.rol]);
+    this.exportService.exportPdf('Kullanıcı Listesi Raporu', headers, rows, 'kullanicilar.pdf');
   }
 }
