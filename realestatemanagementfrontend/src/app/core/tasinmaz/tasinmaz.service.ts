@@ -36,4 +36,7 @@ export class TasinmazService {
   getImage(id: number): string {
     return `${this.apiUrl}/${id}/image`;
   }
+  deleteImage(id: number) {
+  return this.httpClient.delete(`${environment.baseUrl}/api/Tasinmaz/${id}/image`);
+  }
 }

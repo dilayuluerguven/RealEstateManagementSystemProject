@@ -18,7 +18,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
   ],
   imports: [
     CommonModule,
-    TasinmazRoutingModule,ReactiveFormsModule,SharedModule,FormsModule
+    TasinmazRoutingModule,ReactiveFormsModule,SharedModule,FormsModule,SharedModule
   ]
 })
 export class TasinmazModule { }
