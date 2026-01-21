@@ -1,123 +1,152 @@
 <div class="container-fluid mt-4 px-md-4">
+  <div class="d-flex align-items-center mb-3 px-1">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="bi bi-funnel-fill me-2"></i>Filtreleme Seçenekleri
+      </h5>
+      <div class="flex-grow-1 ms-3 border-bottom border-primary" style="opacity: 0.2;"></div>
+    </div>
+  </div>
+
   <div class="card shadow-sm mb-4 border-0 bg-white">
-    <div class="card-body py-3">
-      <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
-        <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
-          <div class="d-flex align-items-center gap-2">
-            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2 text-nowrap">
-              <i class="bi bi-list-check text-primary"></i>
-              Taşınmaz Listesi
-            </h5>
-            <span *ngIf="selectedTasinmazlar.length > 0" class="badge bg-light text-primary border border-primary-subtle px-2 py-2 rounded-pill small shadow-sm">
-              Seçili: <strong>{{ selectedTasinmazlar.length }}</strong>
-            </span>
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-md-3" *ngIf="isAdmin">
+          <label class="form-label small fw-bold text-muted mb-1">Kullanıcı</label>
+          <select class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.user" (change)="applyFilter()">
+            <option value="">Kullanıcı Seçiniz</option>
+            <option *ngFor="let val of getUniqueValues('adSoyad')" [value]="val">{{val}}</option>
+          </select>
+        </div>
+
+        <div class="col-md-9">
+          <label class="form-label small fw-bold text-muted mb-1">Konum Bilgileri</label>
+          <div class="input-group input-group-sm">
+            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.il" (change)="filterCriteria.ilce=''; filterCriteria.mahalle=''; applyFilter()">
+              <option value="">İl Seçiniz</option>
+              <option *ngFor="let val of getUniqueValues('ilAdi')" [value]="val">{{val}}</option>
+            </select>
+            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ilce" (change)="filterCriteria.mahalle=''; applyFilter()">
+              <option value="">İlçe Seçiniz</option>
+              <option *ngFor="let val of getUniqueValues('ilceAdi', 'ilAdi', filterCriteria.il)" [value]="val">{{val}}</option>
+            </select>
+            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.mahalle" (change)="applyFilter()">
+              <option value="">Mahalle Seçiniz</option>
+              <option *ngFor="let val of getUniqueValues('mahalleAdi', 'ilceAdi', filterCriteria.ilce)" [value]="val">{{val}}</option>
+            </select>
           </div>
-          <div class="position-relative w-100" style="max-width: 350px">
-            <i class="bi bi-search position-absolute text-muted"
-               style="top: 50%; left: 12px; transform: translateY(-50%); font-size: 0.85rem"></i>
-            <input
-              type="text"
-              class="form-control form-control-sm ps-5 py-2 border-secondary-subtle shadow-none"
-              placeholder="İl, İlçe, Mahalle ara..."
-              [(ngModel)]="filterText"
-              (input)="applyFilter()"
-            />
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-muted mb-1">Emlak Niteliği</label>
+          <select class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.nitelik" (change)="applyFilter()">
+            <option value="">Nitelik Seçiniz</option>
+            <option *ngFor="let val of getUniqueValues('emlakTipi')" [value]="val">{{val}}</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-muted mb-1">Ada / Parsel</label>
+          <div class="input-group input-group-sm">
+            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ada" (change)="applyFilter()">
+              <option value="">Ada</option>
+              <option *ngFor="let val of getUniqueValues('ada')" [value]="val">{{val}}</option>
+            </select>
+            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.parsel" (change)="applyFilter()">
+              <option value="">Parsel</option>
+              <option *ngFor="let val of getUniqueValues('parsel')" [value]="val">{{val}}</option>
+            </select>
           </div>
         </div>
 
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-end gap-2 w-100">
-          <div class="btn-group shadow-sm" *ngIf="!isAdmin">
-            <button type="button" class="btn btn-sm btn-outline-primary px-3" (click)="goToUpdate()" [disabled]="selectedTasinmazlar.length !== 1">
-              <i class="bi bi-pencil-fill"></i>
+        <div class="col-md-6 d-flex justify-content-end gap-2">
+          <button class="btn btn-sm btn-outline-secondary px-3 shadow-none" (click)="resetFilters()" title="Filtreleri Sıfırla">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Sıfırla
+          </button>
+          
+          <div class="btn-group btn-group-sm shadow-none">
+            <button class="btn btn-outline-success px-3" (click)="exportExcel()">
+              <i class="bi bi-file-earmark-excel me-1"></i> Excel
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger px-3" (click)="deleteSelected()" [disabled]="selectedTasinmazlar.length === 0">
-              <i class="bi bi-trash3-fill"></i>
-            </button>
-          </div>
-
-          <div class="btn-group shadow-sm">
-            <button type="button" class="btn btn-sm btn-outline-success px-3 d-flex align-items-center gap-1" (click)="exportExcel()">
-              <i class="bi bi-file-earmark-excel"></i>
-              <span class="fw-medium">Excel</span>
-            </button>
-
-            <button type="button" class="btn btn-sm btn-outline-danger px-3 d-flex align-items-center gap-1" (click)="exportPdf()">
-              <i class="bi bi-file-earmark-pdf"></i>
-              <span class="fw-medium">PDF</span>
+            <button class="btn btn-outline-danger px-3" (click)="exportPdf()">
+              <i class="bi bi-file-earmark-pdf me-1"></i> PDF
             </button>
           </div>
 
-          <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center gap-1" routerLink="/core/tasinmaz/add" *ngIf="!isAdmin">
-            <i class="bi bi-plus-lg"></i>
-            <span class="text-nowrap fw-medium">Yeni</span>
+          <button *ngIf="!isAdmin" class="btn btn-sm btn-primary px-4 shadow-none fw-medium" routerLink="/core/tasinmaz/add">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Kayıt
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="table-responsive rounded shadow-sm bg-white border">
-    <table class="table table-bordered table-hover align-middle text-nowrap mb-0">
+  <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+      <h5 class="mb-0 fw-bold text-primary text-nowrap">
+        <i class="bi bi-building me-2"></i>Taşınmaz Listesi
+      </h5>
+      <span *ngIf="selectedTasinmazlar.length > 0" class="badge bg-primary rounded-pill">
+        {{ selectedTasinmazlar.length }} Seçili
+      </span>
+      <div class="flex-grow-1 ms-3 border-bottom border-primary" style="opacity: 0.2;"></div>
+    </div>
+    
+    <div class="btn-group shadow-sm ms-3" *ngIf="!isAdmin">
+      <button class="btn btn-sm btn-light border px-3" (click)="goToUpdate()" title="Güncelle">
+        <i class="bi bi-pencil-fill" [ngClass]="selectedTasinmazlar.length === 1 ? 'text-primary' : 'text-secondary'"></i>
+      </button>
+      <button class="btn btn-sm btn-light border px-3" (click)="deleteSelected()" title="Sil">
+        <i class="bi bi-trash3-fill" [ngClass]="selectedTasinmazlar.length > 0 ? 'text-danger' : 'text-secondary'"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive rounded shadow-sm bg-white border border-light-subtle">
+    <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th style="width: 50px">
-            <input class="form-check-input ms-1" type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
+            <input class="form-check-input ms-1 shadow-none" type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll($event)">
           </th>
-          <th class="small text-uppercase fw-bold text-center">Görsel</th>
-          <th *ngIf="isAdmin" class="small text-uppercase fw-bold">User Id</th>
-          <th *ngIf="isAdmin" class="small text-uppercase fw-bold">Adı Soyadı</th>
-          <th class="small text-uppercase fw-bold">İl</th>
-          <th class="small text-uppercase fw-bold">İlçe</th>
-          <th class="small text-uppercase fw-bold">Mahalle</th>
-          <th class="small text-uppercase fw-bold">Nitelik</th>
-          <th class="d-none d-md-table-cell small text-uppercase fw-bold">Ada</th>
-          <th class="d-none d-md-table-cell small text-uppercase fw-bold">Parsel</th>
-          <th class="d-none d-lg-table-cell small text-uppercase fw-bold">Adres</th>
-          <th class="small text-uppercase fw-bold">Eklenme Tarihi</th>
+          <th class="text-center" style="width: 80px">Görsel</th>
+          <th *ngIf="isAdmin">Kullanıcı</th>
+          <th>Konum Bilgisi</th>
+          <th>Nitelik</th>
+          <th>Ada / Parsel</th>
+          <th class="text-center">Kayıt Tarihi</th>
         </tr>
       </thead>
-
-      <tbody>
+      <tbody style="font-size: 0.85rem; color: #222;">
         <tr *ngFor="let item of filteredTasinmazlar">
           <td>
-            <input class="form-check-input ms-1" type="checkbox" [checked]="isSelected(item)" (change)="toggleItem(item)" />
+            <input class="form-check-input ms-1 shadow-none" type="checkbox" [checked]="isSelected(item)" (change)="toggleItem(item)">
           </td>
-
           <td class="text-center">
-            <img
-              [src]="apiUrl + '/api/Tasinmaz/' + item.id + '/image?t=' + item.cacheBuster"
-              (error)="onImageError($event)"
-              class="tasinmaz-img"
-              style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px"
-            />
+            <img [src]="apiUrl + '/api/Tasinmaz/' + item.id + '/image?t=' + item.cacheBuster" 
+                 (error)="onImageError($event)" 
+                 class="rounded shadow-sm border" 
+                 style="width: 45px; height: 45px; object-fit: cover;">
           </td>
-
-          <td *ngIf="isAdmin" class="text-muted small">{{ item.userId }}</td>
-          <td *ngIf="isAdmin" class="fw-medium">{{ item.adSoyad }}</td>
-          <td>{{ item.ilAdi }}</td>
-          <td>{{ item.ilceAdi }}</td>
-          <td>{{ item.mahalleAdi }}</td>
-          <td>{{ item.emlakTipi }}</td>
-          <td class="d-none d-md-table-cell">{{ item.ada }}</td>
-          <td class="d-none d-md-table-cell">{{ item.parsel }}</td>
-          <td class="d-none d-lg-table-cell">
-            <span class="d-inline-block text-truncate" style="max-width: 150px" [title]="item.adres">
-              {{ item.adres }}
-            </span>
+          <td *ngIf="isAdmin">
+            <div class="fw-medium text-dark">{{ item.adSoyad }}</div>
           </td>
-          <td class="text-nowrap">{{ item.olusturmaTarihi | date: 'dd.MM.yyyy' }}</td>
+          <td>
+            <div class="fw-bold">{{ item.ilAdi }} / {{ item.ilceAdi }}</div>
+            <div class="small text-muted">{{ item.mahalleAdi }}</div>
+          </td>
+          <td><span class="badge bg-light text-dark border fw-normal">{{ item.emlakTipi }}</span></td>
+          <td>
+            <span class="fw-bold text-secondary">{{ item.ada }}</span> / 
+            <span class="fw-bold text-secondary">{{ item.parsel }}</span>
+          </td>
+          <td class="text-center small text-muted">
+            {{ item.olusturmaTarihi | date: 'dd.MM.yyyy' }}
+          </td>
         </tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="card shadow-sm mt-4">
-    <div class="card-header bg-white fw-bold">
-      <i class="bi bi-geo-alt me-1 text-danger"></i>
-      Taşınmaz Konumları
-    </div>
-    <div class="card-body p-0" style="height: 450px">
-      <app-tasinmaz-list-map [tasinmazlar]="filteredTasinmazlar"></app-tasinmaz-list-map>
-    </div>
   </div>
 </div>
