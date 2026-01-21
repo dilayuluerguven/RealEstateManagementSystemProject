@@ -1,0 +1,29 @@
+<div>
+  <label class="form-label">Resim Yükle</label>
+
+  <input 
+    type="file" 
+    class="form-control" 
+    (change)="onFileSelected($event)" 
+    accept="image/*"
+  />
+
+  <div *ngIf="previewUrl || currentImageUrl" class="position-relative d-inline-block mt-3">
+    
+    <img 
+      [src]="previewUrl || currentImageUrl" 
+      class="img-thumbnail"
+      style="width:150px;"
+    />
+
+    <button 
+      type="button" 
+      class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle p-1"
+      (click)="onRemoveImage()"
+      title="Resmi Sil"
+    >
+      <i class="bi bi-trash"></i>
+    </button>
+
+  </div>
+</div>
