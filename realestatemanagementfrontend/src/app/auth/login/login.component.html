@@ -22,38 +22,37 @@
           </div>
 
           <div class="mb-3">
-  <label class="form-label">Şifre</label>
+            <label class="form-label">Şifre</label>
 
-  <div class="input-group">
-    <input
-      class="form-control"
-      formControlName="password"
-      [type]="showPassword ? 'text' : 'password'"
-    />
+            <div class="input-group">
+              <input
+                class="form-control"
+                formControlName="password"
+                [type]="showPassword ? 'text' : 'password'"
+              />
 
-    <button
-      type="button"
-      class="btn btn-outline-secondary border"
-      (click)="togglePassword()"
-    >
-      <i
-        class="bi"
-        [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-      ></i>
-    </button>
-  </div>
+              <button
+                type="button"
+                class="btn btn-outline-secondary border"
+                (click)="togglePassword()"
+              >
+                <i
+                  class="bi"
+                  [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                ></i>
+              </button>
+            </div>
 
-  <small
-    class="text-danger"
-    *ngIf="
-      formGroup.get('password')?.touched &&
-      formGroup.get('password')?.invalid
-    "
-  >
-    Şifre zorunludur
-  </small>
-</div>
-
+            <small
+              class="text-danger"
+              *ngIf="
+                formGroup.get('password')?.touched &&
+                formGroup.get('password')?.invalid
+              "
+            >
+              Şifre zorunludur
+            </small>
+          </div>
 
           <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" id="rememberMe" />
