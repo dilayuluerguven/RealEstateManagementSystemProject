@@ -135,17 +135,5 @@ namespace RealEstateManagementProject.Business.Concrete
                 .ToListAsync();
         }
 
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var log = await _context.Loglar.FindAsync(id);
-
-            if (log == null)
-                return false;
-
-            _context.Loglar.Remove(log);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
     }
 }

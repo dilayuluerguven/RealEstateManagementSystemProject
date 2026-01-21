@@ -29,17 +29,5 @@ namespace RealEstateManagementProject.Controllers
             var logs = await _logService.FilterAsync(filter);
             return Ok(logs);
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _logService.DeleteAsync(id);
-
-            if (!result)
-                return NotFound();
-
-            return NoContent();
-        }
-
-
     }
 }

@@ -65,8 +65,8 @@ namespace RealEstateManagementProject.Controllers
             await _logService.AddAsync(new Log
             {
                 UserId = userId,
-                IslemTipi = "LOGOUT",
-                Durum = "SUCCESS",
+                IslemTipi = "logout",
+                Durum = "success",
                 Aciklama = $"{userName} çıkış yaptı",
                 IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Tarih = DateTime.UtcNow

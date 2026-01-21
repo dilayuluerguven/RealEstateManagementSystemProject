@@ -45,8 +45,8 @@ namespace RealEstateManagementProject.Business.Concrete
             await _logService.AddAsync(new Log
             {
                 UserId = user.Id,
-                IslemTipi = "LOGIN",
-                Durum = "Success",
+                IslemTipi = "login",
+                Durum = "success",
                 Aciklama = $"{user.AdSoyad} giriş yaptı",
                 IpAdresi = ipAddress,
                 Tarih = DateTime.UtcNow
@@ -86,8 +86,8 @@ namespace RealEstateManagementProject.Business.Concrete
             await _logService.AddAsync(new Log
             {
                 UserId = user.Id,
-                IslemTipi = "REGISTER",
-                Durum = "Success",
+                IslemTipi = "register",
+                Durum = "success",
                 Aciklama = $"{user.AdSoyad} için kullanıcı kaydı oluşturuldu",
                 IpAdresi = ipAddress,
                 Tarih = DateTime.UtcNow
