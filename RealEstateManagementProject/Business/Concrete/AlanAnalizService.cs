@@ -70,8 +70,8 @@ public class AlanAnalizService : IAlanAnalizService
         await _logService.AddAsync(new Log
         {
             UserId = kullaniciId,
-            IslemTipi = isUpdate ? "Update" : "Create",
-            Durum = "Success",
+            IslemTipi = isUpdate ? "update" : "create",
+            Durum = "success",
             Aciklama = isUpdate
                 ? $"{adSoyad}, '{dto.GeometriAdi}' üzerinde {islemAdi} yaptı (güncellendi)"
                 : $"{adSoyad}, '{dto.GeometriAdi}' üzerinde {islemAdi} yaptı",
@@ -145,8 +145,8 @@ public class AlanAnalizService : IAlanAnalizService
         await _logService.AddAsync(new Log
         {
             UserId = kullaniciId,
-            IslemTipi = "Delete",
-            Durum = "Success",
+            IslemTipi = "delete",
+            Durum = "success",
             Aciklama = $"{adSoyad}, '{entity.GeometriAdi}' alan analizini sildi",
             Tarih = DateTime.UtcNow
         });
@@ -171,8 +171,8 @@ public class AlanAnalizService : IAlanAnalizService
         await _logService.AddAsync(new Log
         {
             UserId = kullaniciId,
-            IslemTipi = "Delete",
-            Durum = "Success",
+            IslemTipi = "delete",
+            Durum = "success",
             Aciklama = $"{adSoyad}, '{geometriAdi}' alan analizini sildi",
             Tarih = DateTime.UtcNow
         });

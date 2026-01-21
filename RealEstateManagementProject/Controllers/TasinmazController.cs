@@ -107,8 +107,21 @@ public class TasinmazController : ControllerBase
             return NotFound();
 
         return File(result.Value.Data, result.Value.ContentType);
+
     }
+    [HttpDelete("{id}/image")]
+    public async Task<IActionResult> DeleteImage(int id)
+    {
+        if (!TryGetUserId(out int userId))
+            return Unauthorized();
 
+        bool isAdmin = User.IsInRole("Admin");
 
+        var result = await _tasinmazService.DeleteImageAsync(id, userId, isAdmin);
 
+        if (!result)
+            return BadRequest("Resim silinemedi");
+
+        return Ok();
+    }
 }

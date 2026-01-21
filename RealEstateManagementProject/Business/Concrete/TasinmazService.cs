@@ -123,8 +123,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "Create",
-                    Durum = "Success",
+                    IslemTipi = "create",
+                    Durum = "success",
                     Aciklama = $"{userName} taşınmaz ekledi"
                 });
 
@@ -135,8 +135,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "Create",
-                    Durum = "Error",
+                    IslemTipi = "create",
+                    Durum = "error",
                     Aciklama = $"{userName} taşınmaz ekleyemedi"
                 });
 
@@ -181,8 +181,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = tasinmaz.UserId,
-                    IslemTipi = "Update",
-                    Durum = "Success",
+                    IslemTipi = "update",
+                    Durum = "success",
                     Aciklama = $"{userName} taşınmaz güncelledi (Id={id})"
                 });
 
@@ -193,8 +193,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = dto.UserId,
-                    IslemTipi = "Update",
-                    Durum = "Error",
+                    IslemTipi = "update",
+                    Durum = "error",
                     Aciklama = $"{userName} taşınmaz güncelleyemedi (Id={id})"
                 });
 
@@ -223,8 +223,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = tasinmaz.UserId,
-                    IslemTipi = "Delete",
-                    Durum = "Success",
+                    IslemTipi = "delete",
+                    Durum = "success",
                     Aciklama = $"{userName} taşınmaz sildi (Id={id})"
                 });
 
@@ -235,8 +235,8 @@ namespace RealEstateManagementProject.Business.Concrete
                 await _logService.AddAsync(new Log
                 {
                     UserId = userId,
-                    IslemTipi = "Delete",
-                    Durum = "Error",
+                    IslemTipi = "delete",
+                    Durum = "error",
                     Aciklama = $"{userName} taşınmaz silemedi (Id={id})"
                 });
 
@@ -256,6 +256,27 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return (t.ImageData, t.ImageContentType ?? "image/jpeg");
         }
+        public async Task<bool> DeleteImageAsync(int id, int userId, bool isAdmin)
+        {
+            try
+            {
+                var tasinmaz = isAdmin
+                    ? await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id)
+                    : await _context.Tasinmazlar.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
+                if (tasinmaz == null)
+                    return false;
+
+                tasinmaz.ImageData = null;
+                tasinmaz.ImageContentType = null;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
