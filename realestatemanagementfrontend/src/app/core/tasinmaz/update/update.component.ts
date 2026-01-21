@@ -64,34 +64,30 @@ export class UpdateComponent implements OnInit {
   }
 
   private loadTasinmaz(): void {
-    this.tasinmazService.getById(this.id).subscribe(res => {
-      this.formGroup.patchValue({
-        il: res.ilId,
-        ilce: res.ilceId,
-        mahalle: res.mahalleId,
-        ada: res.ada,
-        parsel: res.parsel,
-        adres: res.adres,
-        emlakTipi: res.emlakTipi,
-        koordinat: res.koordinat,
+  this.tasinmazService.getById(this.id).subscribe(res => {
+    this.formGroup.patchValue({
+      il: res.ilId,
+      ilce: res.ilceId,
+      mahalle: res.mahalleId,
+      ada: res.ada,
+      parsel: res.parsel,
+      adres: res.adres,
+      emlakTipi: res.emlakTipi,
+      koordinat: res.koordinat,
+    });
+
+    const imgUrl = `${environment.baseUrl}/api/Tasinmaz/${this.id}/image`;
+    
+    fetch(imgUrl)
+      .then(r => {
+        if (r.ok) this.currentImageUrl = imgUrl;
+        else this.currentImageUrl = null;
       });
 
-      this.currentImageUrl = `${environment.baseUrl}/api/Tasinmaz/${this.id}/image`;
-
-      this.locService.getIlceler(res.ilId).subscribe(x => this.ilceler = x);
-      this.locService.getMahalleler(res.ilceId).subscribe(x => this.mahalleler = x);
-    });
-  }
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-    this.selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = e => (this.previewUrl = e.target?.result || null);
-    reader.readAsDataURL(file);
-  }
-
+    this.locService.getIlceler(res.ilId).subscribe(x => this.ilceler = x);
+    this.locService.getMahalleler(res.ilceId).subscribe(x => this.mahalleler = x);
+  });
+}
   onGeometryCreated(geometry: any) {
     this.formGroup.patchValue({ koordinat: JSON.stringify(geometry) });
   }
@@ -125,6 +121,16 @@ export class UpdateComponent implements OnInit {
       error: () => {
         this.toastr.error('Güncelleme hatası');
       }
+    });
+  }
+  onFileSelected(file: File | null) {
+    this.selectedFile = file;
+    if (file) this.currentImageUrl = null;
+  }
+
+  deleteImage() {
+    this.tasinmazService.deleteImage(this.id).subscribe({
+      next: () => this.currentImageUrl = null
     });
   }
 }

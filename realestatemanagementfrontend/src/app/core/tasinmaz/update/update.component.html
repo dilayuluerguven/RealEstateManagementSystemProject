@@ -14,6 +14,7 @@
         </h6>
 
         <div class="row g-3">
+
           <div class="col-md-4">
             <label class="form-label required">İl</label>
             <select class="form-select" formControlName="il">
@@ -60,19 +61,14 @@
 
           <div class="col-md-6">
             <label class="form-label">Yeni Resim Yükle</label>
-            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" />
-            <small class="text-muted">JPG, PNG — max 100MB</small>
+
+            <app-image-uploader
+              [currentImageUrl]="currentImageUrl"
+              (fileSelected)="onFileSelected($event)"
+              (deleteExistingImage)="deleteImage()">
+            </app-image-uploader>
           </div>
 
-          <div class="col-md-6" *ngIf="previewUrl">
-            <label class="form-label d-block">Yeni Resim Önizleme</label>
-            <img [src]="previewUrl" class="img-thumbnail" style="max-height: 180px" />
-          </div>
-
-          <div class="col-md-12 mt-3" *ngIf="currentImageUrl && !previewUrl">
-            <label class="form-label d-block">Mevcut Resim</label>
-            <img [src]="currentImageUrl" class="img-thumbnail" style="max-height: 180px" />
-          </div>
         </div>
       </div>
     </div>
@@ -102,5 +98,6 @@
         </div>
       </div>
     </div>
+
   </form>
 </div>
