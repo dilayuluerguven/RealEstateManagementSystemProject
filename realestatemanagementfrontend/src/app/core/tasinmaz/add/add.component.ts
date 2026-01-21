@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./add.component.css'],
 })
 export class AddComponent implements OnInit {
+
   formGroup = new FormGroup({
     il: new FormControl<number | null>(null, Validators.required),
     ilce: new FormControl<number | null>(null, Validators.required),
@@ -19,8 +20,7 @@ export class AddComponent implements OnInit {
     parsel: new FormControl<number | null>(null, Validators.required),
     adres: new FormControl('', Validators.required),
     emlakTipi: new FormControl('', Validators.required),
-    koordinat: new FormControl<string | null>(null, Validators.required),
-    image: new FormControl<File | null>(null),
+    koordinat: new FormControl<string | null>(null, Validators.required)
   });
 
   iller: any[] = [];
@@ -28,7 +28,6 @@ export class AddComponent implements OnInit {
   mahalleler: any[] = [];
 
   selectedFile: File | null = null;
-  previewUrl: string | ArrayBuffer | null = null;
 
   constructor(
     private tasinmazService: TasinmazService,
@@ -38,38 +37,28 @@ export class AddComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.locService.getIller().subscribe(res => {
-      this.iller = res;
-    });
+    this.locService.getIller().subscribe(res => this.iller = res);
 
     this.formGroup.get('il')?.valueChanges.subscribe(ilId => {
       this.ilceler = [];
       this.mahalleler = [];
       this.formGroup.patchValue({ ilce: null, mahalle: null }, { emitEvent: false });
+
       if (!ilId) return;
-      this.locService.getIlceler(ilId).subscribe(res => {
-        this.ilceler = res;
-      });
+      this.locService.getIlceler(ilId).subscribe(res => this.ilceler = res);
     });
 
     this.formGroup.get('ilce')?.valueChanges.subscribe(ilceId => {
       this.mahalleler = [];
       this.formGroup.patchValue({ mahalle: null }, { emitEvent: false });
+
       if (!ilceId) return;
-      this.locService.getMahalleler(ilceId).subscribe(res => {
-        this.mahalleler = res;
-      });
+      this.locService.getMahalleler(ilceId).subscribe(res => this.mahalleler = res);
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
+  onFileSelected(file: File | null) {
     this.selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = e => (this.previewUrl = e.target?.result || null);
-    reader.readAsDataURL(file);
-    this.formGroup.patchValue({ image: file });
   }
 
   submit() {
@@ -104,7 +93,7 @@ export class AddComponent implements OnInit {
       },
       error: () => {
         this.toastr.error('Taşınmaz eklenemedi');
-      },
+      }
     });
   }
 
@@ -113,6 +102,5 @@ export class AddComponent implements OnInit {
       koordinat: JSON.stringify(geometry),
     });
     this.formGroup.get('koordinat')?.markAsTouched();
-    this.formGroup.get('koordinat')?.updateValueAndValidity();
   }
 }

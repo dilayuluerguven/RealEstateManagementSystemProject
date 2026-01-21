@@ -9,9 +9,13 @@
   <form [formGroup]="formGroup" (ngSubmit)="submit()">
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-4">
-        <h6 class="fw-semibold mb-4 text-primary"><i class="bi bi-info-circle me-1"></i> Temel Bilgiler</h6>
-        
+
+        <h6 class="fw-semibold mb-4 text-primary">
+          <i class="bi bi-info-circle me-1"></i> Temel Bilgiler
+        </h6>
+
         <div class="row g-3">
+
           <div class="col-md-4">
             <label class="form-label required">İl</label>
             <select class="form-select" formControlName="il">
@@ -53,36 +57,42 @@
 
           <div class="col-md-4">
             <label class="form-label">Taşınmaz Resmi</label>
-            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" />
-          </div>
 
-          <div class="col-md-12 mt-2" *ngIf="previewUrl">
-            <label class="form-label d-block text-success">Resim Önizleme</label>
-            <img [src]="previewUrl" class="img-thumbnail" style="max-height: 180px" />
+            <app-image-uploader 
+              (fileSelected)="selectedFile = $event">
+            </app-image-uploader>
+
           </div>
 
           <div class="col-12">
             <label class="form-label required">Adres</label>
             <textarea class="form-control" rows="3" formControlName="adres"></textarea>
           </div>
+
         </div>
       </div>
     </div>
 
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">
-        <h6 class="fw-semibold mb-3 text-primary required"><i class="bi bi-geo-alt-fill me-1"></i> Harita Konumu</h6>
-        <div class="border rounded overflow-hidden mb-4" style="height: 420px">
+
+        <h6 class="fw-semibold mb-3 text-primary required">
+          <i class="bi bi-geo-alt-fill me-1"></i> Harita Konumu
+        </h6>
+
+        <div class="border rounded overflow-hidden mb-4" style="height: 420px;">
           <app-tasinmaz-map (geometryCreated)="onGeometryCreated($event)"></app-tasinmaz-map>
         </div>
-        
+
         <div class="d-flex justify-content-end gap-2 border-top pt-3">
           <button type="button" class="btn btn-outline-secondary" routerLink="/core/tasinmaz/list">Vazgeç</button>
           <button type="submit" class="btn btn-success px-5" [disabled]="formGroup.invalid">
             <i class="bi bi-save me-1"></i> Kaydet
           </button>
         </div>
+
       </div>
     </div>
+
   </form>
 </div>
