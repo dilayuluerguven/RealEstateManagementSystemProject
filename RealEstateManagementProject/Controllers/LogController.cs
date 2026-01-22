@@ -24,7 +24,7 @@ namespace RealEstateManagementProject.Controllers
             return Ok(logs);
         }
         [HttpPost("filter")]
-        public async Task<IActionResult> Filter([FromBody] LogFilterDTO filter)
+        public async Task<IActionResult> Filter([FromBody] LogFilterDto filter)
         {
             var logs = await _logService.FilterAsync(filter);
             return Ok(logs);

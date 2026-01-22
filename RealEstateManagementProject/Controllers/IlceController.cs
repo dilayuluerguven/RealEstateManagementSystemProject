@@ -2,22 +2,25 @@
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class IlceController : ControllerBase
+namespace RealEstateManagementProject.Controllers
 {
-    private readonly IIlceService _ilceService;
-
-    public IlceController(IIlceService ilceService)
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class IlceController : ControllerBase
     {
-        _ilceService = ilceService;
-    }
+        private readonly IIlceService _ilceService;
 
-    [HttpGet("getIlceByIlId/{ilId}")]
-    public async Task<IActionResult> GetIlcelerByIl(int ilId)
-    {
-        var result = await _ilceService.GetByIlIdAsync(ilId);
-        return Ok(result);
+        public IlceController(IIlceService ilceService)
+        {
+            _ilceService = ilceService;
+        }
+
+        [HttpGet("getIlceByIlId/{ilId}")]
+        public async Task<IActionResult> GetIlcelerByIl(int ilId)
+        {
+            var result = await _ilceService.GetByIlIdAsync(ilId);
+            return Ok(result);
+        }
     }
 }

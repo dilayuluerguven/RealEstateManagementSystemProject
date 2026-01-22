@@ -34,7 +34,6 @@ namespace RealEstateManagementProject.Controllers
         {
             int kullaniciId = GetKullaniciId();
             var sonuc = await _service.KaydetAsync(kullaniciId, dto);
-
             return Ok(new { success = true, data = sonuc });
         }
 
@@ -42,10 +41,10 @@ namespace RealEstateManagementProject.Controllers
         public async Task<IActionResult> Getir(string adi)
         {
             int kullaniciId = GetKullaniciId();
-            var sonuc = await _service.GetirAsync(kullaniciId, adi);
+            AlanAnalizSonucDto? sonuc = await _service.GetirAsync(kullaniciId, adi);
 
-            if (sonuc == null)
-                return Ok(new { success = false, data = (object)null });
+            if (sonuc is null)
+                return Ok(new { success = false, data = (object?)null });
 
             return Ok(new { success = true, data = sonuc });
         }
@@ -55,7 +54,6 @@ namespace RealEstateManagementProject.Controllers
         {
             int kullaniciId = GetKullaniciId();
             var list = await _service.ListeAsync(kullaniciId);
-
             return Ok(new { success = true, data = list });
         }
 
@@ -64,7 +62,6 @@ namespace RealEstateManagementProject.Controllers
         {
             int kullaniciId = GetKullaniciId();
             bool sonuc = await _service.SilAsync(kullaniciId, id);
-
             return Ok(new { success = sonuc });
         }
 
@@ -73,7 +70,6 @@ namespace RealEstateManagementProject.Controllers
         {
             int kullaniciId = GetKullaniciId();
             bool sonuc = await _service.GeometriyeGoreSilAsync(kullaniciId, adi);
-
             return Ok(new { success = sonuc });
         }
     }

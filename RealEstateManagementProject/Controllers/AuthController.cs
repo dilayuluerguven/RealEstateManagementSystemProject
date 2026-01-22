@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Dtos;
-using RealEstateManagementProject.Entities.Concrete;
-using System.Security.Claims;
 
 namespace RealEstateManagementProject.Controllers
 {
@@ -12,20 +10,16 @@ namespace RealEstateManagementProject.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ILogService _logService;
 
-        public AuthController(IAuthService authService, ILogService logService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _logService = logService;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDto dto)
         {
-            var ipAddress =
-                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UNKNOWN";
-
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UNKNOWN";
             var user = await _authService.LoginAsync(dto, ipAddress);
 
             if (user == null)
@@ -37,42 +31,13 @@ namespace RealEstateManagementProject.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserForRegisterDto dto)
         {
-            var ipAddress =
-                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UNKNOWN";
-
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UNKNOWN";
             var result = await _authService.RegisterAsync(dto, ipAddress);
 
             if (!result)
                 return BadRequest("Bu e-mail zaten kayıtlı.");
 
             return Ok("Kullanıcı başarıyla oluşturuldu.");
-        }
-
-        [Authorize]
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized();
-
-            var userId = int.Parse(userIdClaim.Value);
-
-            var userName =
-                User.FindFirst(ClaimTypes.Name)?.Value
-                ?? "Bilinmeyen Kullanıcı";
-
-            await _logService.AddAsync(new Log
-            {
-                UserId = userId,
-                IslemTipi = "logout",
-                Durum = "success",
-                Aciklama = $"{userName} çıkış yaptı",
-                IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString(),
-                Tarih = DateTime.UtcNow
-            });
-
-            return Ok();
         }
     }
 }
