@@ -11,7 +11,7 @@ export class AlanAnalizService {
 
   private readonly apiUrl = 'https://localhost:7275/api/alananaliz';
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   kaydet(dto: AlanAnalizCreate): Observable<ApiResponse<AlanAnalizSonuc>> {
     return this.http.post<ApiResponse<AlanAnalizSonuc>>(`${this.apiUrl}/kaydet`, dto);

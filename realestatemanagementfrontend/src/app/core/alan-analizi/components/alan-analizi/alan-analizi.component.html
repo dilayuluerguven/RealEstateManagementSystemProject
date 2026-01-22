@@ -7,6 +7,7 @@
     style="z-index: 1001; width: 140px"
   >
     <label
+      for="opacity"
       class="text-muted small fw-semibold mb-1 d-block"
       style="font-size: 0.65rem"
     >
@@ -22,6 +23,7 @@
       (input)="opacityDegisti()"
       class="form-range"
       style="height: 4px"
+      id="opacity"
     />
   </div>
 
@@ -40,10 +42,11 @@
           </h6>
         </div>
         <div class="mb-2">
-          <label class="fw-semibold text-muted" style="font-size: 0.65rem"
+          <label for="calismaKatmani" class="fw-semibold text-muted" style="font-size: 0.65rem"
             >Çalışma Katmanı</label
           >
           <select
+            id="calismaKatmani"
             class="form-select form-select-sm mt-1"
             [(ngModel)]="seciliGeometri"
             (change)="geometriDegisti()"
@@ -59,7 +62,7 @@
           </div>
         </div>
         <div class="mb-2">
-          <label class="fw-semibold text-muted" style="font-size: 0.65rem"
+          <label for="calismaModu" class="fw-semibold text-muted" style="font-size: 0.65rem"
             >Çalışma Modu</label
           >
           <div class="btn-group btn-group-sm w-100 mt-1">
@@ -83,8 +86,8 @@
           </button>
         </div>
         <div class="mb-2">
-          <label class="fw-semibold text-muted" style="font-size: 0.65rem"
-            >Kesişim</label
+          <p class="fw-semibold text-muted" style="font-size: 0.65rem"
+            >Kesişim</p
           >
           <div class="btn-group btn-group-sm w-100 mt-1">
             <button class="btn btn-outline-secondary py-1" (click)="kesisim()">
@@ -99,8 +102,8 @@
           </div>
         </div>
         <div class="mb-2 p-2 bg-light rounded-3">
-          <label class="fw-semibold text-muted" style="font-size: 0.65rem"
-            >Birleşim</label
+          <p class="fw-semibold text-muted" style="font-size: 0.65rem"
+            >Birleşim</p
           >
           <div class="btn-group btn-group-sm w-100 mt-1">
             <button class="btn btn-outline-primary py-1" (click)="birlesimAB()">
@@ -115,8 +118,8 @@
           </div>
         </div>
         <div class="mb-2">
-          <label class="fw-semibold text-muted" style="font-size: 0.65rem"
-            >Görünürlük</label
+          <p class="fw-semibold text-muted" style="font-size: 0.65rem"
+            >Görünürlük</p
           >
           <div class="btn-group btn-group-sm w-100 mt-1">
             <button
@@ -150,7 +153,7 @@
             class="btn btn-outline-primary btn-sm w-100 py-1 fw-semibold d-flex align-items-center justify-content-center gap-1"
             (click)="ekraniTemizle()"
           >
-            <i class="bi bi-eraser-fill"></i>
+            <i aria-hidden="true" class="bi bi-eraser-fill"></i>
             Ekranı Temizle
           </button>
         </div>

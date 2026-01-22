@@ -47,8 +47,8 @@ export class AlanAnalizComponent implements AfterViewInit {
   });
 
   constructor(
-    private alanAnalizService: AlanAnalizService,
-    private toastr: ToastrService, private mapHelper: MapHelperService
+    private readonly alanAnalizService: AlanAnalizService,
+    private readonly toastr: ToastrService, private readonly mapHelper: MapHelperService
   ) {}
 
   ngAfterViewInit(): void {
@@ -262,9 +262,9 @@ opacityDegisti(): void {
     this.hizliGosterimAyari(ad);
   }
   hizliGosterimAyari(aktif: string): void {
-    ['A','B','C','D','E','F'].forEach(h => {
-      this.getLayer(h).setVisible(h === aktif);
-    });
+    for (const h of ['A','B','C','D','E','F']) {
+    this.getLayer(h).setVisible(h === aktif);
+    }
   }
   ilkHaliGoster(): void {
     this.layerA.setVisible(true);
@@ -300,7 +300,9 @@ opacityDegisti(): void {
     );
 
     toast.onTap.subscribe(() => {
-      ["A", "B", "C"].forEach(g => this.alanAnalizService.temizle(g).subscribe());
+     for (const g of ["A", "B", "C"]) {
+      this.alanAnalizService.temizle(g).subscribe();
+    }
       this.ekraniTemizle();
       this.toastr.success("Kayıtlar silindi.", "Başarılı");
     });
@@ -312,31 +314,35 @@ opacityDegisti(): void {
     const geo = this.geoJson.writeFeatureObject(f);
     return { alanMetrekare: turf.area(geo as any) };
   }
-  autoSelect(): void {
-    if (this.draw) this.map.removeInteraction(this.draw);
-
-    const geometriler = ['A','B','C'];
-    let eksik = false;
-
-    geometriler.forEach(g => this.getLayer(g).getSource()!.clear());
-    geometriler.forEach(g => {
-      this.alanAnalizService.getir(g)
-        .pipe(catchError(() => of(null)))
-        .subscribe(res => {
-          if (res?.data?.geometriJson) {
-            this.getLayer(g).getSource()!.addFeature(
-              this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
-            );
-          } else eksik = true;
-
-          if (g === 'C') {
-            this.ilkHaliGoster();
-            if (eksik) this.toastr.warning("Kayıtlı geometri bulunamadı.", "Auto-Select");
-            else this.toastr.success("A–B–C otomatik yüklendi.", "Auto-Select");
-          }
-        });
-    });
+autoSelect(): void {
+  if (this.draw) this.map.removeInteraction(this.draw);
+  const geometriler = ['A', 'B', 'C'];
+  let eksik = false;
+  for (const g of geometriler) {
+    this.getLayer(g).getSource()!.clear();
   }
+  for (const g of geometriler) {
+    this.alanAnalizService.getir(g)
+      .pipe(catchError(() => of(null)))
+      .subscribe(res => {
+        if (res?.data?.geometriJson) {
+          this.getLayer(g).getSource()!.addFeature(
+            this.geoJson.readFeature(JSON.parse(res.data.geometriJson))
+          );
+        } else {
+          eksik = true;
+        }
+        if (g === 'C') {
+          this.ilkHaliGoster();
+          if (eksik) {
+            this.toastr.warning("Kayıtlı geometri bulunamadı.", "Auto-Select");
+          } else {
+            this.toastr.success("A–B–C otomatik yüklendi.", "Auto-Select");
+          }
+        }
+      });
+  }
+}
   manuelMod(): void {
     this.ilkHaliGoster();
     this.startDraw();
