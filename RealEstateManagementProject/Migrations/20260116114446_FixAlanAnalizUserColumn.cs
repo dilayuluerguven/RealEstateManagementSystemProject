@@ -16,7 +16,7 @@ namespace RealEstateManagementProject.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // Intentional: Bu migration için geri alma işlemi tanımlanmadı.
         }
     }
 }
