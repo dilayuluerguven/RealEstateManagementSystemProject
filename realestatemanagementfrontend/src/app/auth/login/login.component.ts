@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent{
   showPassword: boolean = false;
   formGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -18,11 +18,11 @@ export class LoginComponent implements OnInit {
 
   loading = false;
   constructor(
-    private authService: AuthService,
-    private router: Router,
-    private toastr: ToastrService
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly toastr: ToastrService
   ) {}
-  ngOnInit(): void {}
+  
   togglePassword() {
     this.showPassword = !this.showPassword;
   }

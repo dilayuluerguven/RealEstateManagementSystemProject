@@ -8,8 +8,8 @@
 
         <form [formGroup]="formGroup" (ngSubmit)="register()">
           <div class="mb-3">
-            <label class="form-label">Ad Soyad</label>
-            <input type="text" class="form-control" formControlName="adSoyad" />
+            <label for="adSoyad" class="form-label">Ad Soyad</label>
+            <input type="text" class="form-control" formControlName="adSoyad" id="adSoyad" />
             <small
               class="text-danger"
               *ngIf="
@@ -22,8 +22,8 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">E-mail</label>
-            <input type="email" class="form-control" formControlName="email" />
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" class="form-control" formControlName="email" id="email" />
             <small
               class="text-danger"
               *ngIf="
@@ -36,12 +36,13 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Şifre</label>
+            <label for="password" class="form-label">Şifre</label>
             <div class="input-group">
               <input
                 [type]="hidePassword ? 'password' : 'text'"
                 class="form-control"
                 formControlName="password"
+                id="password"
               />
               <button
                 type="button"
@@ -49,6 +50,7 @@
                 (click)="hidePassword = !hidePassword"
               >
                 <i
+                  aria-hidden="true"
                   class="bi"
                   [ngClass]="hidePassword ? 'bi-eye' : 'bi-eye-slash'"
                 ></i>
@@ -57,9 +59,9 @@
             <small
               class="text-danger"
               *ngIf="
-    formGroup.get('password')?.touched &&
-    formGroup.get('password')?.errors?.['required']
-  "
+                formGroup.get('password')?.touched &&
+                formGroup.get('password')?.errors?.['required']
+              "
             >
               Şifre zorunludur
             </small>
@@ -67,9 +69,9 @@
             <small
               class="text-danger"
               *ngIf="
-    formGroup.get('password')?.touched &&
-    formGroup.get('password')?.errors?.['minlength']
-  "
+                  formGroup.get('password')?.touched &&
+                  formGroup.get('password')?.errors?.['minlength']
+                "
             >
               Şifre en az 8 karakter olmalıdır
             </small>
@@ -77,9 +79,9 @@
             <small
               class="text-danger"
               *ngIf="
-    formGroup.get('password')?.touched &&
-    formGroup.get('password')?.errors?.['maxlength']
-  "
+                formGroup.get('password')?.touched &&
+                formGroup.get('password')?.errors?.['maxlength']
+              "
             >
               Şifre en fazla 12 karakter olabilir
             </small>
@@ -87,21 +89,22 @@
             <small
               class="text-danger"
               *ngIf="
-    formGroup.get('password')?.touched &&
-    formGroup.get('password')?.errors?.['pattern']
-  "
+                formGroup.get('password')?.touched &&
+                formGroup.get('password')?.errors?.['pattern']
+              "
             >
               Şifre harf, rakam ve özel karakter içermelidir
             </small>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Şifre Tekrar</label>
+            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
             <div class="input-group">
               <input
                 [type]="hideConfirmPassword ? 'password' : 'text'"
                 class="form-control"
                 formControlName="confirmPassword"
+                id="confirmPassword"
               />
               <button
                 type="button"
@@ -109,6 +112,7 @@
                 (click)="hideConfirmPassword = !hideConfirmPassword"
               >
                 <i
+                  aria-hidden="true"
                   class="bi"
                   [ngClass]="hideConfirmPassword ? 'bi-eye' : 'bi-eye-slash'"
                 ></i>

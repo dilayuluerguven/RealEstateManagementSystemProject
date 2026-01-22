@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
   formGroup = new FormGroup(
     {
       adSoyad: new FormControl('', [
@@ -37,11 +37,11 @@ export class RegisterComponent implements OnInit {
   hideConfirmPassword = true;
 
   constructor(
-    private authService: AuthService,
-    private toastr: ToastrService,
-    private router: Router
+    private readonly authService: AuthService,
+    private readonly toastr: ToastrService,
+    private readonly router: Router
   ) {}
-  ngOnInit(): void {}
+  
   passwordMatch(group: AbstractControl) {
     const pw = group.get('password')?.value;
     const cpw = group.get('confirmPassword')?.value;

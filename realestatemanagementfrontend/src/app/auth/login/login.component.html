@@ -5,12 +5,12 @@
     <div class="card shadow-lg border-0 rounded-4">
       <div class="card-body p-4">
         <h4 class="text-center mb-4 fw-bold">Giriş Yap</h4>
-
         <form [formGroup]="formGroup" (ngSubmit)="show()">
           <div class="mb-3">
-            <label class="form-label">E-mail</label>
-            <input type="email" class="form-control" formControlName="email" />
+            <label class="form-label" for="email">E-mail</label>
+            <input type="email" class="form-control" formControlName="email" id="email" />
             <small
+              aria-hidden="true"
               class="text-danger"
               *ngIf="
                 formGroup.get('email')?.touched &&
@@ -20,15 +20,14 @@
               Geçerli bir email giriniz
             </small>
           </div>
-
           <div class="mb-3">
-            <label class="form-label">Şifre</label>
-
+            <label class="form-label" for="password">Şifre</label>
             <div class="input-group">
               <input
                 class="form-control"
                 formControlName="password"
                 [type]="showPassword ? 'text' : 'password'"
+                id="password"
               />
 
               <button
@@ -37,6 +36,7 @@
                 (click)="togglePassword()"
               >
                 <i
+                  aria-hidden="true"
                   class="bi"
                   [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
                 ></i>
