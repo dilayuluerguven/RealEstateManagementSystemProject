@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+# SonarQube generated folders (DO NOT COMMIT)
+.scannerwork/
+.sonarqube/
+RealEstateManagementProject/.sonarqube/
+realestatemanagementfrontend/.scannerwork/
