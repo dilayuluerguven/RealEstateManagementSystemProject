@@ -20,10 +20,11 @@
       (ngSubmit)="updateProfile()">
 
     <div class="mb-3">
-      <label class="form-label fw-semibold">
+      <label for="adSoyad" class="form-label fw-semibold">
         Ad Soyad <span class="text-danger">*</span>
       </label>
       <input
+        id="adSoyad"
         class="form-control"
         formControlName="adSoyad"
         placeholder="Ad Soyad"
@@ -31,21 +32,23 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label fw-semibold">
+      <label for="email" class="form-label fw-semibold">
         Email <span class="text-danger">*</span>
       </label>
       <input
         type="email"
+        id="email"
         class="form-control"
         formControlName="email"
         placeholder="Email adresi"
       />
     </div>
     <div class="mb-4">
-      <label class="form-label fw-semibold">Yeni Şifre</label>
+      <label for="sifre" class="form-label fw-semibold">Yeni Şifre</label>
 
       <div class="input-group">
         <input
+          id="sifre"
           class="form-control"
           formControlName="sifre"
           [type]="showPassword ? 'text' : 'password'"
@@ -58,6 +61,7 @@
           (click)="togglePassword()"
         >
           <i
+          aria-hidden="true"
             class="bi"
             [ngClass]="showPassword ? 'bi-eye' : 'bi-eye-slash'"
           ></i>

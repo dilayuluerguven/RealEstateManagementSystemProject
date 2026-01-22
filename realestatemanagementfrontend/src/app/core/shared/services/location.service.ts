@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 })
 export class LocationService {
 
-  constructor(private httpClient:HttpClient) { }
+  constructor(private readonly httpClient:HttpClient) { }
   getIller(){
     return this.httpClient.get<any[]>(`${environment.baseUrl}/api/Il/getAll`);
   }
