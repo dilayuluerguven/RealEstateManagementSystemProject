@@ -12,25 +12,25 @@
     <div class="card-body p-4">
       <div class="row g-3">
         <div class="col-md-3" *ngIf="isAdmin">
-          <label class="form-label small fw-bold text-muted mb-1">Kullanıcı</label>
-          <select class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.user" (change)="applyFilter()">
+          <label for="user" class="form-label small fw-bold text-muted mb-1">Kullanıcı</label>
+          <select id="user" class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.user" (change)="applyFilter()">
             <option value="">Kullanıcı Seçiniz</option>
             <option *ngFor="let val of getUniqueValues('adSoyad')" [value]="val">{{val}}</option>
           </select>
         </div>
 
         <div class="col-md-9">
-          <label class="form-label small fw-bold text-muted mb-1">Konum Bilgileri</label>
+          <label for="location" class="form-label small fw-bold text-muted mb-1">Konum Bilgileri</label>
           <div class="input-group input-group-sm">
-            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.il" (change)="filterCriteria.ilce=''; filterCriteria.mahalle=''; applyFilter()">
+            <select id="il" class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.il" (change)="filterCriteria.ilce=''; filterCriteria.mahalle=''; applyFilter()">
               <option value="">İl Seçiniz</option>
               <option *ngFor="let val of getUniqueValues('ilAdi')" [value]="val">{{val}}</option>
             </select>
-            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ilce" (change)="filterCriteria.mahalle=''; applyFilter()">
+            <select id="ilce" class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ilce" (change)="filterCriteria.mahalle=''; applyFilter()">
               <option value="">İlçe Seçiniz</option>
               <option *ngFor="let val of getUniqueValues('ilceAdi', 'ilAdi', filterCriteria.il)" [value]="val">{{val}}</option>
             </select>
-            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.mahalle" (change)="applyFilter()">
+            <select id="mahalle" class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.mahalle" (change)="applyFilter()">
               <option value="">Mahalle Seçiniz</option>
               <option *ngFor="let val of getUniqueValues('mahalleAdi', 'ilceAdi', filterCriteria.ilce)" [value]="val">{{val}}</option>
             </select>
@@ -40,21 +40,21 @@
 
       <div class="row g-3 mt-1 align-items-end">
         <div class="col-md-3">
-          <label class="form-label small fw-bold text-muted mb-1">Emlak Niteliği</label>
-          <select class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.nitelik" (change)="applyFilter()">
+          <label for="nitelik" class="form-label small fw-bold text-muted mb-1">Emlak Niteliği</label>
+          <select id="nitelik" class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.nitelik" (change)="applyFilter()">
             <option value="">Nitelik Seçiniz</option>
             <option *ngFor="let val of getUniqueValues('emlakTipi')" [value]="val">{{val}}</option>
           </select>
         </div>
 
         <div class="col-md-3">
-          <label class="form-label small fw-bold text-muted mb-1">Ada / Parsel</label>
+          <label for="adaParsel" class="form-label small fw-bold text-muted mb-1">Ada / Parsel</label>
           <div class="input-group input-group-sm">
-            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ada" (change)="applyFilter()">
+            <select id="ada" class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.ada" (change)="applyFilter()">
               <option value="">Ada</option>
               <option *ngFor="let val of getUniqueValues('ada')" [value]="val">{{val}}</option>
             </select>
-            <select class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.parsel" (change)="applyFilter()">
+            <select id="parsel" class="form-select shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.parsel" (change)="applyFilter()">
               <option value="">Parsel</option>
               <option *ngFor="let val of getUniqueValues('parsel')" [value]="val">{{val}}</option>
             </select>
@@ -128,7 +128,8 @@
             <img [src]="apiUrl + '/api/Tasinmaz/' + item.id + '/image?t=' + item.cacheBuster" 
                  (error)="onImageError($event)" 
                  class="rounded shadow-sm border" 
-                 style="width: 45px; height: 45px; object-fit: cover;">
+                 style="width: 45px; height: 45px; object-fit: cover;"
+                 alt="Taşınmaz Görseli">
           </td>
           <td *ngIf="isAdmin">
             <div class="fw-medium text-dark">{{ item.adSoyad }}</div>
@@ -148,5 +149,15 @@
         </tr>
       </tbody>
     </table>
+  </div>
+    <div class="card shadow-sm mt-4">
+    <div class="card-header bg-white fw-bold">
+      <i class="bi bi-geo-alt me-1 text-danger"></i>
+      Taşınmaz Konumları
+    </div>
+
+    <div class="card-body p-0" style="height: 450px">
+      <app-tasinmaz-list-map [tasinmazlar]="filteredTasinmazlar"></app-tasinmaz-list-map>
+    </div>
   </div>
 </div>

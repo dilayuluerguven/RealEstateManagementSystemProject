@@ -30,10 +30,10 @@ export class AddComponent implements OnInit {
   selectedFile: File | null = null;
 
   constructor(
-    private tasinmazService: TasinmazService,
-    private locService: LocationService,
-    private router: Router,
-    private toastr: ToastrService
+    private readonly tasinmazService: TasinmazService,
+    private readonly locService: LocationService,
+    private readonly router: Router,
+    private readonly toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -56,46 +56,60 @@ export class AddComponent implements OnInit {
       this.locService.getMahalleler(ilceId).subscribe(res => this.mahalleler = res);
     });
   }
-
   onFileSelected(file: File | null) {
     this.selectedFile = file;
   }
-
   submit() {
-    if (!this.formGroup.value.koordinat) {
-      this.toastr.warning('Lütfen harita üzerinden taşınmaz çizin');
-      return;
-    }
+  const {
+    il,
+    ilce,
+    mahalle,
+    ada,
+    parsel,
+    adres,
+    emlakTipi,
+    koordinat
+  } = this.formGroup.value;
 
-    if (this.formGroup.invalid) {
-      this.formGroup.markAllAsTouched();
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('ilId', String(this.formGroup.value.il));
-    formData.append('ilceId', String(this.formGroup.value.ilce));
-    formData.append('mahalleId', String(this.formGroup.value.mahalle));
-    formData.append('ada', String(this.formGroup.value.ada));
-    formData.append('parsel', String(this.formGroup.value.parsel));
-    formData.append('adres', this.formGroup.value.adres!);
-    formData.append('emlakTipi', this.formGroup.value.emlakTipi!);
-    formData.append('koordinat', this.formGroup.value.koordinat!);
-
-    if (this.selectedFile) {
-      formData.append('Image', this.selectedFile);
-    }
-
-    this.tasinmazService.add(formData).subscribe({
-      next: () => {
-        this.toastr.success('Taşınmaz başarıyla eklendi');
-        this.router.navigate(['/core/tasinmaz/list']);
-      },
-      error: () => {
-        this.toastr.error('Taşınmaz eklenemedi');
-      }
-    });
+   if (!il || !ilce || !mahalle || !ada || !parsel || !adres || !emlakTipi) {
+    this.toastr.warning('Lütfen tüm zorunlu alanları doldurunuz.');
+    this.formGroup.markAllAsTouched();
+    return;
   }
+  if (!koordinat) {
+    this.toastr.warning('Lütfen harita üzerinden taşınmaz çizin');
+    return;
+  }
+
+  if (this.formGroup.invalid) {
+    this.formGroup.markAllAsTouched();
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('ilId', String(il));
+  formData.append('ilceId', String(ilce));
+  formData.append('mahalleId', String(mahalle));
+  formData.append('ada', String(ada));
+  formData.append('parsel', String(parsel));
+  formData.append('adres', adres);
+  formData.append('emlakTipi', emlakTipi);
+  formData.append('koordinat', koordinat);
+
+  if (this.selectedFile) {
+    formData.append('Image', this.selectedFile);
+  }
+
+  this.tasinmazService.add(formData).subscribe({
+    next: () => {
+      this.toastr.success('Taşınmaz başarıyla eklendi');
+      this.router.navigate(['/core/tasinmaz/list']);
+    },
+    error: () => {
+      this.toastr.error('Taşınmaz eklenemedi');
+    }
+  });
+}
 
   onGeometryCreated(geometry: any) {
     this.formGroup.patchValue({

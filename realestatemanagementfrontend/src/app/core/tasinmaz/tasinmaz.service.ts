@@ -9,9 +9,9 @@ import { TasinmazCreateUpdate } from './models/tasinmaz-create-update';
   providedIn: 'root'
 })
 export class TasinmazService {
-  private apiUrl = `${environment.baseUrl}/api/Tasinmaz`;
+  private readonly apiUrl = `${environment.baseUrl}/api/Tasinmaz`;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private readonly httpClient: HttpClient) {}
 
   getAll(): Observable<TasinmazList[]> {
     return this.httpClient.get<TasinmazList[]>(this.apiUrl);

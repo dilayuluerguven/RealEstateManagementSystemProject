@@ -16,51 +16,51 @@
         <div class="row g-3">
 
           <div class="col-md-4">
-            <label class="form-label required">İl</label>
-            <select class="form-select" formControlName="il">
+            <label for="il" class="form-label required">İl</label>
+            <select id="il" class="form-select" formControlName="il">
               <option [ngValue]="null" disabled>İl seçiniz</option>
               <option *ngFor="let item of iller" [value]="item.id">{{ item.ilAdi }}</option>
             </select>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label required">İlçe</label>
-            <select class="form-select" formControlName="ilce">
+            <label for="ilce" class="form-label required">İlçe</label>
+            <select id="ilce" class="form-select" formControlName="ilce">
               <option [ngValue]="null" disabled>İlçe seçiniz</option>
               <option *ngFor="let item of ilceler" [value]="item.id">{{ item.ilceAdi }}</option>
             </select>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label required">Mahalle</label>
-            <select class="form-select" formControlName="mahalle">
+            <label for="mahalle" class="form-label required">Mahalle</label>
+            <select id="mahalle" class="form-select" formControlName="mahalle">
               <option [ngValue]="null" disabled>Mahalle seçiniz</option>
               <option *ngFor="let item of mahalleler" [value]="item.id">{{ item.mahalleAdi }}</option>
             </select>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label required">Ada</label>
-            <input type="number" class="form-control" formControlName="ada" />
+            <label for="ada" class="form-label required">Ada</label>
+            <input id="ada" type="number" class="form-control" formControlName="ada" />
           </div>
 
           <div class="col-md-4">
-            <label class="form-label required">Parsel</label>
-            <input type="number" class="form-control" formControlName="parsel" />
+            <label for="parsel" class="form-label required">Parsel</label>
+            <input id="parsel" type="number" class="form-control" formControlName="parsel" />
           </div>
 
           <div class="col-md-4">
-            <label class="form-label required">Emlak Tipi</label>
-            <input type="text" class="form-control" formControlName="emlakTipi" />
+            <label for="emlakTipi" class="form-label required">Emlak Tipi</label>
+            <input id="emlakTipi" type="text" class="form-control" formControlName="emlakTipi" />
           </div>
 
           <div class="col-12">
-            <label class="form-label required">Adres</label>
-            <textarea class="form-control" rows="3" formControlName="adres"></textarea>
+            <label for="adres" class="form-label required">Adres</label>
+            <textarea id="adres" class="form-control" rows="3" formControlName="adres"></textarea>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Yeni Resim Yükle</label>
+            <label for="yeniResim" class="form-label">Yeni Resim Yükle</label>
 
             <app-image-uploader
               [currentImageUrl]="currentImageUrl"

@@ -6,7 +6,6 @@ import { AddComponent } from './add/add.component';
 import { ListComponent } from './list/list.component';
 import { UpdateComponent } from './update/update.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CoreModule } from '../core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 

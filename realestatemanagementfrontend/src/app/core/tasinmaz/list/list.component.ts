@@ -28,10 +28,10 @@ export class ListComponent implements OnInit {
   };
 
   constructor(
-    private tasinmazService: TasinmazService,
-    private toastr: ToastrService,
-    private router: Router,
-    private exportService: ExportService
+    private readonly tasinmazService: TasinmazService,
+    private readonly toastr: ToastrService,
+    private readonly router: Router,
+    private readonly exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -40,20 +40,20 @@ export class ListComponent implements OnInit {
     this.getAll();
   }
 
-  getAll() {
+getAll() {
   this.tasinmazService.getAll().subscribe({
     next: (x) => {
       const ts = Date.now();
 
-      this.tasinmazlar = x
-        .sort((a, b) =>
-          new Date(b.olusturmaTarihi).getTime() -
-          new Date(a.olusturmaTarihi).getTime()
-        )
-        .map(item => ({
-          ...item,
-          cacheBuster: ts
-        }));
+      const sorted = x.sort((a: any, b: any) =>
+        new Date(b.olusturmaTarihi).getTime() -
+        new Date(a.olusturmaTarihi).getTime()
+      );
+
+      this.tasinmazlar = sorted.map((item: any) => ({
+        ...item,
+        cacheBuster: ts
+      }));
 
       this.filteredTasinmazlar = this.tasinmazlar;
     },
@@ -74,16 +74,27 @@ export class ListComponent implements OnInit {
 
       return matchUser && matchIl && matchIlce && matchMahalle && matchNitelik && matchAda && matchParsel;
     });
+
     this.selectedTasinmazlar = [];
   }
 
   getUniqueValues(column: string, filterBy?: string, filterValue?: any) {
-    let data = this.tasinmazlar;
-    if (filterBy && filterValue) {
-      data = data.filter(x => x[filterBy] === filterValue);
-    }
-    return [...new Set(data.map(i => i[column]))].filter(val => val !== null && val !== undefined && val !== '').sort();
+  let data = this.tasinmazlar;
+
+  if (filterBy && filterValue) {
+    data = data.filter((x: any) => x[filterBy] === filterValue);
   }
+
+  const unique = [...new Set(data.map((i: any) => i[column]))]
+    .filter(val => val !== null && val !== undefined && val !== '');
+
+  unique.sort((a: any, b: any) =>
+    a.toString().localeCompare(b.toString())
+  );
+
+  return unique;
+}
+
 
   resetFilters() {
     this.filterCriteria = { user: '', il: '', ilce: '', mahalle: '', nitelik: '', ada: '', parsel: '' };
@@ -117,15 +128,24 @@ export class ListComponent implements OnInit {
       this.toastr.info("Lütfen silmek istediğiniz taşınmazları seçin.");
       return;
     }
+
     const count = this.selectedTasinmazlar.length;
+
     const toast = this.toastr.warning(
       count === 1 ? 'Seçili taşınmaz silinecek.' : `${count} taşınmaz silinecek.`,
       'Onay Gerekli',
       { enableHtml: true, closeButton: true, timeOut: 0, tapToDismiss: false }
     );
+
     toast.onTap.subscribe(() => {
-      this.selectedTasinmazlar.forEach(item => this.tasinmazService.delete(item.id).subscribe());
-      this.tasinmazlar = this.tasinmazlar.filter(t => !this.selectedTasinmazlar.some(s => s.id === t.id));
+      for (const item of this.selectedTasinmazlar) {
+        this.tasinmazService.delete(item.id).subscribe();
+      }
+
+      this.tasinmazlar = this.tasinmazlar.filter(
+        t => !this.selectedTasinmazlar.some(s => s.id === t.id)
+      );
+
       this.applyFilter();
       this.selectedTasinmazlar = [];
       this.toastr.success('Silme işlemi tamamlandı');
@@ -137,34 +157,65 @@ export class ListComponent implements OnInit {
       this.toastr.info("Lütfen güncellemek istediğiniz taşınmazı seçin.");
       return;
     }
+
     if (this.selectedTasinmazlar.length > 1) {
       this.toastr.warning("Aynı anda sadece bir taşınmazı güncelleyebilirsiniz.");
       return;
     }
+
     const id = this.selectedTasinmazlar[0].id;
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const url = user?.rol === 'Admin' ? ['/core/admin/tasinmaz/update', id] : ['/core/tasinmaz/update', id];
+    const url = user?.rol === 'Admin'
+      ? ['/core/admin/tasinmaz/update', id]
+      : ['/core/tasinmaz/update', id];
+
     this.router.navigate(url);
   }
 
   exportExcel() {
-    const source = this.selectedTasinmazlar.length > 0 ? this.selectedTasinmazlar : this.filteredTasinmazlar;
+    const source = this.selectedTasinmazlar.length > 0
+      ? this.selectedTasinmazlar
+      : this.filteredTasinmazlar;
+
     const data = source.map(t => ({
-      Kullanici: t.adSoyad, Il: t.ilAdi, Ilce: t.ilceAdi, Mahalle: t.mahalleAdi,
-      Ada: t.ada, Parsel: t.parsel, Tip: t.emlakTipi, Tarih: t.olusturmaTarihi ? new Date(t.olusturmaTarihi).toLocaleDateString() : ''
+      Kullanici: t.adSoyad,
+      Il: t.ilAdi,
+      Ilce: t.ilceAdi,
+      Mahalle: t.mahalleAdi,
+      Ada: t.ada,
+      Parsel: t.parsel,
+      Tip: t.emlakTipi,
+      Tarih: t.olusturmaTarihi
+        ? new Date(t.olusturmaTarihi).toLocaleDateString()
+        : ''
     }));
-    this.exportService.exportExcel(JSON.parse(JSON.stringify(data)), 'tasinmazlar.xlsx', 'Tasinmazlar');
+
+    this.exportService.exportExcel(structuredClone(data), 'tasinmazlar.xlsx', 'Tasinmazlar');
     this.toastr.success('Excel aktarıldı');
   }
 
   async exportPdf() {
-    const data = this.selectedTasinmazlar.length > 0 ? this.selectedTasinmazlar : this.filteredTasinmazlar;
+    const data = this.selectedTasinmazlar.length > 0
+      ? this.selectedTasinmazlar
+      : this.filteredTasinmazlar;
+
     const headers = ['Kullanıcı', 'İl', 'İlçe', 'Mahalle', 'Ada', 'Parsel', 'Tip', 'Tarih'];
+
     const rows = data.map(t => [
-      t.adSoyad, t.ilAdi, t.ilceAdi, t.mahalleAdi, t.ada, t.parsel, t.emlakTipi,
-      t.olusturmaTarihi ? new Date(t.olusturmaTarihi).toLocaleDateString() : ''
+      t.adSoyad, t.ilAdi, t.ilceAdi, t.mahalleAdi,
+      t.ada, t.parsel, t.emlakTipi,
+      t.olusturmaTarihi
+        ? new Date(t.olusturmaTarihi).toLocaleDateString()
+        : ''
     ]);
-    const images = await Promise.all(data.map(t => this.getBase64ImageFromURL(`${this.apiUrl}/api/Tasinmaz/${t.id}/image`).catch(() => this.getBase64ImageFromURL('assets/no-image.png'))));
+
+    const images = await Promise.all(
+      data.map(t =>
+        this.getBase64ImageFromURL(`${this.apiUrl}/api/Tasinmaz/${t.id}/image`)
+          .catch(() => this.getBase64ImageFromURL('assets/no-image.png'))
+      )
+    );
+
     this.exportService.exportPdfWithImages('Taşınmaz Listesi', headers, rows, images, 'tasinmazlar.pdf');
     this.toastr.success('PDF aktarıldı');
   }
@@ -178,13 +229,18 @@ export class ListComponent implements OnInit {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
+
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
+        canvas.width = img.width;
+        canvas.height = img.height;
+
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0);
+
         resolve(canvas.toDataURL('image/png'));
       };
+
       img.onerror = reject;
       img.src = url;
     });

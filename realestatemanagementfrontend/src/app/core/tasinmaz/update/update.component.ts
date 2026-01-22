@@ -36,11 +36,11 @@ export class UpdateComponent implements OnInit {
   currentImageUrl: string | null = null;
 
   constructor(
-    private tasinmazService: TasinmazService,
-    private locService: LocationService,
-    private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private toastr: ToastrService
+    private readonly tasinmazService: TasinmazService,
+    private readonly locService: LocationService,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly router: Router,
+    private readonly toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
