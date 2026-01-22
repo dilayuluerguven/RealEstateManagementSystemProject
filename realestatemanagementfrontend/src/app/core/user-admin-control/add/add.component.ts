@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminControlService } from '../admin-control.service';
 import { Router } from '@angular/router';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-add',
@@ -12,7 +12,7 @@ import { Toast, ToastrService } from 'ngx-toastr';
 export class AddComponent implements OnInit {
   formGroup!:FormGroup;
   showPassword: boolean = false;
-  constructor(private fb:FormBuilder,private userService:AdminControlService,private router:Router,private toastr:ToastrService) {
+  constructor(private readonly fb:FormBuilder,private readonly userService:AdminControlService,private readonly router:Router,private readonly toastr:ToastrService) {
     
   }
   ngOnInit(): void {
@@ -25,7 +25,7 @@ export class AddComponent implements OnInit {
         rol:['',Validators.required]
       });
   }
-  save() {
+ save() {
   if (this.formGroup.invalid) {
     this.formGroup.markAllAsTouched();
     this.toastr.warning('Lütfen zorunlu alanları doğru doldurun');
@@ -39,17 +39,20 @@ export class AddComponent implements OnInit {
     },
     error: (err) => {
       if (err.error?.errors) {
-        Object.values(err.error.errors).forEach((messages: any) => {
-          messages.forEach((msg: string) => {
-            this.toastr.error(msg);
-          });
-        });
+
+        for (const messages of Object.values(err.error.errors)) {
+          for (const message of messages as string[]) {
+            this.toastr.error(message);
+          }
+        }
+
       } else {
         this.toastr.error('Kullanıcı kaydedilemedi');
       }
     },
   });
 }
+
 togglePassword() {
   this.showPassword = !this.showPassword;
 }

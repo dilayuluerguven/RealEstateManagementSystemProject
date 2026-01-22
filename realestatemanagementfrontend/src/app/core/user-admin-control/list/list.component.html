@@ -13,24 +13,24 @@
       <div class="row g-3 align-items-end">
         
         <div class="col-12 col-md-6 col-lg-3">
-          <label class="small fw-bold text-muted mb-1">Adı Soyadı</label>
+          <label for="adSoyad" class="small fw-bold text-muted mb-1">Adı Soyadı</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text bg-white border-secondary-subtle text-muted"><i class="bi bi-search" style="-webkit-text-stroke: 0.3px;"></i></span>
-            <input type="text" class="form-control shadow-none border-secondary-subtle border-start-0" placeholder="İsim ile ara..." [(ngModel)]="filterCriteria.adSoyad" (input)="applyFilter()">
+            <input id="adSoyad" type="text" class="form-control shadow-none border-secondary-subtle border-start-0" placeholder="İsim ile ara..." [(ngModel)]="filterCriteria.adSoyad" (input)="applyFilter()">
           </div>
         </div>
 
         <div class="col-12 col-md-6 col-lg-3">
-          <label class="small fw-bold text-muted mb-1">Email</label>
+          <label for="email" class="small fw-bold text-muted mb-1">Email</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text bg-white border-secondary-subtle text-muted"><i class="bi bi-envelope" style="-webkit-text-stroke: 0.3px;"></i></span>
-            <input type="text" class="form-control shadow-none border-secondary-subtle border-start-0" placeholder="Email ile ara..." [(ngModel)]="filterCriteria.email" (input)="applyFilter()">
+            <input id="email" type="text" class="form-control shadow-none border-secondary-subtle border-start-0" placeholder="Email ile ara..." [(ngModel)]="filterCriteria.email" (input)="applyFilter()">
           </div>
         </div>
 
         <div class="col-12 col-md-6 col-lg-2">
-          <label class="small fw-bold text-muted mb-1">Rol</label>
-          <select class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.rol" (change)="applyFilter()">
+          <label for="rol" class="small fw-bold text-muted mb-1">Rol</label>
+          <select id="rol" class="form-select form-select-sm shadow-none border-secondary-subtle" [(ngModel)]="filterCriteria.rol" (change)="applyFilter()">
             <option value="">Tümü</option>
             <option value="Admin">Admin</option>
             <option value="User">User</option>

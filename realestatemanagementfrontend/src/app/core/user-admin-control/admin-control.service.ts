@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class AdminControlService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private readonly httpClient: HttpClient) {}
 
   getUsers() {
     return this.httpClient.get<any[]>(`${environment.baseUrl}/api/User`);

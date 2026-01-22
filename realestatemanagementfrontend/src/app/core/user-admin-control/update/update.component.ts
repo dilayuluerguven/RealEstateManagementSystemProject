@@ -15,12 +15,11 @@ export class UpdateComponent implements OnInit {
   userId!: number;
   showPassword: boolean = false;
   constructor(
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private userService: AdminControlService,
-    private router: Router,
-    private toastr: ToastrService
-
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
+    private readonly userService: AdminControlService,
+    private readonly router: Router,
+    private readonly toastr: ToastrService
   ) {}
 
   ngOnInit(): void {

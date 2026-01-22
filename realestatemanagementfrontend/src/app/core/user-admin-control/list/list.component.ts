@@ -13,18 +13,18 @@ export class ListComponent implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   selectedUsers: any[] = [];
-  
+
   filterCriteria = {
     adSoyad: '',
     email: '',
-    rol: ''
+    rol: '',
   };
 
   constructor(
-    private userService: AdminControlService,
-    private toastr: ToastrService,
-    private router: Router,
-    private exportService: ExportService
+    private readonly userService: AdminControlService,
+    private readonly toastr: ToastrService,
+    private readonly router: Router,
+    private readonly exportService: ExportService,
   ) {}
 
   ngOnInit(): void {
@@ -43,13 +43,18 @@ export class ListComponent implements OnInit {
 
   applyFilter() {
     this.filteredUsers = this.users.filter((u) => {
-      const nameMatch = !this.filterCriteria.adSoyad || 
-                        u.adSoyad.toLowerCase().includes(this.filterCriteria.adSoyad.toLowerCase());
-      
-      const emailMatch = !this.filterCriteria.email || 
-                         u.email.toLowerCase().includes(this.filterCriteria.email.toLowerCase());
-      
-      const rolMatch = !this.filterCriteria.rol || u.rol === this.filterCriteria.rol;
+      const nameMatch =
+        !this.filterCriteria.adSoyad ||
+        u.adSoyad
+          .toLowerCase()
+          .includes(this.filterCriteria.adSoyad.toLowerCase());
+
+      const emailMatch =
+        !this.filterCriteria.email ||
+        u.email.toLowerCase().includes(this.filterCriteria.email.toLowerCase());
+
+      const rolMatch =
+        !this.filterCriteria.rol || u.rol === this.filterCriteria.rol;
 
       return nameMatch && emailMatch && rolMatch;
     });
@@ -85,46 +90,49 @@ export class ListComponent implements OnInit {
   }
 
   deleteSelected() {
-    if (this.selectedUsers.length === 0) {
-      this.toastr.info("Lütfen silmek istediğiniz kullanıcıları seçin.");
-      return;
+  if (this.selectedUsers.length === 0) {
+    this.toastr.info('Lütfen silmek istediğiniz kullanıcıları seçin.');
+    return;
+  }
+
+  const count = this.selectedUsers.length;
+
+  const toast = this.toastr.warning(
+    `Seçili ${count} kullanıcı silinecek. Onaylamak için buraya tıklayın.`,
+    'Onay Gerekli',
+    { enableHtml: true, timeOut: 0, tapToDismiss: false }
+  );
+
+  toast.onTap.subscribe(() => {
+    const ids = this.selectedUsers.map((u) => u.id);
+    for (const id of ids) {
+      this.userService.deleteUser(id).subscribe({
+        next: (res: any) => {
+          if (res.selfDeleted) {
+            localStorage.clear();
+            this.router.navigate(['/login']);
+          }
+        }
+      });
     }
 
-    const count = this.selectedUsers.length;
-    const toast = this.toastr.warning(
-      `Seçili ${count} kullanıcı silinecek. Onaylamak için buraya tıklayın.`,
-      'Onay Gerekli',
-      { enableHtml: true, timeOut: 0, tapToDismiss: false }
-    );
-
-    toast.onTap.subscribe(() => {
-      const ids = this.selectedUsers.map((u) => u.id);
-      ids.forEach((id) => {
-        this.userService.deleteUser(id).subscribe({
-          next: (res: any) => {
-            if (res.selfDeleted) {
-              localStorage.clear();
-              this.router.navigate(['/login']);
-            }
-          },
-        });
-      });
-
-      this.users = this.users.filter(u => !ids.includes(u.id));
-      this.applyFilter();
-      this.selectedUsers = [];
-      this.toastr.success('Silme işlemi tamamlandı');
-    });
+    this.users = this.users.filter((u) => !ids.includes(u.id));
+    this.applyFilter();
+    this.selectedUsers = [];
+    this.toastr.success('Silme işlemi tamamlandı');
+  });
   }
 
   goToUpdate() {
     if (this.selectedUsers.length === 0) {
-      this.toastr.info("Lütfen güncellemek istediğiniz kullanıcıyı seçin.");
+      this.toastr.info('Lütfen güncellemek istediğiniz kullanıcıyı seçin.');
       return;
     }
-    
+
     if (this.selectedUsers.length > 1) {
-      this.toastr.warning("Aynı anda sadece bir kullanıcıyı güncelleyebilirsiniz.");
+      this.toastr.warning(
+        'Aynı anda sadece bir kullanıcıyı güncelleyebilirsiniz.',
+      );
       return;
     }
 
@@ -132,15 +140,22 @@ export class ListComponent implements OnInit {
   }
 
   exportExcel() {
-    const rawData = this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
+    const rawData =
+      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
     const data = rawData.map(({ token, ...rest }) => rest);
     this.exportService.exportExcel(data, 'kullanicilar.xlsx', 'Kullanicilar');
   }
 
   exportPdf() {
-    const rawData = this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
+    const rawData =
+      this.selectedUsers.length > 0 ? this.selectedUsers : this.filteredUsers;
     const headers = ['Id', 'Ad Soyad', 'Email', 'Rol'];
     const rows = rawData.map((u) => [u.id, u.adSoyad, u.email, u.rol]);
-    this.exportService.exportPdf('Kullanıcı Listesi Raporu', headers, rows, 'kullanicilar.pdf');
+    this.exportService.exportPdf(
+      'Kullanıcı Listesi Raporu',
+      headers,
+      rows,
+      'kullanicilar.pdf',
+    );
   }
 }

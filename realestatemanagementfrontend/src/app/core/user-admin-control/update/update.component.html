@@ -14,24 +14,25 @@
 
   <form [formGroup]="formGroup" (ngSubmit)="update()">
     <div class="mb-3">
-      <label class="form-label fw-semibold">
+      <label for="adSoyad" class="form-label fw-semibold">
         Ad Soyad <span class="text-danger">*</span>
       </label>
-      <input class="form-control" formControlName="adSoyad" />
+      <input id="adSoyad" class="form-control" formControlName="adSoyad" />
     </div>
 
     <div class="mb-3">
-      <label class="form-label fw-semibold">
+      <label for="email" class="form-label fw-semibold">
         Email <span class="text-danger">*</span>
       </label>
-      <input class="form-control" formControlName="email" />
+      <input id="email" class="form-control" formControlName="email" />
     </div>
 
     <div class="mb-3">
-  <label class="form-label fw-semibold"> Şifre </label>
+  <label for="sifre" class="form-label fw-semibold"> Şifre </label>
 
   <div class="input-group">
     <input
+      id="sifre"
       class="form-control"
       formControlName="sifre"
       [type]="showPassword ? 'text' : 'password'"
@@ -54,10 +55,10 @@
 
 
     <div class="mb-4">
-      <label class="form-label fw-semibold">
+      <label for="rol" class="form-label fw-semibold">
         Rol <span class="text-danger">*</span>
       </label>
-      <select class="form-control" formControlName="rol">
+      <select id="rol" class="form-control" formControlName="rol">
         <option value="Admin">Admin</option>
         <option value="User">User</option>
       </select>
