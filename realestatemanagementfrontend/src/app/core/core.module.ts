@@ -4,8 +4,6 @@ import { CoreRoutingModule } from './core-routing.module';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { UserLayoutComponent } from './layouts/user-layout/user-layout.component';
 import { RouterModule } from '@angular/router';
-import { TasinmazMapComponent } from '../shared/tasinmaz-map/tasinmaz-map.component';
-import { TasinmazListMapComponent } from '../shared/tasinmaz-list-map/tasinmaz-list-map.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './profile/profile.component';
