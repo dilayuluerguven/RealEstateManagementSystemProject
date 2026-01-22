@@ -157,54 +157,53 @@ export class TasinmazListMapComponent implements AfterViewInit, OnChanges {
   }
 
   private drawTasinmazlar(): void {
-    const format = new GeoJSON();
-    this.vectorSource.clear();
+  const format = new GeoJSON();
+  this.vectorSource.clear();
 
-    const extents: number[][] = [];
+  const extents: number[][] = [];
 
-    this.tasinmazlar.forEach((t) => {
-      if (!t.koordinat) return;
+  for (const t of this.tasinmazlar) { 
+    if (!t.koordinat) continue;
 
-      try {
-        const geojson = JSON.parse(t.koordinat);
+    try {
+      const geojson = JSON.parse(t.koordinat);
 
-        const polygonFeature = format.readFeature(geojson, {
-          dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857',
-        });
+      const polygonFeature = format.readFeature(geojson, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857',
+      });
 
-        this.vectorSource.addFeature(polygonFeature);
-        extents.push(polygonFeature.getGeometry()!.getExtent());
+      this.vectorSource.addFeature(polygonFeature);
+      extents.push(polygonFeature.getGeometry()!.getExtent());
 
-        const center = getCenter(polygonFeature.getGeometry()!.getExtent());
+      const center = getCenter(polygonFeature.getGeometry()!.getExtent());
 
-        const pointFeature = new Feature({
-          geometry: new Point(center),
-        });
+      const pointFeature = new Feature({
+        geometry: new Point(center),
+      });
 
-        pointFeature.set('adSoyad', t.adSoyad);
-        this.vectorSource.addFeature(pointFeature);
-      } catch (err) {
-        console.warn('Geçersiz koordinat:', err);
-      }
-    });
-
-    if (extents.length > 0) {
-      this.map
-        .getView()
-        .fit(
-          [
-            Math.min(...extents.map((e) => e[0])),
-            Math.min(...extents.map((e) => e[1])),
-            Math.max(...extents.map((e) => e[2])),
-            Math.max(...extents.map((e) => e[3])),
-          ],
-          {
-            padding: [40, 40, 40, 40],
-            maxZoom: 14,
-            duration: 600,
-          }
-        );
+      pointFeature.set('adSoyad', t.adSoyad);
+      this.vectorSource.addFeature(pointFeature);
+    } catch (err) {
+      console.warn('Geçersiz koordinat:', err);
     }
   }
+
+  if (extents.length > 0) {
+    this.map.getView().fit(
+      [
+        Math.min(...extents.map((e) => e[0])),
+        Math.min(...extents.map((e) => e[1])),
+        Math.max(...extents.map((e) => e[2])),
+        Math.max(...extents.map((e) => e[3])),
+      ],
+      {
+        padding: [40, 40, 40, 40],
+        maxZoom: 14,
+        duration: 600,
+      }
+    );
+  }
+}
+
 }

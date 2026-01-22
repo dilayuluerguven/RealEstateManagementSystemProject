@@ -37,7 +37,7 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   });
   draw?: Draw;
 
-  constructor(private mapHelper: MapHelperService) {}
+  constructor(private readonly mapHelper: MapHelperService) {}
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -52,14 +52,17 @@ export class TasinmazMapComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialGeometry'] && changes['initialGeometry'].currentValue && this.map) {
-      this.drawExistingGeometry(changes['initialGeometry'].currentValue);
+    const newGeometry = changes['initialGeometry']?.currentValue;
+    if (newGeometry && this.map) {
+      this.drawExistingGeometry(newGeometry);
     }
 
-    if (changes['opacity'] && this.map) {
-      this.mapHelper.setAllLayersOpacity(this.map, changes['opacity'].currentValue);
+    const newOpacity = changes['opacity']?.currentValue;
+    if (newOpacity !== undefined && this.map) {
+      this.mapHelper.setAllLayersOpacity(this.map, newOpacity);
     }
   }
+
 
   initMap(): void {
     this.baseLayer = new TileLayer({

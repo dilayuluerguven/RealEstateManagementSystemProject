@@ -17,11 +17,11 @@ export class MapHelperService {
     );
   }
 
-  setAllLayersOpacity(map: Map, opacity: number): void {
-    map.getLayers().forEach((layer: any) => {
+ setAllLayersOpacity(map: Map, opacity: number): void {
+    for (const layer of map.getLayers().getArray()) {
       if (layer instanceof TileLayer || layer.setOpacity) {
         layer.setOpacity(opacity);
       }
-    });
+    }
   }
 }

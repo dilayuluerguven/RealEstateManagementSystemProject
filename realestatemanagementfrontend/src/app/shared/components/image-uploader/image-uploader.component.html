@@ -1,7 +1,8 @@
 <div>
-  <label class="form-label">Resim Yükle</label>
+  <label for="imageUploader" class="form-label">Resim Yükle</label>
 
   <input 
+    id="imageUploader"
     type="file" 
     class="form-control" 
     (change)="onFileSelected($event)" 
@@ -14,6 +15,7 @@
       [src]="previewUrl || currentImageUrl" 
       class="img-thumbnail"
       style="width:150px;"
+      alt="Görüntü"
     />
 
     <button 

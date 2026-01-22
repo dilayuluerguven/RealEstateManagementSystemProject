@@ -30,7 +30,7 @@ export class ExportService {
   }
 
   exportPdfWithImages(title: string, headers: string[], rows: any[], images: string[], fileName: string) {
-    const pdfMake: any = (window as any).pdfMake;
+    const pdfMake: any = (globalThis as any).pdfMake;
     const tableBody: any[] = [];
     tableBody.push([{ text: 'Görsel', bold: true }, ...headers.map(h => ({ text: h, bold: true }))]);
 
