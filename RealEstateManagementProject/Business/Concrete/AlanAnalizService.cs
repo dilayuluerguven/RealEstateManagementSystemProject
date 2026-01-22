@@ -5,178 +5,158 @@ using RealEstateManagementProject.Business.Abstract;
 using RealEstateManagementProject.Entities;
 using RealEstateManagementProject.Entities.Concrete;
 
-public class AlanAnalizService : IAlanAnalizService
+namespace RealEstateManagementProject.Business.Concrete
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILogService _logService;
-
-    public AlanAnalizService(ApplicationDbContext context, ILogService logService)
+    public class AlanAnalizService : IAlanAnalizService
     {
-        _context = context;
-        _logService = logService;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
 
-    public async Task<AlanAnalizSonucDto> KaydetAsync(int kullaniciId, AlanAnalizCreateDto dto)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == kullaniciId);
-        var adSoyad = user?.AdSoyad ?? "Kullanıcı";
-
-        var mevcutEntity = await _context.AlanAnalizleri
-            .FirstOrDefaultAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == dto.GeometriAdi);
-
-        bool isUpdate = mevcutEntity != null;
-
-        if (isUpdate)
+        public AlanAnalizService(ApplicationDbContext context, ILogService logService)
         {
-            mevcutEntity.AnalizTuru = dto.AnalizTuru;
-            mevcutEntity.GeometriJson = dto.GeometriJson;
-            mevcutEntity.AlanMetrekare = dto.AlanMetrekare;
-            mevcutEntity.OlusturmaTarihi = DateTime.UtcNow;
-
-            _context.AlanAnalizleri.Update(mevcutEntity);
+            _context = context;
+            _logService = logService;
         }
-        else
+
+        public async Task<AlanAnalizSonucDto> KaydetAsync(int kullaniciId, AlanAnalizCreateDto dto)
         {
-            var yeniEntity = new AlanAnaliz
+            var geometriAdi = dto.GeometriAdi ?? string.Empty;
+            var analizTuru = dto.AnalizTuru ?? string.Empty;
+
+            var mevcutEntity = await _context.AlanAnalizleri
+                .FirstOrDefaultAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi);
+
+            if (mevcutEntity is not null)
             {
-                KullaniciId = kullaniciId,
-                GeometriAdi = dto.GeometriAdi,
-                AnalizTuru = dto.AnalizTuru,
-                GeometriJson = dto.GeometriJson,
-                AlanMetrekare = dto.AlanMetrekare,
-                OlusturmaTarihi = DateTime.UtcNow
-            };
+                mevcutEntity.AnalizTuru = analizTuru;
+                mevcutEntity.GeometriJson = dto.GeometriJson;
+                mevcutEntity.AlanMetrekare = dto.AlanMetrekare ?? 0;
+                mevcutEntity.OlusturmaTarihi = DateTime.UtcNow;
 
-            _context.AlanAnalizleri.Add(yeniEntity);
+                _context.AlanAnalizleri.Update(mevcutEntity);
+            }
+            else
+            {
+                var yeniEntity = new AlanAnaliz
+                {
+                    KullaniciId = kullaniciId,
+                    GeometriAdi = geometriAdi,
+                    AnalizTuru = analizTuru,
+                    GeometriJson = dto.GeometriJson,
+                    AlanMetrekare = dto.AlanMetrekare ?? 0,
+                    OlusturmaTarihi = DateTime.UtcNow
+                };
+
+                _context.AlanAnalizleri.Add(yeniEntity);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var entity = mevcutEntity ??
+                         await _context.AlanAnalizleri
+                             .FirstOrDefaultAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi)
+                             ?? throw new InvalidOperationException("Alan analizi kaydedilemedi.");
+
+            return new AlanAnalizSonucDto
+            {
+                GeometriAdi = entity.GeometriAdi,
+                AnalizTuru = entity.AnalizTuru,
+                Islem = analizTuru,
+                GeometriJson = entity.GeometriJson,
+                AlanMetrekare = entity.AlanMetrekare,
+                OlusturmaTarihi = entity.OlusturmaTarihi
+            };
         }
 
-        await _context.SaveChangesAsync();
-
-        var entity = mevcutEntity ??
-                     await _context.AlanAnalizleri
-                        .FirstAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == dto.GeometriAdi);
-
-        string islemAdi = dto.AnalizTuru.ToLower() switch
+        public async Task<AlanAnalizSonucDto?> GetirAsync(int kullaniciId, string geometriAdi)
         {
-            "union" => "birleştirme (union)",
-            "intersection" => "kesişim (intersection)",
-            "difference" => "fark alma (difference)",
-            "split" => "bölme (split)",
-            "buffer" => "buffer işlemi",
-            "area" => "alan hesabı",
-            _ => dto.AnalizTuru.ToLower()
-        };
+            var entity = await _context.AlanAnalizleri
+                .Where(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
 
-        await _logService.AddAsync(new Log
+            if (entity == null)
+                return null;
+
+            return new AlanAnalizSonucDto
+            {
+                GeometriAdi = entity.GeometriAdi,
+                AnalizTuru = entity.AnalizTuru,
+                Islem = entity.AnalizTuru,
+                GeometriJson = entity.GeometriJson,
+                AlanMetrekare = entity.AlanMetrekare,
+                OlusturmaTarihi = entity.OlusturmaTarihi
+            };
+        }
+
+        public async Task<List<AlanAnalizSonucDto>> ListeAsync(int kullaniciId)
         {
-            UserId = kullaniciId,
-            IslemTipi = isUpdate ? "update" : "create",
-            Durum = "success",
-            Aciklama = isUpdate
-                ? $"{adSoyad}, '{dto.GeometriAdi}' üzerinde {islemAdi} yaptı (güncellendi)"
-                : $"{adSoyad}, '{dto.GeometriAdi}' üzerinde {islemAdi} yaptı",
-            Tarih = DateTime.UtcNow
-        });
+            var list = await _context.AlanAnalizleri
+                .Where(x => x.KullaniciId == kullaniciId)
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
 
-        return new AlanAnalizSonucDto
+            return list.Select(entity => new AlanAnalizSonucDto
+            {
+                GeometriAdi = entity.GeometriAdi,
+                AnalizTuru = entity.AnalizTuru,
+                Islem = entity.AnalizTuru,
+                GeometriJson = entity.GeometriJson,
+                AlanMetrekare = entity.AlanMetrekare,
+                OlusturmaTarihi = entity.OlusturmaTarihi
+            }).ToList();
+        }
+
+        public async Task<bool> SilAsync(int kullaniciId, int id)
         {
-            GeometriAdi = entity.GeometriAdi,
-            AnalizTuru = entity.AnalizTuru,
-            Islem = dto.AnalizTuru,
-            GeometriJson = entity.GeometriJson,
-            AlanMetrekare = entity.AlanMetrekare,
-            OlusturmaTarihi = entity.OlusturmaTarihi
-        };
-    }
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == kullaniciId);
+            var adSoyad = user?.AdSoyad ?? "Kullanıcı";
 
-    public async Task<AlanAnalizSonucDto?> GetirAsync(int kullaniciId, string geometriAdi)
-    {
-        var entity = await _context.AlanAnalizleri
-            .Where(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi)
-            .OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync();
+            var entity = await _context.AlanAnalizleri
+                .FirstOrDefaultAsync(x => x.Id == id && x.KullaniciId == kullaniciId);
 
-        if (entity == null)
-            return null;
+            if (entity == null)
+                return false;
 
-        return new AlanAnalizSonucDto
+            _context.AlanAnalizleri.Remove(entity);
+            await _context.SaveChangesAsync();
+
+            await _logService.AddAsync(new Log
+            {
+                UserId = kullaniciId,
+                IslemTipi = "delete",
+                Durum = "success",
+                Aciklama = $"{adSoyad}, '{entity.GeometriAdi}' alan analizini sildi",
+                Tarih = DateTime.UtcNow
+            });
+
+            return true;
+        }
+
+        public async Task<bool> GeometriyeGoreSilAsync(int kullaniciId, string geometriAdi)
         {
-            GeometriAdi = entity.GeometriAdi,
-            AnalizTuru = entity.AnalizTuru,
-            Islem = entity.AnalizTuru,
-            GeometriJson = entity.GeometriJson,
-            AlanMetrekare = entity.AlanMetrekare,
-            OlusturmaTarihi = entity.OlusturmaTarihi
-        };
-    }
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == kullaniciId);
+            var adSoyad = user?.AdSoyad ?? "Kullanıcı";
 
-    public async Task<List<AlanAnalizSonucDto>> ListeAsync(int kullaniciId)
-    {
-        var list = await _context.AlanAnalizleri
-            .Where(x => x.KullaniciId == kullaniciId)
-            .OrderByDescending(x => x.Id)
-            .ToListAsync();
+            var entity = await _context.AlanAnalizleri
+                .FirstOrDefaultAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi);
 
-        return list.Select(entity => new AlanAnalizSonucDto
-        {
-            GeometriAdi = entity.GeometriAdi,
-            AnalizTuru = entity.AnalizTuru,
-            Islem = entity.AnalizTuru,
-            GeometriJson = entity.GeometriJson,
-            AlanMetrekare = entity.AlanMetrekare,
-            OlusturmaTarihi = entity.OlusturmaTarihi
-        }).ToList();
-    }
+            if (entity == null)
+                return false;
 
-    public async Task<bool> SilAsync(int kullaniciId, int id)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == kullaniciId);
-        var adSoyad = user?.AdSoyad ?? "Kullanıcı";
+            _context.AlanAnalizleri.Remove(entity);
+            await _context.SaveChangesAsync();
 
-        var entity = await _context.AlanAnalizleri
-            .FirstOrDefaultAsync(x => x.Id == id && x.KullaniciId == kullaniciId);
+            await _logService.AddAsync(new Log
+            {
+                UserId = kullaniciId,
+                IslemTipi = "delete",
+                Durum = "success",
+                Aciklama = $"{adSoyad}, '{geometriAdi}' alan analizini sildi",
+                Tarih = DateTime.UtcNow
+            });
 
-        if (entity == null)
-            return false;
-
-        _context.AlanAnalizleri.Remove(entity);
-        await _context.SaveChangesAsync();
-
-        await _logService.AddAsync(new Log
-        {
-            UserId = kullaniciId,
-            IslemTipi = "delete",
-            Durum = "success",
-            Aciklama = $"{adSoyad}, '{entity.GeometriAdi}' alan analizini sildi",
-            Tarih = DateTime.UtcNow
-        });
-
-        return true;
-    }
-
-    public async Task<bool> GeometriyeGoreSilAsync(int kullaniciId, string geometriAdi)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == kullaniciId);
-        var adSoyad = user?.AdSoyad ?? "Kullanıcı";
-
-        var entity = await _context.AlanAnalizleri
-            .FirstOrDefaultAsync(x => x.KullaniciId == kullaniciId && x.GeometriAdi == geometriAdi);
-
-        if (entity == null)
-            return false;
-
-        _context.AlanAnalizleri.Remove(entity);
-        await _context.SaveChangesAsync();
-
-        await _logService.AddAsync(new Log
-        {
-            UserId = kullaniciId,
-            IslemTipi = "delete",
-            Durum = "success",
-            Aciklama = $"{adSoyad}, '{geometriAdi}' alan analizini sildi",
-            Tarih = DateTime.UtcNow
-        });
-
-        return true;
+            return true;
+        }
     }
 }

@@ -21,12 +21,12 @@ namespace RealEstateManagementProject.Business.Concrete
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<List<LogFilterDTO>> GetAllAsync()
+        public async Task<List<LogFilterDto>> GetAllAsync()
         {
             return await _context.Loglar
                 .AsNoTracking()
                 .OrderByDescending(x => x.Tarih)
-                .Select(log => new LogFilterDTO
+                .Select(log => new LogFilterDto
                 {
                     Id = log.Id,
                     UserId = log.UserId,
@@ -89,7 +89,7 @@ namespace RealEstateManagementProject.Business.Concrete
             }
         }
 
-        public async Task<List<LogFilterDTO>> FilterAsync(LogFilterDTO filter)
+        public async Task<List<LogFilterDto>> FilterAsync(LogFilterDto filter)
         {
             IQueryable<Log> query = _context.Loglar.AsNoTracking();
 
@@ -118,7 +118,7 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return await query
                 .OrderByDescending(x => x.Tarih)
-                .Select(log => new LogFilterDTO
+                .Select(log => new LogFilterDto
                 {
                     Id = log.Id,
                     UserId = log.UserId,

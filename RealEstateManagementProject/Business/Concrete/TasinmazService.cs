@@ -243,6 +243,7 @@ namespace RealEstateManagementProject.Business.Concrete
                 return false;
             }
         }
+
         public async Task<(byte[] Data, string ContentType)?> GetImageAsync(int id)
         {
             var t = await _context.Tasinmazlar
@@ -256,6 +257,7 @@ namespace RealEstateManagementProject.Business.Concrete
 
             return (t.ImageData, t.ImageContentType ?? "image/jpeg");
         }
+
         public async Task<bool> DeleteImageAsync(int id, int userId, bool isAdmin)
         {
             try

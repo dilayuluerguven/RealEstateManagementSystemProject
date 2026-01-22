@@ -5,8 +5,8 @@ namespace RealEstateManagementProject.Business.Abstract
 {
     public interface ILogService
     {
-        Task<List<LogFilterDTO>> GetAllAsync();
-        Task<List<LogFilterDTO>> FilterAsync(LogFilterDTO filter);
+        Task<List<LogFilterDto>> GetAllAsync();
+        Task<List<LogFilterDto>> FilterAsync(LogFilterDto filter);
         Task<bool> AddAsync(Log log);
     }
 }

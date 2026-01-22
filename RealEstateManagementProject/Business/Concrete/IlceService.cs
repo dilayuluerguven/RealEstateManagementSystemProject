@@ -9,12 +9,10 @@ namespace RealEstateManagementProject.Business.Concrete
     public class IlceService : IIlceService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogService _logService;
 
-        public IlceService(ApplicationDbContext context, ILogService logService)
+        public IlceService(ApplicationDbContext context)
         {
             _context = context;
-            _logService = logService;
         }
 
         public async Task<List<IlceDto>> GetByIlIdAsync(int ilId)
